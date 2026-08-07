@@ -72,6 +72,8 @@ class Agent {
     double qualifier_defense_score_ = .18;
     int required_defense_ = 0, defense_alert_turns_ = 0, meta_turns_ = 0;
     int feint_actions_ = 0, intercept_actions_ = 0, fork_actions_ = 0;
+    int hard_defense_alerts_ = 0, watch_zone_sightings_ = 0;
+    int watch_zone_alerts_ = 0, watch_zone_ignored_ = 0;
 
     bool flip10() { return unit_(rng_) < 0.10; }
 
@@ -228,7 +230,7 @@ class Agent {
             int hidden=std::max(0,o.opp_army-seen);
             defense_lower_=seen; defense_expected_=seen+hidden/std::max(3,d+2); defense_upper_=seen+hidden;
             int arrival=main_stack_>=0?std::max(0,o.army[main_stack_]-1):0;
-            bool confident=arrival>defense_expected_+std::max(3,d/2)||o.turn>=740;
+            bool confident=arrival>defense_expected_+std::max(2,d/3)||o.turn>=720;
             int adjacent=0;for(int d2=0;d2<4;++d2){int z=neighbor(enemy_general_,d2);if(z>=0&&o.owner[z]==1&&o.army[z]>1)++adjacent;}
             if(o.turn>=800&&adjacent>=2)strategy_=DEATHTOUCH_FORK;
             else if(o.turn>=800)strategy_=DEATHTOUCH_ATTACK;
@@ -250,7 +252,15 @@ class Agent {
             auto s=visible_enemy_stacks_.front();int dg=general_>=0?dist_[cell_id_[s.first]][cell_id_[general_]]:INF;
             largest_enemy_history_.push_back({o.turn,s.first,s.second,dg});
             if(largest_enemy_history_.size()>12)largest_enemy_history_.erase(largest_enemy_history_.begin());
-            if(dg<=8){required_defense_=s.second+std::max(3,(8-dg)/2)+4;evidence+=.28;}
+            int local=o.army[general_];
+            for(int d=0;d<4;++d){int x=neighbor(general_,d);if(x>=0&&o.owner[x]==1)local+=std::max(0,o.army[x]-1);}
+            int near_power=s.second+3;
+            bool closing_twice=largest_enemy_history_.size()>=3;
+            if(closing_twice){auto a=largest_enemy_history_[largest_enemy_history_.size()-3];auto b=largest_enemy_history_[largest_enemy_history_.size()-2];closing_twice=a.distance_to_general>b.distance_to_general&&b.distance_to_general>dg;}
+            if(dg<=5){required_defense_=s.second+std::max(3,(8-dg)/2)+4;++hard_defense_alerts_;evidence+=.28;}
+            else if(dg<=8){++watch_zone_sightings_;bool dangerous=near_power>=local-2||(closing_twice&&s.second>=std::max(8,local/2));
+                if(dangerous){required_defense_=s.second+std::max(3,(8-dg)/2)+4;++watch_zone_alerts_;}else ++watch_zone_ignored_;
+                evidence+=dangerous?.22:.08;}
             if(largest_enemy_history_.size()>=2){auto p=largest_enemy_history_[largest_enemy_history_.size()-2];if(dg<p.distance_to_general)evidence+=.12;}
             if(main_stack_>=0&&dist_[cell_id_[s.first]][cell_id_[main_stack_]]<=4)evidence+=.35;
         }
@@ -495,7 +505,7 @@ public:
         if (decision_ms_.empty()) return;
         std::vector<double> t=decision_ms_;std::sort(t.begin(),t.end());double mean=std::accumulate(t.begin(),t.end(),0.0)/t.size();auto pct=[&](double p){return t[std::min(t.size()-1,static_cast<size_t>(std::ceil(p*t.size())-1))];};
         double sf=strategic_flip_opportunities_?100.0*strategic_flips_taken_/strategic_flip_opportunities_:0, pf=split_flip_opportunities_?100.0*split_flips_taken_/split_flip_opportunities_:0, hp=movement_decisions_?100.0*half_moves_/movement_decisions_:0;
-        std::fprintf(stderr,"[juraj_metrics] player=%d turns=%zu land50=%d opp_land50=%d army50=%d opp_army50=%d enemy_general_found=%d found_turn=%d approach10=%d approach5=%d approach2=%d approach1=%d castles_built=%d moves=%llu all=%llu half=%llu half_pct=%.3f strategic_flip_opportunities=%llu strategic_flips=%llu strategic_flip_pct=%.3f split_flip_opportunities=%llu split_flips=%llu split_flip_pct=%.3f half_general=%llu half_castle=%llu half_choke=%llu half_main=%llu half_feeder=%llu qualifier_score=%.3f meta_turns=%d defense_alert_turns=%d feints=%d intercepts=%d forks=%d probes=%zu mean_ms=%.4f p95_ms=%.4f p99_ms=%.4f max_ms=%.4f\n",player_id_,decision_ms_.size(),land50_,opp_land50_,my_army50_,opp_army50_,enemy_general_>=0,found_enemy_turn_,approach_turn_[0],approach_turn_[1],approach_turn_[2],approach_turn_[3],castles_built_,movement_decisions_,all_moves_,half_moves_,hp,strategic_flip_opportunities_,strategic_flips_taken_,sf,split_flip_opportunities_,split_flips_taken_,pf,half_from_general_,half_from_castle_,half_from_choke_,half_from_main_,half_from_feeder_,qualifier_defense_score_,meta_turns_,defense_alert_turns_,feint_actions_,intercept_actions_,fork_actions_,probe_history_.size(),mean,pct(.95),pct(.99),t.back());
+        std::fprintf(stderr,"[juraj_metrics] player=%d turns=%zu land50=%d opp_land50=%d army50=%d opp_army50=%d enemy_general_found=%d found_turn=%d approach10=%d approach5=%d approach2=%d approach1=%d castles_built=%d moves=%llu all=%llu half=%llu half_pct=%.3f strategic_flip_opportunities=%llu strategic_flips=%llu strategic_flip_pct=%.3f split_flip_opportunities=%llu split_flips=%llu split_flip_pct=%.3f half_general=%llu half_castle=%llu half_choke=%llu half_main=%llu half_feeder=%llu qualifier_score=%.3f meta_turns=%d defense_alert_turns=%d hard_defense_alerts_1_5=%d watch_zone_sightings_6_8=%d watch_zone_alerts=%d watch_zone_ignored=%d feints=%d intercepts=%d forks=%d probes=%zu mean_ms=%.4f p95_ms=%.4f p99_ms=%.4f max_ms=%.4f\n",player_id_,decision_ms_.size(),land50_,opp_land50_,my_army50_,opp_army50_,enemy_general_>=0,found_enemy_turn_,approach_turn_[0],approach_turn_[1],approach_turn_[2],approach_turn_[3],castles_built_,movement_decisions_,all_moves_,half_moves_,hp,strategic_flip_opportunities_,strategic_flips_taken_,sf,split_flip_opportunities_,split_flips_taken_,pf,half_from_general_,half_from_castle_,half_from_choke_,half_from_main_,half_from_feeder_,qualifier_defense_score_,meta_turns_,defense_alert_turns_,hard_defense_alerts_,watch_zone_sightings_,watch_zone_alerts_,watch_zone_ignored_,feint_actions_,intercept_actions_,fork_actions_,probe_history_.size(),mean,pct(.95),pct(.99),t.back());
     }
 };
 
