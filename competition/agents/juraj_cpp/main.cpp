@@ -74,6 +74,18 @@ class Agent {
     int feint_actions_ = 0, intercept_actions_ = 0, fork_actions_ = 0;
     int hard_defense_alerts_ = 0, watch_zone_sightings_ = 0;
     int watch_zone_alerts_ = 0, watch_zone_ignored_ = 0;
+    int main_stack_idle_turns_ = 0, main_stack_idle_max_ = 0;
+    int main_stack_progress_moves_ = 0, overconcentrated_turns_ = 0;
+    int overconcentrated_idle_turns_ = 0, max_main_stack_army_ = 0;
+    double max_main_stack_fraction_pct_ = 0;
+    unsigned long long reverse_candidates_rejected_ = 0, two_cycle_detections_ = 0;
+    unsigned long long short_cycle_detections_ = 0, dead_end_escape_moves_ = 0;
+    unsigned long long repeated_cell_penalties_ = 0;
+    int max_main_stack_recent_revisits_ = 0;
+    std::vector<std::pair<int,int>> recent_significant_edges_;
+    std::vector<int> recent_main_stack_positions_;
+    int trace_discovery_turn_ = -1, trace_main_army_ = 0, trace_main_distance_ = -1;
+    std::vector<int> discovery_main_path_;
 
     bool flip10() { return unit_(rng_) < 0.10; }
 
@@ -338,6 +350,7 @@ class Agent {
     Action move(int x,int y,int split=0) const { return {0,row(x),col(x),direction(x,y),split}; }
     Action pass() const { return {1,0,0,0,0}; }
     bool legal_source(const Observation&o,int x)const{return x>=0&&o.owner[x]==1&&o.army[x]>1;}
+    bool overconcentrated(const Observation&o)const{return main_stack_>=0&&(o.army[main_stack_]>=std::max(80,(3*o.my_army+9)/10)||(enemy_general_>=0&&dist_[cell_id_[main_stack_]][cell_id_[enemy_general_]]>5&&o.army[main_stack_]>o.opp_army));}
 
     Action immediate_tactics(const Observation& o, bool& found) {
         found=true;
@@ -427,6 +440,12 @@ class Agent {
         if(strategy_==QUALIFIER_EXPLOIT&&o.owner[y]==0)s+=120+(until_tick<=10?130:0);
         if(strategy_==GENERAL_CONTAINMENT&&target>=0){int d=dist_[cell_id_[y]][cell_id_[target]];s+=(d>=1&&d<=3?100:-30);if(o.owner[y]==2)s+=45;}
         if(strategy_==DEATHTOUCH_FORK&&target>=0&&dist_[cell_id_[y]][cell_id_[target]]==1)s+=2000;
+        if(enemy_general_>=0&&x==main_stack_&&required_defense_==0){
+            int before=dist_[cell_id_[x]][cell_id_[enemy_general_]],after=dist_[cell_id_[y]][cell_id_[enemy_general_]];
+            bool staging=after<before||(before<=5&&after>=2&&after<=5);
+            if(staging&&(main_stack_idle_turns_>=2||overconcentrated(o)))s+=800+std::min(700,main_stack_idle_turns_*120)+(overconcentrated(o)?300:0);
+        }
+        if(x==main_stack_&&degree_[x]==1&&x!=general_&&x!=enemy_general_&&degree_[y]>degree_[x])s+=700;
         double sv=source_value(o,x); s+=std::log1p(moved)*12+std::log1p(dest_after)*4;
         s+=std::min(sv,remain*7.0); if(remain<=1)s-=sv;
         if(split)s-=35; // action efficiency: retaining force must have real value
@@ -442,7 +461,13 @@ class Agent {
         int candidate_peak=*std::max_element(enemy_score_.begin(),enemy_score_.end());
         for(int x:id_cell_) if(legal_source(o,x)) for(int d=0;d<4;++d) {
             int y=neighbor(x,d); if(y<0||!passable_[y])continue;
+            bool captures=o.owner[y]==2;
+            bool target_progress=enemy_general_>=0&&dist_[cell_id_[y]][cell_id_[enemy_general_]]<dist_[cell_id_[x]][cell_id_[enemy_general_]];
+            bool reverse=std::any_of(recent_significant_edges_.rbegin(),recent_significant_edges_.rend(),[&](auto e){return e.first==y&&e.second==x;});
+            if(reverse&&!captures&&!target_progress){++reverse_candidates_rejected_;++two_cycle_detections_;continue;}
             double all=score_variant(o,x,y,0,until_tick,candidate_peak), half=score_variant(o,x,y,1,until_tick,candidate_peak);
+            int revisits=static_cast<int>(std::count(recent_main_stack_positions_.begin(),recent_main_stack_positions_.end(),y));
+            if(x==main_stack_&&revisits){double penalty=180.0*revisits;all-=penalty;half-=penalty;++repeated_cell_penalties_;max_main_stack_recent_revisits_=std::max(max_main_stack_recent_revisits_,revisits);if(revisits>=2)++short_cycle_detections_;}
             bool half_distinct=o.army[x]/2!=o.army[x]-1, both=half_distinct&&all>-1e90&&half>-1e90;
             bool prefer_half=half>all;
             if(both){++split_flip_opportunities_;if(flip10()){prefer_half=!prefer_half;++split_flips_taken_;}}
@@ -456,7 +481,9 @@ class Agent {
         }
         // Interior forces are feeders: when no good frontier action exists, route
         // the most efficient one toward the main stack or its attack path.
-        if(main_stack_>=0)for(int x:id_cell_)if(x!=main_stack_&&legal_source(o,x)&&o.owner[x]==1){int hop=next_hop_[cell_id_[x]][cell_id_[main_stack_]];if(hop>=0){int y=id_cell_[hop];double s=o.army[x]*7.0-dist_[cell_id_[x]][cell_id_[main_stack_]]*5+source_value(o,x)*.1;if(s>economy.score)economy={s,move(x,y,source_value(o,x)>60&&o.army[x]>=6),true};}}
+        bool stop_feeding=enemy_general_>=0&&overconcentrated(o)&&dist_[cell_id_[main_stack_]][cell_id_[enemy_general_]]>5;
+        if(main_stack_>=0&&!stop_feeding)for(int x:id_cell_)if(x!=main_stack_&&legal_source(o,x)&&o.owner[x]==1){int hop=next_hop_[cell_id_[x]][cell_id_[main_stack_]];if(hop>=0){int y=id_cell_[hop];double s=o.army[x]*7.0-dist_[cell_id_[x]][cell_id_[main_stack_]]*5+source_value(o,x)*.1;if(s>economy.score)economy={s,move(x,y,source_value(o,x)>60&&o.army[x]>=6),true};}}
+        if(enemy_general_>=0&&(main_stack_idle_turns_>=2||overconcentrated(o))&&economy.valid){double factor=until_tick<=8?.65:.48;economy.score*=factor;}
         if(!offense.valid)return economy.valid?economy.action:pass();
         if(!economy.valid)return offense.action;
         bool prefer_offense=offense.score>economy.score;
@@ -465,6 +492,29 @@ class Agent {
         if(strategy_==QUALIFIER_FEINT)++feint_actions_;
         if(strategy_==DEATHTOUCH_FORK||(chosen.kind==0&&chosen.split&&cell(chosen.row,chosen.col)==main_stack_&&qualifier_defense_score_>.48))++fork_actions_;
         return chosen;
+    }
+
+    void update_main_stack_metrics(const Observation&o,const Action&a,bool forced_defense){
+        if(main_stack_<0)return;
+        if(enemy_general_>=0&&trace_discovery_turn_<0){trace_discovery_turn_=o.turn;trace_main_army_=o.army[main_stack_];trace_main_distance_=dist_[cell_id_[main_stack_]][cell_id_[enemy_general_]];discovery_main_path_.push_back(main_stack_);}
+        max_main_stack_army_=std::max(max_main_stack_army_,o.army[main_stack_]);
+        double fraction=o.my_army?100.0*o.army[main_stack_]/o.my_army:0;
+        max_main_stack_fraction_pct_=std::max(max_main_stack_fraction_pct_,fraction);
+        bool over=overconcentrated(o);if(over)++overconcentrated_turns_;
+        if(forced_defense)return;
+        bool progress=false;int x=-1,y=-1;
+        if(a.kind==0){x=cell(a.row,a.col);y=neighbor(x,a.dir);
+            if(x==main_stack_){int before=enemy_general_>=0?dist_[cell_id_[x]][cell_id_[enemy_general_]]:INF,after=enemy_general_>=0?dist_[cell_id_[y]][cell_id_[enemy_general_]]:INF;
+                progress=after<before||o.owner[y]!=1||(degree_[x]==1&&degree_[y]>1);
+                if(degree_[x]==1&&degree_[y]>1)++dead_end_escape_moves_;
+                if(recent_main_stack_positions_.empty()||recent_main_stack_positions_.back()!=x)recent_main_stack_positions_.push_back(x);
+                recent_main_stack_positions_.push_back(y);
+                while(recent_main_stack_positions_.size()>12)recent_main_stack_positions_.erase(recent_main_stack_positions_.begin());
+                if(trace_discovery_turn_>=0&&discovery_main_path_.size()<11)discovery_main_path_.push_back(y);
+            }
+            if(x==main_stack_||o.army[x]>=std::max(20,o.my_army/10)){recent_significant_edges_.push_back({x,y});if(recent_significant_edges_.size()>8)recent_significant_edges_.erase(recent_significant_edges_.begin());}
+        }
+        if(enemy_general_>=0){if(progress){main_stack_idle_turns_=0;++main_stack_progress_moves_;}else{++main_stack_idle_turns_;if(over)++overconcentrated_idle_turns_;}main_stack_idle_max_=std::max(main_stack_idle_max_,main_stack_idle_turns_);}
     }
 
     Action maybe_build(const Observation& o) {
@@ -498,6 +548,7 @@ public:
         }
         // Final legality guard always leaves time for a protocol-safe pass.
         if(result.kind==0){int x=cell(result.row,result.col),y=neighbor(x,result.dir);if(!inside(result.row,result.col)||y<0||!passable_[y]||o.owner[x]!=1||o.army[x]<=1)result=fallback;}
+        update_main_stack_metrics(o,result,tactical&&required_defense_>0);
         if(result.kind==0){++movement_decisions_;if(result.split){++half_moves_;++half_by_mode_[strategy_];int x=cell(result.row,result.col);if(x==general_)++half_from_general_;if(known_castle_[x])++half_from_castle_;if(articulation_[x])++half_from_choke_;if(x==main_stack_)++half_from_main_;else ++half_from_feeder_;}else ++all_moves_;}
         auto end=Clock::now();decision_ms_.push_back(std::chrono::duration<double,std::milli>(end-begin).count());return result;
     }
@@ -505,7 +556,11 @@ public:
         if (decision_ms_.empty()) return;
         std::vector<double> t=decision_ms_;std::sort(t.begin(),t.end());double mean=std::accumulate(t.begin(),t.end(),0.0)/t.size();auto pct=[&](double p){return t[std::min(t.size()-1,static_cast<size_t>(std::ceil(p*t.size())-1))];};
         double sf=strategic_flip_opportunities_?100.0*strategic_flips_taken_/strategic_flip_opportunities_:0, pf=split_flip_opportunities_?100.0*split_flips_taken_/split_flip_opportunities_:0, hp=movement_decisions_?100.0*half_moves_/movement_decisions_:0;
-        std::fprintf(stderr,"[juraj_metrics] player=%d turns=%zu land50=%d opp_land50=%d army50=%d opp_army50=%d enemy_general_found=%d found_turn=%d approach10=%d approach5=%d approach2=%d approach1=%d castles_built=%d moves=%llu all=%llu half=%llu half_pct=%.3f strategic_flip_opportunities=%llu strategic_flips=%llu strategic_flip_pct=%.3f split_flip_opportunities=%llu split_flips=%llu split_flip_pct=%.3f half_general=%llu half_castle=%llu half_choke=%llu half_main=%llu half_feeder=%llu qualifier_score=%.3f meta_turns=%d defense_alert_turns=%d hard_defense_alerts_1_5=%d watch_zone_sightings_6_8=%d watch_zone_alerts=%d watch_zone_ignored=%d feints=%d intercepts=%d forks=%d probes=%zu mean_ms=%.4f p95_ms=%.4f p99_ms=%.4f max_ms=%.4f\n",player_id_,decision_ms_.size(),land50_,opp_land50_,my_army50_,opp_army50_,enemy_general_>=0,found_enemy_turn_,approach_turn_[0],approach_turn_[1],approach_turn_[2],approach_turn_[3],castles_built_,movement_decisions_,all_moves_,half_moves_,hp,strategic_flip_opportunities_,strategic_flips_taken_,sf,split_flip_opportunities_,split_flips_taken_,pf,half_from_general_,half_from_castle_,half_from_choke_,half_from_main_,half_from_feeder_,qualifier_defense_score_,meta_turns_,defense_alert_turns_,hard_defense_alerts_,watch_zone_sightings_,watch_zone_alerts_,watch_zone_ignored_,feint_actions_,intercept_actions_,fork_actions_,probe_history_.size(),mean,pct(.95),pct(.99),t.back());
+        std::fprintf(stderr,"[juraj_metrics] player=%d turns=%zu land50=%d opp_land50=%d army50=%d opp_army50=%d enemy_general_found=%d found_turn=%d approach10=%d approach5=%d approach2=%d approach1=%d castles_built=%d moves=%llu all=%llu half=%llu half_pct=%.3f strategic_flip_opportunities=%llu strategic_flips=%llu strategic_flip_pct=%.3f split_flip_opportunities=%llu split_flips=%llu split_flip_pct=%.3f half_general=%llu half_castle=%llu half_choke=%llu half_main=%llu half_feeder=%llu qualifier_score=%.3f meta_turns=%d defense_alert_turns=%d hard_defense_alerts_1_5=%d watch_zone_sightings_6_8=%d watch_zone_alerts=%d watch_zone_ignored=%d feints=%d intercepts=%d forks=%d probes=%zu main_stack_idle_max=%d main_stack_progress_moves=%d overconcentrated_turns=%d overconcentrated_idle_turns=%d max_main_stack_army=%d max_main_stack_fraction_pct=%.3f reverse_move_candidates_rejected=%llu two_cycle_detections=%llu short_cycle_detections=%llu dead_end_escape_moves=%llu repeated_cell_penalties=%llu max_main_stack_recent_revisits=%d mean_ms=%.4f p95_ms=%.4f p99_ms=%.4f max_ms=%.4f main_path=",player_id_,decision_ms_.size(),land50_,opp_land50_,my_army50_,opp_army50_,enemy_general_>=0,found_enemy_turn_,approach_turn_[0],approach_turn_[1],approach_turn_[2],approach_turn_[3],castles_built_,movement_decisions_,all_moves_,half_moves_,hp,strategic_flip_opportunities_,strategic_flips_taken_,sf,split_flip_opportunities_,split_flips_taken_,pf,half_from_general_,half_from_castle_,half_from_choke_,half_from_main_,half_from_feeder_,qualifier_defense_score_,meta_turns_,defense_alert_turns_,hard_defense_alerts_,watch_zone_sightings_,watch_zone_alerts_,watch_zone_ignored_,feint_actions_,intercept_actions_,fork_actions_,probe_history_.size(),main_stack_idle_max_,main_stack_progress_moves_,overconcentrated_turns_,overconcentrated_idle_turns_,max_main_stack_army_,max_main_stack_fraction_pct_,reverse_candidates_rejected_,two_cycle_detections_,short_cycle_detections_,dead_end_escape_moves_,repeated_cell_penalties_,max_main_stack_recent_revisits_,mean,pct(.95),pct(.99),t.back());
+        for(size_t i=0;i<recent_main_stack_positions_.size();++i)std::fprintf(stderr,"%s%d",i?",":"",recent_main_stack_positions_[i]);
+        std::fprintf(stderr," discovery_trace_turn=%d discovery_trace_army=%d discovery_trace_distance=%d discovery_path=",trace_discovery_turn_,trace_main_army_,trace_main_distance_);
+        for(size_t i=0;i<discovery_main_path_.size();++i)std::fprintf(stderr,"%s%d",i?",":"",discovery_main_path_[i]);
+        std::fputc('\n',stderr);
     }
 };
 
