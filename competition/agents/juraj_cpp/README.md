@@ -52,3 +52,12 @@ concentrated army, and sacrificed land tempo. When observations support that
 model, route scoring permits short detours, probes and feints tax the defender,
 and containment or two-prong Deathtouch pressure replaces a losing head-on ram.
 The original V2 policy remains the fallback when the opponent ignores probes.
+
+## V2.4 Hunter counterattack
+
+A behavioral signature recognizes Hunter's dominant linear conveyor and its
+one-army breadcrumb trail. A persistent compact raider follows that trail back
+toward the weak feeding general while deterministic kill-zone moves exploit
+Hunter's unsafe advance. When affordable, an owned articulation castle can be
+built as an impassable gate in Hunter's route. These dedicated actions are not
+randomized; ordinary opponents continue through the V2.3 policy.
