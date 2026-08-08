@@ -101,3 +101,34 @@ one-unit production residue is routed from safe rear edges, corners, and termina
 branches toward an explicit attack or defense sink. Search, Hunter, contact,
 tactical, and castle systems remain intact; ordinary second castles are deferred
 during a severe land deficit.
+
+## V2.7.1 productive pass fallback
+
+Passing is audited and is now a last resort. A cheap neutral-capture fallback is
+precomputed before deeper strategy; otherwise idle turns feed high-capacity
+expansion frontiers, continue general-search/attack routing, or relocate useful
+surplus. Land parity is monitored before the stronger deficit thresholds, and
+recent 20-turn land growth raises frontier-feed urgency when the production gap
+is worsening. Intentional Hunter kill-zone holds remain deterministic and are
+reported separately from no-army, unsafe, deadline, legality, and empty-strategy
+passes.
+
+## V2.7.2 hybrid strategy
+
+The V2.6.1 offense/search/contact-versus-economy competition is again the
+primary selector; land status contributes moderate scores rather than forcing
+early expansion. A hysteretic production emergency starts only below 65% land
+(or below 75% with a worsening 20-turn trend) and remains active until 85%
+recovery. Frontier feeding is otherwise restricted to productive fallback, so
+the V2.7.1 pass protection cannot displace a valid normal strategic action.
+Rear-surplus cleanup remains explicit and affinity-free.
+
+## V2.7.3 exploration tempo
+
+Before the enemy general is known, three turns without neutral capture,
+meaningful fog revelation, or progress toward the best spawn candidate add a
+moderate search/expansion score bonus. Repeated low-information harassment of
+the same contact front receives a mild diminishing-return penalty, while major
+combat, castles, new corridors, qualifier/Hunter tactics, and all known-general
+conversion remain exempt. The soft land-behind bonus is slightly stronger, but
+production emergency and productive fallback retain their V2.7.2 placement.
