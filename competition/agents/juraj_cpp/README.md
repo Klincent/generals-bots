@@ -61,3 +61,12 @@ toward the weak feeding general while deterministic kill-zone moves exploit
 Hunter's unsafe advance. When affordable, an owned articulation castle can be
 built as an impassable gate in Hunter's route. These dedicated actions are not
 randomized; ordinary opponents continue through the V2.3 policy.
+
+## V2.5 contact logistics
+
+First contact is persistent even after fog returns. A proximity-weighted front
+stack, a staging cell two to four steps behind contact, and at most one extra
+forward castle redirect interior logistics toward the known war. Remote neutral
+expansion is discounted while front pressure is idle or our land/army advantage
+is dominant, while safe weak-frontier captures and relocation of remote large
+stacks receive priority. Hunter's dedicated counterattack still runs first.
