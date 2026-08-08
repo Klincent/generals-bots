@@ -70,3 +70,22 @@ forward castle redirect interior logistics toward the known war. Remote neutral
 expansion is discounted while front pressure is idle or our land/army advantage
 is dominant, while safe weak-frontier captures and relocation of remote large
 stacks receive priority. Hunter's dedicated counterattack still runs first.
+
+## V2.6 spatial affinity
+
+A turn-zero geometry/graph affinity field penalizes rear edges, corners and
+terminal branches while rewarding room, junctions, chokepoints and the likely
+enemy direction. Cheap dynamic front, attack-corridor and interception bonuses
+then override that prior wherever an edge is genuinely useful. Excess rear army
+flows toward whichever of the attack and defense networks is under its target
+allocation. Exact-cost second castles are allowed on useful dual-purpose axes
+under dominance or in response to a newly observed enemy castle.
+
+## V2.6.1 dynamic potential
+
+Static affinity is terrain-only except for a very weak opening direction prior.
+Every observation rebuilds a fresh potential field from the current contact,
+front, staging cell, visible enemy territory/stacks, defense corridor, strategic
+mode and—once revealed—the dominant enemy-general attractor. Search candidates,
+fog-revealing scouts, qualifier probes and Hunter breadcrumbs remain governed by
+their independent probability/search models rather than terrain affinity.
