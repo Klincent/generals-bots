@@ -89,3 +89,15 @@ front, staging cell, visible enemy territory/stacks, defense corridor, strategic
 mode and—once revealed—the dominant enemy-general attractor. Search candidates,
 fog-revealing scouts, qualifier probes and Hunter breadcrumbs remain governed by
 their independent probability/search models rather than terrain affinity.
+
+## V2.7 production-first expansion
+
+Affinity no longer casts a vote in action selection. Neutral frontier captures
+receive persistent production value, larger bonuses shortly before turn-50
+ticks, and explicit land-deficit/severe-deficit priority. Contact-side discounts
+apply only after turn 400 when the agent already leads land by at least 25%.
+Rear cleanup is now a narrow deterministic rule: only excess above the mandatory
+one-unit production residue is routed from safe rear edges, corners, and terminal
+branches toward an explicit attack or defense sink. Search, Hunter, contact,
+tactical, and castle systems remain intact; ordinary second castles are deferred
+during a severe land deficit.
