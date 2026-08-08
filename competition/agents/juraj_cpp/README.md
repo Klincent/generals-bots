@@ -132,3 +132,15 @@ the same contact front receives a mild diminishing-return penalty, while major
 combat, castles, new corridors, qualifier/Hunter tactics, and all known-general
 conversion remain exempt. The soft land-behind bonus is slightly stronger, but
 production emergency and productive fallback retain their V2.7.2 placement.
+
+## V2.7.5 selective logistics and castles
+
+The V2.7.3 selector remains authoritative.  A rate-limited edge-surplus
+candidate may move all but one army from a safe inactive boundary stack of at
+least eight only toward an existing front, search, or main-stack objective; it
+can displace routine feeding but not tactical, Hunter, search, or attack play.
+Ordinary castles now choose exact-cost-minimum useful sites (within a two-army
+price band).  Optional proactive castles begin no earlier than turn 250 and
+require economic parity, post-build reserve, a forward graph position, and no
+Hunter indication or production emergency.  Castle and edge-action telemetry
+is emitted separately for qualification regression auditing.
