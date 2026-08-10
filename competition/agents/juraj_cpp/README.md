@@ -144,3 +144,78 @@ price band).  Optional proactive castles begin no earlier than turn 250 and
 require economic parity, post-build reserve, a forward graph position, and no
 Hunter indication or production emergency.  Castle and edge-action telemetry
 is emitted separately for qualification regression auditing.
+
+## V3.0 experimental static-route production architecture
+
+V3 precomputes immutable nine-sector distance fields, up to three general-rooted
+route branches, articulation breakthrough values, sector route load, and a
+probability-weighted interpretation of the unchanged enemy-general candidate
+model. Two cheap, separated route hubs are planned at initialization. The
+opening controller values broad neutral frontiers and feeds those planned hubs
+only after the initial expansion wave.
+
+Split selection is deterministic: `FULL-1` is the road/feed default, while
+`HALF` is used only when both resulting packets have independent route or
+frontier work. A short strategic packet history rejects no-progress cycles of
+length two through four and penalizes longer repeats. Existing tactical,
+general-search, qualifier, Hunter, contact, and known-general conversion layers
+retain priority. `JURAJ_V3_SPLIT=full|naive|smart` and
+`JURAJ_V3_CASTLES=0|1|2` expose the requested ablations; `JURAJ_V3_TRACE=1`
+prints action labels to stderr only.
+
+## V3.1 stabilization
+
+V3.1 keeps the static-route opening but makes route movement full-first: smart
+half moves require a large source, a substantial moved frontier, and a distinct
+high-value secondary branch. Planned castle sites are restricted to the
+general's reachable component, receive persistent full-force funding after turn
+90, and can build through ordinary contact at their exact live cost. A
+hysteretic pre-trigger Hunter suspicion state suppresses optional splits and
+castle spending while consolidating a distant mobile stack toward interception;
+the confirmed Hunter thresholds and tactical implementation are unchanged.
+Funding checkpoints, castle-miss reasons, split source/value statistics, and
+Hunter entry-board snapshots are reported to stderr.
+
+## V3.2 early warning and C1 optionality
+
+V3.2 adds a lightweight warning confidence below the unchanged Hunter
+confirmation threshold. It combines existing signature evidence with repeated
+dominant-stack concentration, proximity, route-consistent movement, and closing
+history; hysteresis makes warning logistics deterministic and reversible.
+Warning suppresses optional route splits and discourages sending the largest
+mobile packet farther from the general without stopping broad expansion.
+
+C1 funding remains persistent, but ordinary construction now waits until turn
+140 unless post-build army superiority, local safety, general garrison, and
+Hunter-warning checks justify an exceptional early build. Telemetry separates
+first funding/buildability from construction, records delay reasons and tactical
+use of the funded stack, and reports warning evidence/activation lead times.
+
+## V3.3 generic approaching-force reaction
+
+V3.3 adds an opponent-agnostic logistics constraint for a repeatedly observed,
+meaningful concentrated enemy stack whose static graph distance to our general
+is decreasing.  The bounded score uses only visible force size, enemy army
+concentration, graph proximity, closing rate, persistence, and the position and
+strength of our largest useful reaction stack; it does not consume any Hunter
+classification state.
+
+Activation requires at least two compatible observations, positive closing,
+at least eight enemy army, at least 12% visible concentration, and score 0.55.
+The score clears below 0.30 for five turns and unseen evidence decays by 0.90,
+0.72, or 0.45 according to age.  While active, ordinary route production keeps
+small productive packets moving but protects the primary reaction stack,
+suppresses optional HALF, and can consolidate along existing high-load routes.
+C1/C2 builds are delayed only when post-build nearby/reaction capacity is
+insufficient for the observed force.  Detailed activation and economic-cost
+telemetry is emitted on stderr under `[v33_approach]`.
+
+## V3.3.1 approach intervention fixes
+
+V3.3.1 leaves the V3.3 detector unchanged and fixes only its intervention
+semantics. Reaction adequacy now requires both sufficient force and plausible
+graph positioning; an inadequately positioned reaction stack is hard-rejected
+from ordinary outward production moves. A funded castle whose build is delayed
+for reaction safety no longer accepts additional castle-feed actions that turn.
+Telemetry separately reports candidate penalties, hard rejections, final
+selected-action changes, castle delays, and funded-site feed suppressions.
