@@ -160,7 +160,7 @@ frontier work. A short strategic packet history rejects no-progress cycles of
 length two through four and penalizes longer repeats. Existing tactical,
 general-search, qualifier, Hunter, contact, and known-general conversion layers
 retain priority. `JURAJ_V3_SPLIT=full|naive|smart` and
-`JURAJ_V3_CASTLES=0|1|2` expose the requested ablations; `JURAJ_V3_TRACE=1`
+`JURAJ_V3_CASTLES=0|1|2|3` expose the requested ablations; `JURAJ_V3_TRACE=1`
 prints action labels to stderr only.
 
 ## V3.1 stabilization
@@ -219,3 +219,31 @@ from ordinary outward production moves. A funded castle whose build is delayed
 for reaction safety no longer accepts additional castle-feed actions that turn.
 Telemetry separately reports candidate penalties, hard rejections, final
 selected-action changes, castle delays, and funded-site feed suppressions.
+
+## V3.4 rear logistics and three planned castles
+
+V3.4 converts surplus on safe, inactive rear cells into mobile army while
+leaving one army to retain each territory. Small two-, three-, and four-army
+piles qualify through aggregate branch/sector surplus; local graph-distance
+danger checks protect threatened cells. Rear-drain actions use FULL-1 toward an
+attack or defense sink and compete with ordinary economy at a bounded cadence,
+rather than existing only as unused candidate telemetry.
+
+The static turn-zero castle program now plans C1, C2, and C3 with sequential
+cost estimates and branch/sector diversity. Persistent funding targets the
+established C1 and C2 windows plus a C3 window beginning at turn 300. Contact or
+enemy-general discovery no longer cancels later plans, while immediate defense,
+site danger, and inadequate post-build reaction capacity can still delay them.
+`[v34_logistics]` and `[v34_castles]` stderr records expose drain sources,
+evacuated army, distance progress, and each castle's funding/build outcome.
+
+After the enemy general is known, V3.4 enters an opponent-agnostic mass
+mobilization phase. Safe ordinary rear stacks are ranked by moved army times
+static graph progress, so large stranded forces move before marginal economy
+packets. At least half of the eligible discovery-time surplus is progressively
+committed to the known attack corridor unless general defense or an inadequate
+approach-threat reaction force requires the army first. Mobilized-unit credits
+follow packets as they merge, preventing repeated hops from being counted as
+newly committed army. `[v34_mobilization]` reports discovery-time eligibility,
+attack/defense commitments, attack-network concentration, large-stack idle
+counts, and +10/+25/+50/+100 snapshots.
