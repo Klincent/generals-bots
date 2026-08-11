@@ -1,0 +1,75 @@
+name: V4.1 finalize (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      input_artifact:
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PYTHONUNBUFFERED: '1'
+      XLA_PYTHON_CLIENT_PREALLOCATE: 'false'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Materialize corrected V4.1 sources
+        run: |
+          cat competition/training/v4/v41_bundle.part00_0 \
+              competition/training/v4/v41_bundle.part00_1_0 \
+              competition/training/v4/v41_bundle.part00_1_1 \
+              competition/training/v4/v41_bundle.part01 \
+              competition/training/v4/v41_bundle.part02 \
+              competition/training/v4/v41_bundle.part03 \
+              competition/training/v4/v41_bundle.part04 \
+            | base64 -d | tar -xzf - -C .
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -e . pytest
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.input_artifact }}
+          path: training-state
+      - name: Fit rollout-trained policy once
+        run: |
+          PYTHONPATH=.:competition:competition/training/v4 python competition/training/v4/rollout_train.py \
+            --out training-state --games 5000 --target-pairs 1000000 --max-games 10000 \
+            --seed-start 10000 --rollouts 4 --horizon 50 --states-per-game 10 \
+            --candidates 8 --hash-bits 20 --fit-only
+      - name: Build handoff without replacing checked-in models
+        run: |
+          mkdir -p v41-handoff
+          python competition/training/v4/prepare_v41_runtime.py --output v41-handoff/main.cpp
+          python competition/training/v4/github_finalize.py \
+            --state-dir training-state --out v41-handoff --minimum-games 5000 --minimum-pairs 1000000
+          g++ -O2 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o /tmp/juraj-v41 v41-handoff/main.cpp
+          PYTHONPATH=.:competition:competition/training/v4 python -m pytest -q \
+            competition/training/v4/test_rollout_train.py \
+            competition/training/v4/test_github_pipeline.py
+          echo '## V4.1 final manifest' >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          cat v41-handoff/manifest.json >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v41-final-handoff
+          path: v41-handoff/
+          retention-days: 30
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v41-final-training-state
+          path: training-state/
+          retention-days: 30
+          if-no-files-found: error
