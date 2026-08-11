@@ -1,0 +1,68 @@
+name: V4.1 training chunk (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      input_artifact:
+        type: string
+        required: true
+      output_artifact:
+        type: string
+        required: true
+      chunk_no:
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      PYTHONUNBUFFERED: '1'
+      XLA_PYTHON_CLIENT_PREALLOCATE: 'false'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Materialize corrected V4.1 sources
+        run: |
+          cat competition/training/v4/v41_bundle.part00_0 \
+              competition/training/v4/v41_bundle.part00_1_0 \
+              competition/training/v4/v41_bundle.part00_1_1 \
+              competition/training/v4/v41_bundle.part01 \
+              competition/training/v4/v41_bundle.part02 \
+              competition/training/v4/v41_bundle.part03 \
+              competition/training/v4/v41_bundle.part04 \
+            | base64 -d | tar -xzf - -C .
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -e .
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.input_artifact }}
+          path: training-state
+      - name: Controlled-rollout collection
+        run: |
+          python competition/training/v4/run_github_chunk.py \
+            --state-dir training-state --target-games 5000 --target-pairs 1000000 --max-games 10000 \
+            --max-minutes 150 --rollouts 4 --horizon 50 --states-per-game 10 \
+            --candidates 8 --seed-start 10000 --hash-bits 20
+      - name: Chunk summary
+        run: |
+          echo "## V4.1 chunk ${{ inputs.chunk_no }}" >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          cat training-state/chunk-summary.json >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ${{ inputs.output_artifact }}
+          path: training-state/
+          retention-days: 14
+          if-no-files-found: error
