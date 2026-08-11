@@ -1,0 +1,557 @@
+name: V4.1 cloud rollout training
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: v41-training-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+env:
+  PYTHONUNBUFFERED: '1'
+  XLA_PYTHON_CLIENT_PREALLOCATE: 'false'
+  OMP_NUM_THREADS: '1'
+  OPENBLAS_NUM_THREADS: '1'
+  MKL_NUM_THREADS: '1'
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Materialize V4.1 training bundle
+        run: base64 -d competition/training/v4/v41_bundle.tar.gz.b64 | tar -xzf - -C .
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install engine and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e . pytest
+      - name: Reconstruct corrected V4.1 runtime and run preflight
+        run: |
+          python competition/training/v4/prepare_v41_runtime.py --output /tmp/main.v41.cpp
+          g++ -O2 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o /tmp/juraj-v41 /tmp/main.v41.cpp
+          PYTHONPATH=.:competition:competition/training/v4 python -m pytest -q \
+            competition/training/v4/test_rollout_train.py \
+            competition/training/v4/test_github_pipeline.py
+      - name: Restore latest compatible state from an earlier PR run
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python competition/training/v4/restore_previous_state.py --state-dir training-state
+      - name: Initialize production checkpoint if no prior state exists
+        run: |
+          PYTHONPATH=.:competition:competition/training/v4 python competition/training/v4/rollout_train.py \
+            --out training-state --games 0 --target-pairs 0 --max-games 0 \
+            --seed-start 10000 --rollouts 4 --horizon 50 --states-per-game 10 \
+            --candidates 8 --hash-bits 20 --collect-only
+      - name: Tiny actual-engine smoke test
+        run: |
+          rm -rf smoke-state
+          python competition/training/v4/run_github_chunk.py \
+            --state-dir smoke-state --target-games 1 --target-pairs 0 --max-games 1 \
+            --max-minutes 10 --rollouts 1 --horizon 1 --states-per-game 1 --candidates 4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v41-state-00
+          path: training-state/
+          retention-days: 14
+          if-no-files-found: error
+  train_01:
+    needs: bootstrap
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Materialize V4.1 training bundle
+        run: base64 -d competition/training/v4/v41_bundle.tar.gz.b64 | tar -xzf - -C .
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -e .
+      - uses: actions/download-artifact@v4
+        with:
+          name: v41-state-00
+          path: training-state
+      - name: Controlled-rollout chunk 01
+        run: |
+          python competition/training/v4/run_github_chunk.py \
+            --state-dir training-state --target-games 5000 --target-pairs 1000000 --max-games 10000 \
+            --max-minutes 150 --rollouts 4 --horizon 50 --states-per-game 10 \
+            --candidates 8 --seed-start 10000 --hash-bits 20
+          {
+            echo "## V4.1 chunk 01"
+            echo
+            echo "```json"
+            cat training-state/chunk-summary.json
+            echo "```"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v41-state-01
+          path: training-state/
+          retention-days: 14
+          if-no-files-found: error
+  train_02:
+    needs: train_01
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Materialize V4.1 training bundle
+        run: base64 -d competition/training/v4/v41_bundle.tar.gz.b64 | tar -xzf - -C .
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -e .
+      - uses: actions/download-artifact@v4
+        with:
+          name: v41-state-01
+          path: training-state
+      - name: Controlled-rollout chunk 02
+        run: |
+          python competition/training/v4/run_github_chunk.py \
+            --state-dir training-state --target-games 5000 --target-pairs 1000000 --max-games 10000 \
+            --max-minutes 150 --rollouts 4 --horizon 50 --states-per-game 10 \
+            --candidates 8 --seed-start 10000 --hash-bits 20
+          {
+            echo "## V4.1 chunk 02"
+            echo
+            echo "```json"
+            cat training-state/chunk-summary.json
+            echo "```"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v41-state-02
+          path: training-state/
+          retention-days: 14
+          if-no-files-found: error
+  train_03:
+    needs: train_02
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Materialize V4.1 training bundle
+        run: base64 -d competition/training/v4/v41_bundle.tar.gz.b64 | tar -xzf - -C .
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -e .
+      - uses: actions/download-artifact@v4
+        with:
+          name: v41-state-02
+          path: training-state
+      - name: Controlled-rollout chunk 03
+        run: |
+          python competition/training/v4/run_github_chunk.py \
+            --state-dir training-state --target-games 5000 --target-pairs 1000000 --max-games 10000 \
+            --max-minutes 150 --rollouts 4 --horizon 50 --states-per-game 10 \
+            --candidates 8 --seed-start 10000 --hash-bits 20
+          {
+            echo "## V4.1 chunk 03"
+            echo
+            echo "```json"
+            cat training-state/chunk-summary.json
+            echo "```"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v41-state-03
+          path: training-state/
+          retention-days: 14
+          if-no-files-found: error
+  train_04:
+    needs: train_03
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Materialize V4.1 training bundle
+        run: base64 -d competition/training/v4/v41_bundle.tar.gz.b64 | tar -xzf - -C .
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -e .
+      - uses: actions/download-artifact@v4
+        with:
+          name: v41-state-03
+          path: training-state
+      - name: Controlled-rollout chunk 04
+        run: |
+          python competition/training/v4/run_github_chunk.py \
+            --state-dir training-state --target-games 5000 --target-pairs 1000000 --max-games 10000 \
+            --max-minutes 150 --rollouts 4 --horizon 50 --states-per-game 10 \
+            --candidates 8 --seed-start 10000 --hash-bits 20
+          {
+            echo "## V4.1 chunk 04"
+            echo
+            echo "```json"
+            cat training-state/chunk-summary.json
+            echo "```"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v41-state-04
+          path: training-state/
+          retention-days: 14
+          if-no-files-found: error
+  train_05:
+    needs: train_04
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Materialize V4.1 training bundle
+        run: base64 -d competition/training/v4/v41_bundle.tar.gz.b64 | tar -xzf - -C .
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -e .
+      - uses: actions/download-artifact@v4
+        with:
+          name: v41-state-04
+          path: training-state
+      - name: Controlled-rollout chunk 05
+        run: |
+          python competition/training/v4/run_github_chunk.py \
+            --state-dir training-state --target-games 5000 --target-pairs 1000000 --max-games 10000 \
+            --max-minutes 150 --rollouts 4 --horizon 50 --states-per-game 10 \
+            --candidates 8 --seed-start 10000 --hash-bits 20
+          {
+            echo "## V4.1 chunk 05"
+            echo
+            echo "```json"
+            cat training-state/chunk-summary.json
+            echo "```"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v41-state-05
+          path: training-state/
+          retention-days: 14
+          if-no-files-found: error
+  train_06:
+    needs: train_05
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Materialize V4.1 training bundle
+        run: base64 -d competition/training/v4/v41_bundle.tar.gz.b64 | tar -xzf - -C .
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -e .
+      - uses: actions/download-artifact@v4
+        with:
+          name: v41-state-05
+          path: training-state
+      - name: Controlled-rollout chunk 06
+        run: |
+          python competition/training/v4/run_github_chunk.py \
+            --state-dir training-state --target-games 5000 --target-pairs 1000000 --max-games 10000 \
+            --max-minutes 150 --rollouts 4 --horizon 50 --states-per-game 10 \
+            --candidates 8 --seed-start 10000 --hash-bits 20
+          {
+            echo "## V4.1 chunk 06"
+            echo
+            echo "```json"
+            cat training-state/chunk-summary.json
+            echo "```"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v41-state-06
+          path: training-state/
+          retention-days: 14
+          if-no-files-found: error
+  train_07:
+    needs: train_06
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Materialize V4.1 training bundle
+        run: base64 -d competition/training/v4/v41_bundle.tar.gz.b64 | tar -xzf - -C .
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -e .
+      - uses: actions/download-artifact@v4
+        with:
+          name: v41-state-06
+          path: training-state
+      - name: Controlled-rollout chunk 07
+        run: |
+          python competition/training/v4/run_github_chunk.py \
+            --state-dir training-state --target-games 5000 --target-pairs 1000000 --max-games 10000 \
+            --max-minutes 150 --rollouts 4 --horizon 50 --states-per-game 10 \
+            --candidates 8 --seed-start 10000 --hash-bits 20
+          {
+            echo "## V4.1 chunk 07"
+            echo
+            echo "```json"
+            cat training-state/chunk-summary.json
+            echo "```"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v41-state-07
+          path: training-state/
+          retention-days: 14
+          if-no-files-found: error
+  train_08:
+    needs: train_07
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Materialize V4.1 training bundle
+        run: base64 -d competition/training/v4/v41_bundle.tar.gz.b64 | tar -xzf - -C .
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -e .
+      - uses: actions/download-artifact@v4
+        with:
+          name: v41-state-07
+          path: training-state
+      - name: Controlled-rollout chunk 08
+        run: |
+          python competition/training/v4/run_github_chunk.py \
+            --state-dir training-state --target-games 5000 --target-pairs 1000000 --max-games 10000 \
+            --max-minutes 150 --rollouts 4 --horizon 50 --states-per-game 10 \
+            --candidates 8 --seed-start 10000 --hash-bits 20
+          {
+            echo "## V4.1 chunk 08"
+            echo
+            echo "```json"
+            cat training-state/chunk-summary.json
+            echo "```"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v41-state-08
+          path: training-state/
+          retention-days: 14
+          if-no-files-found: error
+  train_09:
+    needs: train_08
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Materialize V4.1 training bundle
+        run: base64 -d competition/training/v4/v41_bundle.tar.gz.b64 | tar -xzf - -C .
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -e .
+      - uses: actions/download-artifact@v4
+        with:
+          name: v41-state-08
+          path: training-state
+      - name: Controlled-rollout chunk 09
+        run: |
+          python competition/training/v4/run_github_chunk.py \
+            --state-dir training-state --target-games 5000 --target-pairs 1000000 --max-games 10000 \
+            --max-minutes 150 --rollouts 4 --horizon 50 --states-per-game 10 \
+            --candidates 8 --seed-start 10000 --hash-bits 20
+          {
+            echo "## V4.1 chunk 09"
+            echo
+            echo "```json"
+            cat training-state/chunk-summary.json
+            echo "```"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v41-state-09
+          path: training-state/
+          retention-days: 14
+          if-no-files-found: error
+  train_10:
+    needs: train_09
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Materialize V4.1 training bundle
+        run: base64 -d competition/training/v4/v41_bundle.tar.gz.b64 | tar -xzf - -C .
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -e .
+      - uses: actions/download-artifact@v4
+        with:
+          name: v41-state-09
+          path: training-state
+      - name: Controlled-rollout chunk 10
+        run: |
+          python competition/training/v4/run_github_chunk.py \
+            --state-dir training-state --target-games 5000 --target-pairs 1000000 --max-games 10000 \
+            --max-minutes 150 --rollouts 4 --horizon 50 --states-per-game 10 \
+            --candidates 8 --seed-start 10000 --hash-bits 20
+          {
+            echo "## V4.1 chunk 10"
+            echo
+            echo "```json"
+            cat training-state/chunk-summary.json
+            echo "```"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v41-state-10
+          path: training-state/
+          retention-days: 14
+          if-no-files-found: error
+  train_11:
+    needs: train_10
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Materialize V4.1 training bundle
+        run: base64 -d competition/training/v4/v41_bundle.tar.gz.b64 | tar -xzf - -C .
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -e .
+      - uses: actions/download-artifact@v4
+        with:
+          name: v41-state-10
+          path: training-state
+      - name: Controlled-rollout chunk 11
+        run: |
+          python competition/training/v4/run_github_chunk.py \
+            --state-dir training-state --target-games 5000 --target-pairs 1000000 --max-games 10000 \
+            --max-minutes 150 --rollouts 4 --horizon 50 --states-per-game 10 \
+            --candidates 8 --seed-start 10000 --hash-bits 20
+          {
+            echo "## V4.1 chunk 11"
+            echo
+            echo "```json"
+            cat training-state/chunk-summary.json
+            echo "```"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v41-state-11
+          path: training-state/
+          retention-days: 14
+          if-no-files-found: error
+  train_12:
+    needs: train_11
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Materialize V4.1 training bundle
+        run: base64 -d competition/training/v4/v41_bundle.tar.gz.b64 | tar -xzf - -C .
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -e .
+      - uses: actions/download-artifact@v4
+        with:
+          name: v41-state-11
+          path: training-state
+      - name: Controlled-rollout chunk 12
+        run: |
+          python competition/training/v4/run_github_chunk.py \
+            --state-dir training-state --target-games 5000 --target-pairs 1000000 --max-games 10000 \
+            --max-minutes 150 --rollouts 4 --horizon 50 --states-per-game 10 \
+            --candidates 8 --seed-start 10000 --hash-bits 20
+          {
+            echo "## V4.1 chunk 12"
+            echo
+            echo "```json"
+            cat training-state/chunk-summary.json
+            echo "```"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v41-state-12
+          path: training-state/
+          retention-days: 14
+          if-no-files-found: error
+  finalize:
+    needs: train_12
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Materialize V4.1 training bundle
+        run: base64 -d competition/training/v4/v41_bundle.tar.gz.b64 | tar -xzf - -C .
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -e . pytest
+      - uses: actions/download-artifact@v4
+        with:
+          name: v41-state-12
+          path: training-state
+      - name: Fit final policy candidate from accumulated rollout values
+        run: |
+          PYTHONPATH=.:competition:competition/training/v4 python competition/training/v4/rollout_train.py \
+            --out training-state --games 5000 --target-pairs 1000000 --max-games 10000 \
+            --seed-start 10000 --rollouts 4 --horizon 50 --states-per-game 10 \
+            --candidates 8 --hash-bits 20 --fit-only
+      - name: Verify final checkpoint without replacing production models
+        run: |
+          mkdir -p v41-handoff
+          python competition/training/v4/prepare_v41_runtime.py --output v41-handoff/main.cpp
+          python competition/training/v4/github_finalize.py \
+            --state-dir training-state --out v41-handoff --minimum-games 5000 --minimum-pairs 1000000
+          g++ -O2 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic -o /tmp/juraj-v41 v41-handoff/main.cpp
+          PYTHONPATH=.:competition:competition/training/v4 python -m pytest -q \
+            competition/training/v4/test_rollout_train.py \
+            competition/training/v4/test_github_pipeline.py
+          cat v41-handoff/manifest.json >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v41-final-handoff
+          path: v41-handoff/
+          retention-days: 30
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v41-final-training-state
+          path: training-state/
+          retention-days: 30
+          if-no-files-found: error
