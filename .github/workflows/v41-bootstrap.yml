@@ -56,6 +56,46 @@ jobs:
               --seed-start 10000 --rollouts 4 --horizon 50 --states-per-game 10 \
               --candidates 8 --hash-bits 20 --collect-only
           fi
+      - name: Require Run 1 checkpoint before continuation
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          state = Path('training-state')
+          cp = json.loads((state / 'checkpoint.json').read_text())
+          cfg = cp.get('config', {})
+          expected_cfg = {
+              'candidates': 8,
+              'env_mode': 'competition',
+              'feature_schema': 2,
+              'hash_bits': 20,
+              'horizon': 50,
+              'pack_version': 2,
+              'rollouts': 4,
+              'seed_start': 10000,
+              'states_per_game': 10,
+          }
+          minimum = {
+              'games': 3480,
+              'raw_rollouts': 1009460,
+              'states': 33194,
+              'usable_pairs': 760741,
+              'data_bytes': 15745049,
+          }
+          errors = []
+          if cfg != expected_cfg:
+              errors.append(f'config mismatch: {cfg!r}')
+          for key, value in minimum.items():
+              if int(cp.get(key, -1)) < value:
+                  errors.append(f'{key}={cp.get(key)!r} < required {value}')
+          for name in ('rollouts.jsonl.gz', 'policy.bin'):
+              if not (state / name).is_file():
+                  errors.append(f'missing restored {name}')
+          if errors:
+              raise SystemExit('REFUSING TO CONTINUE WITHOUT RUN 1 STATE: ' + '; '.join(errors))
+          print('Resume guard PASS:', json.dumps({k: cp[k] for k in minimum}, sort_keys=True))
+          PY
       - name: Tiny actual competition-engine smoke test
         run: |
           rm -rf smoke-state
