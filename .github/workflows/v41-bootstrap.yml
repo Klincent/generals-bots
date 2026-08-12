@@ -44,18 +44,14 @@ jobs:
           PYTHONPATH=.:competition:competition/training/v4 python -m pytest -q \
             competition/training/v4/test_rollout_train.py \
             competition/training/v4/test_github_pipeline.py
-      - name: Restore latest compatible state from an earlier PR run
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: python competition/training/v4/restore_previous_state.py --state-dir training-state
-      - name: Initialize checkpoint if no compatible state exists
-        run: |
-          if [ ! -f training-state/checkpoint.json ]; then
-            PYTHONPATH=.:competition:competition/training/v4 python competition/training/v4/rollout_train.py \
-              --out training-state --games 0 --target-pairs 0 --max-games 0 \
-              --seed-start 10000 --rollouts 4 --horizon 50 --states-per-game 10 \
-              --candidates 8 --hash-bits 20 --collect-only
-          fi
+      - name: Restore Run 1 final training state
+        uses: actions/download-artifact@v4
+        with:
+          name: v41-final-training-state
+          path: training-state
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 31461226650
       - name: Require Run 1 checkpoint before continuation
         run: |
           python - <<'PY'
