@@ -1,0 +1,138 @@
+--- v34_final.cpp
++++ v41_runtime.cpp
+@@ -5,6 +5,9 @@
+ #include <cstdio>
+ #include <cstdlib>
+ #include <functional>
++#include <fstream>
++#include <cstdint>
++#include <cstring>
+ #include <limits>
+ #include <numeric>
+ #include <queue>
+@@ -36,6 +39,7 @@
+                     GENERAL_CONTAINMENT, DEATHTOUCH_FORK, GENERAL_DEFENSE_ALERT,
+                     HUNTER_COUNTERATTACK, HUNTER_KILL_ZONE,
+                     STRATEGY_COUNT };
++    struct Choice { double score=-1e100; Action action{}; bool valid=false; };
+ 
+     int player_id_, h_, w_, n_, turn_ = 0, general_ = -1, enemy_general_ = -1;
+     int castles_built_ = 0, enemy_castle_events_ = 0, found_enemy_turn_ = -1;
+@@ -196,9 +200,60 @@
+     struct RearHemisphereSnapshot {int turn,cells,army,remaining,belt,belt1,belt2,reserve,surplus,released;};std::vector<RearHemisphereSnapshot> rear_hemisphere_snapshots_;
+     long long mandatory_rear_actions_=0,mandatory_rear_army_=0,mandatory_rear_source_sum_=0,belt_attack_actions_=0,belt_attack_army_=0,threat_clear_release_actions_=0,counterattack_release_actions_=0;int attack_direction_turn_=-1,attack_direction_cell_=-1,largest_rear_source_=0,pending_belt_layer_=0;bool pending_belt_release_=false,previous_direction_threat_=false;
+     std::array<int,3> castle_funding_start_{{-1,-1,-1}},castle_first_safe_{{-1,-1,-1}};
++    struct V4Tactic {uint64_t key;int16_t value;uint16_t visits;};
++    std::vector<float> v4_policy_weights_;std::vector<uint8_t> v4_policy_coverage_;std::vector<V4Tactic> v4_tactics_;
++    bool v4_policy_enabled_=true,v4_tactics_enabled_=true,v4_opening_enabled_=true,v4_policy_loaded_=false,v4_tactics_loaded_=false,v4_opening_loaded_=false;double v4_policy_scale_=1.0;
++    long long v4_policy_decisions_=0,v4_policy_changes_=0,v4_ood_fallbacks_=0,v4_low_margin_fallbacks_=0,v4_tactic_attempts_=0,v4_tactic_hits_=0,v4_tactic_misses_=0,v4_collision_rejects_=0,v4_candidate_sum_=0;double v4_margin_sum_=0,v4_feature_ms_=0,v4_lookup_ms_=0,v4_score_ms_=0,v4_load_ms_=0,v4_parse_ms_=0,v4_static_ms_=0,v4_turn0_ms_=0;
+ 
+     bool flip10() { return unit_(rng_) < 0.10; }
+ 
++    static uint64_t v4_mix(uint64_t x){x+=0x9e3779b97f4a7c15ULL;x=(x^(x>>30))*0xbf58476d1ce4e5b9ULL;x=(x^(x>>27))*0x94d049bb133111ebULL;return x^(x>>31);}
++    static uint32_t v4_checksum(const uint8_t*p,size_t n){uint32_t h=2166136261u;for(size_t i=0;i<n;++i)h=(h^p[i])*16777619u;return h;}
++    static int v4_bucket(int a){if(a<=1)return 0;if(a<=3)return 1;if(a<=7)return 2;if(a<=15)return 3;if(a<=31)return 4;if(a<=63)return 5;if(a<=127)return 6;return 7;}
++    static constexpr uint32_t V4_PACK_VERSION=3;
++    static constexpr uint32_t V4_FEATURE_SCHEMA=2;
++    struct V4Header {char magic[8];uint32_t version,kind,count,hash_size,payload_bytes,checksum,reserved[8];};
++    bool load_v4_file(const char*name,uint32_t kind){auto load_begin=Clock::now();std::ifstream f(name,std::ios::binary);if(!f){std::fprintf(stderr,"[v4] warning: missing %s; V3.4 fallback active\n",name);return false;}V4Header h{};f.read(reinterpret_cast<char*>(&h),sizeof(h));if(!f||std::string(h.magic,h.magic+7)!="JURAJV4"||h.version!=V4_PACK_VERSION||h.kind!=kind||h.payload_bytes>48u*1024u*1024u){std::fprintf(stderr,"[v4] warning: invalid %s header; V3.4 fallback active\n",name);return false;}std::vector<uint8_t>payload(h.payload_bytes);f.read(reinterpret_cast<char*>(payload.data()),payload.size());if(!f||f.peek()!=std::char_traits<char>::eof()||v4_checksum(payload.data(),payload.size())!=h.checksum){std::fprintf(stderr,"[v4] warning: corrupt %s; V3.4 fallback active\n",name);return false;}auto parse=Clock::now();if(kind==1){if(h.reserved[0]!=V4_FEATURE_SCHEMA||h.reserved[1]!=1||h.hash_size==0||(h.hash_size&(h.hash_size-1))||payload.size()!=h.hash_size*5ull)return false;v4_policy_weights_.resize(h.hash_size);v4_policy_coverage_.resize(h.hash_size);std::memcpy(v4_policy_weights_.data(),payload.data(),h.hash_size*4ull);std::memcpy(v4_policy_coverage_.data(),payload.data()+h.hash_size*4ull,h.hash_size);for(float x:v4_policy_weights_)if(!std::isfinite(x)){v4_policy_weights_.clear();v4_policy_coverage_.clear();return false;}}else if(kind==2){if(payload.size()!=h.count*12ull)return false;v4_tactics_.resize(h.count);for(uint32_t i=0;i<h.count;++i){std::memcpy(&v4_tactics_[i].key,payload.data()+i*12,8);std::memcpy(&v4_tactics_[i].value,payload.data()+i*12+8,2);std::memcpy(&v4_tactics_[i].visits,payload.data()+i*12+10,2);}}else{v4_opening_loaded_=h.count>0;}v4_load_ms_+=std::chrono::duration<double,std::milli>(parse-load_begin).count();v4_parse_ms_+=std::chrono::duration<double,std::milli>(Clock::now()-parse).count();return true;}
++    void load_v4_pack(){auto flag=[](const char*n,bool d){const char*s=std::getenv(n);return s?std::atoi(s)!=0:d;};v4_policy_enabled_=flag("JURAJ_V4_POLICY",true);v4_tactics_enabled_=flag("JURAJ_V4_TACTICS",true);v4_opening_enabled_=flag("JURAJ_V4_OPENING",false);if(const char*s=std::getenv("JURAJ_V4_POLICY_SCALE"))v4_policy_scale_=std::clamp(std::atof(s),0.0,2.0);if(v4_policy_enabled_)v4_policy_loaded_=load_v4_file("policy.bin",1);if(v4_tactics_enabled_)v4_tactics_loaded_=load_v4_file("tactics.bin",2);if(v4_opening_enabled_)v4_opening_loaded_=load_v4_file("opening.bin",3);}
++    // V4.1 feature schema v2.  Every tag below has the exact same meaning in
++    // competition/training/v4/rollout_train.py.  Only information reproducible
++    // from the perspective-relative observation plus immutable map geometry is
++    // learned; hard V3.4 state (rear evacuation, belt reserve, castle timing,
++    // approach defense) remains outside the learned ranker.
++    std::vector<uint64_t> v4_features(const Observation&o,const Action&a)const{
++        std::vector<uint64_t>f;f.reserve(30);if(a.kind!=0)return f;
++        int x=cell(a.row,a.col),y=neighbor(x,a.dir);if(x<0||y<0||x>=n_||y>=n_)return f;
++        int source_army=o.army[x],dest_army=o.army[y];
++        int m=a.split?std::max(1,source_army/2):std::max(1,source_army-1);
++        auto add=[&](uint64_t tag,int value){f.push_back(v4_mix((tag<<32)^uint32_t(value)));};
++        int own_castles=0,visible_enemy=-1;bool contact_visible=false;
++        for(int i=0;i<n_;++i){if(o.owner[i]==1&&o.type[i]==3)++own_castles;if(o.owner[i]==2){contact_visible=true;if(o.type[i]==4)visible_enemy=i;}}
++        auto graph_dist=[&](int a0,int b0){if(a0<0||b0<0||a0>=n_||b0>=n_)return 999;int ia=cell_id_[a0],ib=cell_id_[b0];if(ia<0||ib<0)return 999;return dist_[ia][ib];};
++        int own_src=std::min(31,graph_dist(x,general_)),own_dst=std::min(31,graph_dist(y,general_));
++        int enemy_progress=0;if(visible_enemy>=0)enemy_progress=std::clamp(graph_dist(x,visible_enemy)-graph_dist(y,visible_enemy),-2,2);
++        int capture_class=(o.owner[y]==2&&m>dest_army)?2:((o.owner[y]==0&&m>dest_army)?1:0);
++        int merge_bucket=o.owner[y]==1?v4_bucket(dest_army+m):0;
++        int src_r=x/w_,src_c=x%w_,dst_r=y/w_,dst_c=y%w_;
++        int own_delta=std::clamp(graph_dist(x,general_)-graph_dist(y,general_),-2,2);
++        add(1,0);add(2,o.turn/25);
++        add(3,std::clamp(o.my_land*8/std::max(1,o.opp_land),0,31));
++        add(4,std::clamp(o.my_army*8/std::max(1,o.opp_army),0,31));
++        add(5,std::min(15,own_castles));add(6,visible_enemy>=0);add(7,contact_visible);
++        add(8,v4_bucket(source_army));add(9,o.type[x]);add(10,o.owner[y]);
++        add(11,v4_bucket(dest_army));add(12,o.type[y]);add(13,a.split);add(14,v4_bucket(m));
++        add(15,own_src);add(16,own_dst);add(17,o.owner[y]==1);add(18,o.owner[y]==2);add(19,o.owner[y]==0);
++        add(20,capture_class);add(21,merge_bucket);add(22,enemy_progress);add(23,v4_bucket(m)*8+enemy_progress+2);
++        add(24,degree_[x]);add(25,degree_[y]);
++        add(26,src_r==0||src_c==0||src_r==h_-1||src_c==w_-1);
++        add(27,dst_r==0||dst_c==0||dst_r==h_-1||dst_c==w_-1);
++        add(28,std::min(31,m/4));add(29,v4_bucket(dest_army)*4+o.owner[y]);add(30,own_delta);
++        return f;
++    }
++    uint64_t v4_tactic_key(const Observation&o,const Action&a)const{if(a.kind!=0)return 0;int x=cell(a.row,a.col),y=neighbor(x,a.dir),gdist=std::min(15,dist_[cell_id_[y]][cell_id_[general_]]);uint64_t k=o.owner[y]|(uint64_t(o.type[y])<<2)|(uint64_t(v4_bucket(o.army[x]))<<5)|(uint64_t(v4_bucket(o.army[y]))<<8)|(uint64_t(a.split)<<11)|(uint64_t(gdist)<<12)|(uint64_t(approach_threat_active_)<<16)|(uint64_t(enemy_general_>=0)<<17);return v4_mix(k);}
++    double v4_policy_value(const Observation&o,const Action&a,int&coverage,double&tactical){coverage=0;tactical=0;double value=0;auto fb=Clock::now();auto features=v4_features(o,a);v4_feature_ms_+=std::chrono::duration<double,std::milli>(Clock::now()-fb).count();if(v4_policy_loaded_&&!v4_policy_weights_.empty()){size_t mask=v4_policy_weights_.size()-1;for(uint64_t q:features){size_t i=q&mask;value+=v4_policy_weights_[i];coverage+=v4_policy_coverage_[i];}}if(v4_tactics_loaded_){auto lb=Clock::now();++v4_tactic_attempts_;uint64_t key=v4_tactic_key(o,a);auto it=std::lower_bound(v4_tactics_.begin(),v4_tactics_.end(),key,[](const V4Tactic&r,uint64_t k){return r.key<k;});if(it!=v4_tactics_.end()&&it->key==key){tactical=it->value;++v4_tactic_hits_;}else ++v4_tactic_misses_;v4_lookup_ms_+=std::chrono::duration<double,std::milli>(Clock::now()-lb).count();}return std::clamp(value*64.0*v4_policy_scale_+tactical/8.0,-450.0,450.0);}
++    static bool same_action(const Action&a,const Action&b){return a.kind==b.kind&&a.row==b.row&&a.col==b.col&&a.dir==b.dir&&a.split==b.split;}
++    Action v4_rank_candidates(const Observation&o,std::vector<Choice>cs,const Action&baseline){if((!v4_policy_loaded_&&!v4_tactics_loaded_)||cs.empty())return baseline;bool have=false;for(auto&c:cs)if(c.valid&&same_action(c.action,baseline))have=true;if(!have)cs.push_back({0,baseline,true});std::sort(cs.begin(),cs.end(),[](const Choice&a,const Choice&b){return a.score>b.score;});std::vector<Choice>u;for(auto&c:cs)if(c.valid&&!std::any_of(u.begin(),u.end(),[&](const Choice&q){return same_action(q.action,c.action);})&&u.size()<24)u.push_back(c);++v4_policy_decisions_;v4_candidate_sum_+=u.size();double best=-1e100,second=-1e100;Action ans=baseline;int bestcov=0;for(auto&c:u){int cov=0;double tv=0,lv=v4_policy_value(o,c.action,cov,tv),score=c.score+lv;if(score>best){second=best;best=score;ans=c.action;bestcov=cov;}else second=std::max(second,score);}double margin=best-second;v4_margin_sum_+=std::max(0.0,margin);if(bestcov<8){++v4_ood_fallbacks_;return baseline;}if(margin<12){++v4_low_margin_fallbacks_;return baseline;}if(!same_action(ans,baseline))++v4_policy_changes_;return ans;}
++
+     bool inside(int r, int c) const { return r >= 0 && r < h_ && c >= 0 && c < w_; }
+     int cell(int r, int c) const { return r * w_ + c; }
+     int row(int x) const { return x / w_; }
+@@ -705,7 +760,6 @@
+         return pass();
+     }
+ 
+-    struct Choice { double score=-1e100; Action action{}; bool valid=false; };
+     double source_value(const Observation&,int x)const {
+         double v=(x==general_?180:0)+(known_castle_[x]?70:0)+(articulation_[x]?65:0)+(degree_[x]>=3?18:0);
+         if(general_>=0&&dist_[cell_id_[x]][cell_id_[general_]]<=1)v+=55;
+@@ -871,7 +925,7 @@
+     Choice choose_rear_drain(const Observation&o){Choice best;int attack=-1,defense=-1;bool to_defense=false;rear_sinks(o,attack,defense,to_defense);bool mass=enemy_general_>=0&&!to_defense&&mobilized_to_attack_*2<std::max(1,mobilization_initial_eligible_);if(!mass&&o.turn-last_rear_drain_turn_<4)return best;int sink=to_defense?defense:attack;if(sink<0)return best;std::array<int,3> branch{};std::array<int,9> sector{};for(int x:id_cell_)if(stranded_source(o,x,sink)){int surplus=o.army[x]-1,b=v3_branch(x);if(b>=0)branch[b]+=surplus;sector[nav_[x].sector]+=surplus;}for(int x:id_cell_){bool eligible=mass?mobilizable_source(o,x):stranded_source(o,x,sink);if(!eligible)continue;int h=next_hop_[cell_id_[x]][cell_id_[sink]];if(h<0)continue;int y=id_cell_[h];if(o.owner[y]!=1||dist_[cell_id_[y]][cell_id_[sink]]>=dist_[cell_id_[x]][cell_id_[sink]])continue;++rear_drain_candidates_;int reserve=mass?mobilization_reserve(x):1,surplus=o.army[x]-reserve,b=v3_branch(x),aggregate=(b>=0?branch[b]:sector[nav_[x].sector]);int edge=std::min({row(x),h_-1-row(x),col(x),w_-1-col(x)}),remote=dist_[cell_id_[x]][cell_id_[sink]],progress=dist_[cell_id_[x]][cell_id_[sink]]-dist_[cell_id_[y]][cell_id_[sink]];double score=mass?1200+surplus*progress*30:180+std::min(aggregate,20)*12+std::min(surplus,12)*10+remote*3+(edge<=1?30:0)+(degree_[x]<=1||terminal_depth_[x]>0?30:0);if(score>best.score){best={score,move(x,y,0),true};pending_rear_drain_source_=x;pending_rear_drain_dest_=y;pending_rear_drain_sink_=sink;pending_rear_drain_kind_=mass?3:(to_defense?2:1);}}return best;}
+     StrandedSnapshot stranded_snapshot(const Observation&o)const{int attack=-1,defense=-1;bool to_defense=false;rear_sinks(o,attack,defense,to_defense);int sink=to_defense?defense:attack;StrandedSnapshot s{o.turn,0,0,0,0,{}};if(sink<0)return s;for(int x:id_cell_)if(stranded_source(o,x,sink)){int z=o.army[x]-1,edge=std::min({row(x),h_-1-row(x),col(x),w_-1-col(x)});s.total+=z;if(edge<=1)s.edge+=z;if(degree_[x]<=1||terminal_depth_[x]>0)s.terminal+=z;if(dist_[cell_id_[x]][cell_id_[sink]]>=10)s.remote+=z;int b=v3_branch(x);if(b>=0)s.branch[b]+=z;}return s;}
+     Action choose_strategic(const Observation& o) {
+-        Choice offense,economy,expansion,rear_cleanup,edge_surplus;
++        Choice offense,economy,expansion,rear_cleanup,edge_surplus;std::vector<Choice>v4_candidates;
+         int next_tick=((o.turn/50)+1)*50, until_tick=next_tick-o.turn;
+         int candidate_peak=*std::max_element(enemy_score_.begin(),enemy_score_.end());
+         for(int x:id_cell_) if(legal_source(o,x)) for(int d=0;d<4;++d) {
+@@ -888,6 +942,7 @@
+             if(both){++split_flip_opportunities_;if(flip10()){prefer_half=!prefer_half;++split_flips_taken_;}}
+             int split=(both&&prefer_half)?1:0; double s=split?half:all;
+             if(s<=-1e90)continue;
++            v4_candidates.push_back({s,move(x,y,split),true});
+             int strategic_target=enemy_general_>=0?enemy_general_:static_cast<int>(std::max_element(enemy_score_.begin(),enemy_score_.end())-enemy_score_.begin());
+             bool pressure=o.owner[y]==2||(strategic_target>=0&&enemy_score_[strategic_target]>0&&
+                 dist_[cell_id_[y]][cell_id_[strategic_target]]<dist_[cell_id_[x]][cell_id_[strategic_target]]);
+@@ -952,11 +1007,11 @@
+         // route-production choice. Existing search below remains authoritative.
+         if(enemy_general_<0&&hunter_trigger_turn_<0&&!contact_established_){Choice routed=choose_v3_production(o);if(routed.valid)economy=routed;}
+         Choice rear_drain=choose_rear_drain(o);if(rear_drain.valid&&(!economy.valid||rear_drain.score>economy.score))economy=rear_drain;
+-        if(!offense.valid)return economy.valid?economy.action:pass();
+-        if(!economy.valid){pending_v3_source_=pending_v3_dest_=-1;return offense.action;}
++        if(!offense.valid){Action base=economy.valid?economy.action:pass();return v4_rank_candidates(o,v4_candidates,base);}
++        if(!economy.valid){pending_v3_source_=pending_v3_dest_=-1;return v4_rank_candidates(o,v4_candidates,offense.action);}
+         bool prefer_offense=offense.score>economy.score;
+         ++strategic_flip_opportunities_; if(flip10()){prefer_offense=!prefer_offense;++strategic_flips_taken_;}
+-        Action chosen=prefer_offense?offense.action:economy.action;
++        Action chosen=prefer_offense?offense.action:economy.action;v4_candidates.push_back(offense);v4_candidates.push_back(economy);chosen=v4_rank_candidates(o,v4_candidates,chosen);
+         if(chosen.kind!=0||cell(chosen.row,chosen.col)!=pending_v3_source_||neighbor(pending_v3_source_,chosen.dir)!=pending_v3_dest_||chosen.split!=economy.action.split)pending_v3_source_=pending_v3_dest_=-1;
+         if(strategy_==QUALIFIER_FEINT)++feint_actions_;
+         if(strategy_==DEATHTOUCH_FORK||(chosen.kind==0&&chosen.split&&cell(chosen.row,chosen.col)==main_stack_&&qualifier_defense_score_>.48))++fork_actions_;
+@@ -1081,7 +1136,7 @@
+         auto begin=Clock::now();
+         auto hard=o.turn==0 ? process_start_+std::chrono::milliseconds(8500)
+                             : begin+std::chrono::milliseconds(120);
+-        if (o.turn==0) initialise(o);
++        if(o.turn==0){auto t0=Clock::now();load_v4_pack();auto gs=Clock::now();initialise(o);v4_static_ms_=std::chrono::duration<double,std::milli>(Clock::now()-gs).count();v4_turn0_ms_=std::chrono::duration<double,std::milli>(Clock::now()-t0).count();}
+         update_memory(o);
+         update_known_mobilization(o);
+         {int target=attack_direction_target();if(target>=0){attack_direction_cell_=target;if(attack_direction_turn_<0)attack_direction_turn_=o.turn;}}
+@@ -1163,6 +1218,7 @@
+         std::fprintf(stderr,"[v34_logistics] max_stranded=%d candidates=%lld selected=%lld evacuated=%lld source2=%lld source3=%lld source4=%lld source5plus=%lld attack=%lld defense=%lld edge=%lld terminal=%lld mean_source=%.2f mean_moved=%.2f mean_progress=%.2f snapshots=",max_stranded_surplus_,rear_drain_candidates_,rear_drain_actions_,rear_drain_army_,rear_source_bins_[0],rear_source_bins_[1],rear_source_bins_[2],rear_source_bins_[3],rear_drain_attack_,rear_drain_defense_,rear_drain_edge_,rear_drain_terminal_,rear_drain_actions_?(double)rear_source_sum_/rear_drain_actions_:0,rear_drain_actions_?(double)rear_moved_sum_/rear_drain_actions_:0,rear_drain_actions_?(double)rear_progress_sum_/rear_drain_actions_:0);for(size_t i=0;i<stranded_snapshots_.size();++i){auto&s=stranded_snapshots_[i];std::fprintf(stderr,"%s%d:%d:e%d:t%d:r%d:b%d/%d/%d",i?",":"",s.turn,s.total,s.edge,s.terminal,s.remote,s.branch[0],s.branch[1],s.branch[2]);}std::fputc('\n',stderr);
+         std::fprintf(stderr,"[v34_rear_hemisphere] direction_turn=%d target=%d mandatory=%lld evacuated=%lld largest_source=%d mean_source=%.2f belt_to_attack_actions=%lld belt_to_attack_army=%lld threat_clear_release=%lld counterattack_release=%lld snapshots=",attack_direction_turn_,attack_direction_cell_,mandatory_rear_actions_,mandatory_rear_army_,largest_rear_source_,mandatory_rear_actions_?(double)mandatory_rear_source_sum_/mandatory_rear_actions_:0,belt_attack_actions_,belt_attack_army_,threat_clear_release_actions_,counterattack_release_actions_);for(size_t i=0;i<rear_hemisphere_snapshots_.size();++i){auto&r=rear_hemisphere_snapshots_[i];std::fprintf(stderr,"%s%d:cells%d:army%d:remaining%d:belt%d:l1%d:l2%d:reserve%d:surplus%d:released%d",i?",":"",r.turn,r.cells,r.army,r.remaining,r.belt,r.belt1,r.belt2,r.reserve,r.surplus,r.released);}std::fputc('\n',stderr);
+         std::fprintf(stderr,"[v34_mobilization] discovery=%d initial_eligible=%d to_attack=%lld to_defense=%lld idle20_10=%d idle20_25=%d idle20_50=%d snapshots=",mobilization_discovery_turn_,mobilization_initial_eligible_,mobilized_to_attack_,mobilized_to_defense_,mobilization_idle10_,mobilization_idle25_,mobilization_idle50_);for(size_t i=0;i<mobilization_snapshots_.size();++i){auto&m=mobilization_snapshots_[i];std::fprintf(stderr,"%s%d:eligible%d:still%d:moved%d:network%d:largest%d:second%d:ratio%.3f",i?",":"",m.turn,m.eligible,m.still,m.moved,m.network,m.largest,m.second,m.ratio);}std::fputc('\n',stderr);
++        std::fprintf(stderr,"[v4_pack] version=3 feature_schema=2 policy_loaded=%d tactics_loaded=%d opening_loaded=%d policy_decisions=%lld policy_changes=%lld ood=%lld low_margin=%lld mean_candidates=%.2f mean_margin=%.3f tactic_attempts=%lld tactic_hits=%lld tactic_misses=%lld collision_rejects=%lld load_ms=%.3f parse_ms=%.3f static_ms=%.3f turn0_ms=%.3f feature_ms=%.3f lookup_ms=%.3f scoring_ms=%.3f\n",v4_policy_loaded_,v4_tactics_loaded_,v4_opening_loaded_,v4_policy_decisions_,v4_policy_changes_,v4_ood_fallbacks_,v4_low_margin_fallbacks_,v4_policy_decisions_?(double)v4_candidate_sum_/v4_policy_decisions_:0,v4_policy_decisions_?v4_margin_sum_/v4_policy_decisions_:0,v4_tactic_attempts_,v4_tactic_hits_,v4_tactic_misses_,v4_collision_rejects_,v4_load_ms_,v4_parse_ms_,v4_static_ms_,v4_turn0_ms_,v4_feature_ms_,v4_lookup_ms_,v4_score_ms_);
+         std::fprintf(stderr,"[v34_castles] ");for(int i=0;i<3;++i){const char*reason=planned_castle_built_turn_[i]>=0?"BUILT":(funding_[i].max_army==0?"NOT_REACHED":(planned_delay_turns_[i]>0?"APPROACH_DELAY":(planned_tactical_use_[i]>0?"TACTICAL_USE":(funding_[i].max_army<funding_[i].live_cost?"UNDERFUNDED":"WINDOW_EXPIRED"))));int b=planned_castle_[i]>=0?v3_branch(planned_castle_[i]):-1,sector=planned_castle_[i]>=0?nav_[planned_castle_[i]].sector:-1;std::fprintf(stderr,"%sC%d:cell%d:branch%d:sector%d:flow%.3f:load%d:est%d:funding_start%d:funded%d:first_safe%d:built%d:actual%d:feeds%d:delays%d:late%s:tactical%d:reason%s",i?" ":"",i+1,planned_castle_[i],b,sector,planned_castle_[i]>=0?nav_[planned_castle_[i]].route_flow:0,planned_castle_[i]>=0?nav_[planned_castle_[i]].route_load:0,planned_castle_cost_[i],castle_funding_start_[i],planned_first_funded_[i],castle_first_safe_[i],planned_castle_built_turn_[i],planned_actual_cost_[i],funding_[i].feeds,planned_delay_turns_[i],(i==1&&planned_castle_built_turn_[i]<0&&turn_>200)?"C2_LATE":((i==2&&planned_castle_built_turn_[i]<0&&turn_>275)?"C3_LATE":"NO"),planned_tactical_use_[i],reason);}std::fputc('\n',stderr);
+     }
+ };
