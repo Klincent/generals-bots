@@ -1,11 +1,5 @@
 #!/usr/bin/env python3
-"""Reconstruct the corrected V4.1 C++ runtime from the repository's split V3.4 source.
-
-The juraj-v3.4 branch stores the original V3.4 main.cpp as exact textual include
-chunks.  To avoid transporting a 150+ KiB monolithic file through the GitHub API,
-cloud training reconstructs that source, applies the audited V3.4-final patch and
-then the small V4.1 runtime patch, and emits one monolithic main.v41.cpp.
-"""
+"""Reconstruct the corrected V4.1 C++ runtime from the repository's split V3.4 source."""
 from __future__ import annotations
 
 import argparse
@@ -16,7 +10,9 @@ import tempfile
 from pathlib import Path
 
 EXPECTED_INITIAL_SHA256 = "19a8a2107d16229a4246e6da7a47d1052a56a3aac52d2c3fc6a8363d6986ed1c"
-EXPECTED_FINAL_SHA256 = "666f7ed64f30f71bb0b593f450ffba5d89c9404952406b6e5a92d8ca00a1d478"
+EXPECTED_PHASE1_SHA256 = "666f7ed64f30f71bb0b593f450ffba5d89c9404952406b6e5a92d8ca00a1d478"
+# Filled after the first Phase 2 CI reconstruction proves the patch applies and compiles.
+EXPECTED_PHASE2_SHA256: str | None = None
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -57,17 +53,27 @@ def main() -> int:
     try:
         apply_patch(tmp_path, args.patch_dir / "v34-final.patch")
         apply_patch(tmp_path, args.patch_dir / "v41-runtime.patch")
+        phase1 = tmp_path.read_bytes()
+        phase1_sha = sha256_bytes(phase1)
+        if phase1_sha != EXPECTED_PHASE1_SHA256:
+            raise SystemExit(
+                f"generated Phase 1 V4.1 source hash {phase1_sha} != expected {EXPECTED_PHASE1_SHA256}"
+            )
+
+        phase2_patch = args.patch_dir / "v41-tactics-key.patch"
+        if phase2_patch.exists():
+            apply_patch(tmp_path, phase2_patch)
         final = tmp_path.read_bytes()
         final_sha = sha256_bytes(final)
-        if final_sha != EXPECTED_FINAL_SHA256:
+        if EXPECTED_PHASE2_SHA256 is not None and final_sha != EXPECTED_PHASE2_SHA256:
             raise SystemExit(
-                f"generated V4.1 source hash {final_sha} != expected {EXPECTED_FINAL_SHA256}"
+                f"generated Phase 2 V4.1 source hash {final_sha} != expected {EXPECTED_PHASE2_SHA256}"
             )
         args.output.write_bytes(final)
     finally:
         tmp_path.unlink(missing_ok=True)
 
-    print(f"generated {args.output} sha256={EXPECTED_FINAL_SHA256}")
+    print(f"generated {args.output} sha256={final_sha}")
     return 0
 
 
