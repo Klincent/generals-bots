@@ -1,11 +1,12 @@
 from tactics_v41 import TacticRecord, deserialize_tactics, serialize_tactics, tactic_key
 
 
-def test_tactic_key_deterministic():
+def test_tactic_key_deterministic_and_golden():
     kwargs = dict(dest_owner=2, dest_type=3, source_army=18, dest_army=7,
                   split=False, own_general_distance=4,
                   enemy_general_visible=True, contact_visible=True,
                   source_degree=3, dest_degree=2)
+    assert tactic_key(**kwargs) == 7476397078084802427
     assert tactic_key(**kwargs) == tactic_key(**kwargs)
     assert tactic_key(**kwargs) != tactic_key(**{**kwargs, "split": True})
 
