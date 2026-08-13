@@ -45,9 +45,12 @@ def validation_seed(seed: int, fraction: float = 0.2, salt: int = 0x41A9) -> boo
 
 def confidence_weight(delta: float, scale: float = 100.0, maximum: float = 4.0) -> float:
     """Map arbitrary rollout deltas to [1, maximum) without changing labels."""
-    if scale <= 0 or maximum < 1 or not math.isfinite(delta):
+    if scale <= 0 or maximum <= 1 or not math.isfinite(delta):
         raise ValueError("invalid confidence input/configuration")
-    return 1.0 + (maximum - 1.0) * math.tanh(abs(delta) / scale)
+    weight = 1.0 + (maximum - 1.0) * math.tanh(abs(delta) / scale)
+    # tanh rounds to exactly 1.0 for sufficiently large finite inputs.  Keep
+    # the documented half-open bound even after floating-point rounding.
+    return min(weight, math.nextafter(maximum, -math.inf))
 
 
 def read_pairs(path: Path, hash_size: int) -> Iterator[Pair]:
