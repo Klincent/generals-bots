@@ -11,8 +11,7 @@ from pathlib import Path
 
 EXPECTED_INITIAL_SHA256 = "19a8a2107d16229a4246e6da7a47d1052a56a3aac52d2c3fc6a8363d6986ed1c"
 EXPECTED_PHASE1_SHA256 = "666f7ed64f30f71bb0b593f450ffba5d89c9404952406b6e5a92d8ca00a1d478"
-# Filled after CI proves the deterministic Phase 2 transform compiles.
-EXPECTED_PHASE2_SHA256: str | None = None
+EXPECTED_PHASE2_SHA256 = "d9975877aca99371508bbfc142342e2ba55676b49d9455d78e0e7c4baa884b6d"
 
 PHASE2_TACTIC_KEY = '''    uint64_t v4_tactic_key(const Observation&o,const Action&a)const{if(a.kind!=0)return 0;int x=cell(a.row,a.col),y=neighbor(x,a.dir);if(x<0||y<0||x>=n_||y>=n_)return 0;int gdist=std::min(31,dist_[cell_id_[y]][cell_id_[general_]]);bool contact=false,enemy_visible=false;for(int i=0;i<n_;++i)if(o.owner[i]==2){contact=true;if(o.type[i]==4)enemy_visible=true;}uint64_t k=(uint64_t(o.owner[y])&3u)|((uint64_t(o.type[y])&7u)<<2)|((uint64_t(v4_bucket(o.army[x]))&7u)<<5)|((uint64_t(v4_bucket(o.army[y]))&7u)<<8)|(uint64_t(a.split)<<11)|((uint64_t(gdist)&31u)<<12)|(uint64_t(enemy_visible)<<17)|(uint64_t(contact)<<18)|((uint64_t(degree_[x])&7u)<<19)|((uint64_t(degree_[y])&7u)<<22)|(uint64_t(1)<<56);return v4_mix(k);}
 '''
@@ -74,7 +73,7 @@ def main() -> int:
 
         final = apply_phase2_transform(phase1)
         final_sha = sha256_bytes(final)
-        if EXPECTED_PHASE2_SHA256 is not None and final_sha != EXPECTED_PHASE2_SHA256:
+        if final_sha != EXPECTED_PHASE2_SHA256:
             raise SystemExit(
                 f"generated Phase 2 V4.1 source hash {final_sha} != expected {EXPECTED_PHASE2_SHA256}"
             )
