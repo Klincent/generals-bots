@@ -1,0 +1,17 @@
+name: V4.1 Phase 2 smoke
+on:
+  push:
+    branches: [v41-phase2]
+  workflow_dispatch:
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install numpy==2.4.6 jax==0.11.0 pytest
+      - run: python -m pip install -e . --no-deps
+      - run: python -m py_compile competition/training/v4/*.py
+      - run: PYTHONPATH="$PWD:$PWD/competition:$PWD/competition/training/v4" pytest -q competition/training/v4/test_fit_policy_v41.py competition/training/v4/test_github_pipeline.py competition/training/v4/test_rollout_train.py competition/training/v4/test_tactics_v41.py
