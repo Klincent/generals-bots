@@ -1,0 +1,22 @@
+name: V4.1 benchmark smoke
+on:
+  push:
+    branches: [v41-phase2]
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONPATH: ${{ github.workspace }}:${{ github.workspace }}/competition:${{ github.workspace }}/competition/training/v4
+      SDL_VIDEODRIVER: dummy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install -e .
+      - name: Play one seed with seats swapped
+        run: python competition/training/v4/benchmark_v41.py --baseline-run competition/agents/expander_python/run.sh --candidate-run competition/agents/expander_python/run.sh --seed-start 42990 --seed-end 42990 --timeout-seconds 120 --output /tmp/smoke.jsonl
+      - name: Aggregate paired result
+        run: |
+          python competition/training/v4/aggregate_benchmark_v41.py /tmp/smoke.jsonl --bootstrap-samples 1000 --output /tmp/summary.json
+          python -c 'import json; r=json.load(open("/tmp/summary.json")); assert r["games_scored"]==2 and r["paired_seed_count"]==1 and r["acceptance_ready"]'
