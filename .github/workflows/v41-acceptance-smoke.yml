@@ -1,0 +1,97 @@
+name: V4.1 candidate acceptance smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [v41-phase2]
+    paths:
+      - .github/workflows/v41-acceptance-smoke.yml
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      PYTHONPATH: ${{ github.workspace }}:${{ github.workspace }}/competition:${{ github.workspace }}/competition/training/v4
+      SDL_VIDEODRIVER: dummy
+      XLA_PYTHON_CLIENT_PREALLOCATE: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install engine dependencies
+        run: python -m pip install -e .
+      - name: Download exact Phase 2 candidate
+        uses: actions/download-artifact@v4
+        with:
+          name: v41-phase2-candidate
+          path: /tmp/candidate-artifact
+          github-token: ${{ github.token }}
+          repository: Klincent/generals-bots
+          run-id: 31777528051
+      - name: Prepare candidate run directory
+        run: |
+          mkdir -p /tmp/v41-agent
+          cp /tmp/candidate-artifact/v41-candidate/juraj-v41 /tmp/v41-agent/juraj-v41
+          cp /tmp/candidate-artifact/v41-candidate/policy.bin /tmp/v41-agent/policy.bin
+          cp /tmp/candidate-artifact/v41-candidate/tactics.bin /tmp/v41-agent/tactics.bin
+          chmod +x /tmp/v41-agent/juraj-v41
+          cat > /tmp/v41-agent/run.sh <<'SH'
+          #!/usr/bin/env bash
+          exec "$(dirname "$0")/juraj-v41"
+          SH
+          chmod +x /tmp/v41-agent/run.sh
+          sha256sum /tmp/v41-agent/juraj-v41 /tmp/v41-agent/policy.bin /tmp/v41-agent/tactics.bin
+      - name: Reconstruct exact corrected V3.4 baseline
+        run: |
+          git fetch --no-tags --depth=1 origin refs/heads/juraj-v3.4:refs/remotes/origin/juraj-v3.4
+          test "$(git rev-parse refs/remotes/origin/juraj-v3.4)" = "2ed9e8bbcf76b36c5276013afc356118fccc8b6e"
+          mkdir -p /tmp/v34-source /tmp/v34-agent
+          git archive 2ed9e8bbcf76b36c5276013afc356118fccc8b6e competition/agents/juraj_cpp | tar -x -C /tmp/v34-source
+          python competition/training/v4/prepare_v34_baseline.py \
+            --agent-dir /tmp/v34-source/competition/agents/juraj_cpp \
+            --output /tmp/v34-agent/main.cpp
+          g++ -std=c++17 -O2 -Wall -Wextra -pedantic /tmp/v34-agent/main.cpp -o /tmp/v34-agent/juraj-v34
+          cat > /tmp/v34-agent/run.sh <<'SH'
+          #!/usr/bin/env bash
+          exec "$(dirname "$0")/juraj-v34"
+          SH
+          chmod +x /tmp/v34-agent/run.sh
+          sha256sum /tmp/v34-agent/main.cpp /tmp/v34-agent/juraj-v34
+      - name: Run 20-map paired validation acceptance
+        run: |
+          python competition/training/v4/benchmark_v41.py \
+            --baseline-run /tmp/v34-agent/run.sh \
+            --candidate-run /tmp/v41-agent/run.sh \
+            --seed-start 20000 \
+            --seed-end 20019 \
+            --output /tmp/v41-acceptance.jsonl \
+            --timeout-seconds 180
+      - name: Aggregate acceptance
+        run: |
+          python competition/training/v4/aggregate_benchmark_v41.py \
+            /tmp/v41-acceptance.jsonl \
+            --output /tmp/v41-acceptance-summary.json \
+            --bootstrap-samples 10000
+          python - <<'PY'
+          import json
+          p='/tmp/v41-acceptance-summary.json'
+          s=json.load(open(p))
+          if not s['acceptance_ready']:
+              raise SystemExit('acceptance benchmark has incomplete/error games')
+          print('score', s['score'], 'W/D/L', s['wins'], s['draws'], s['losses'])
+          print('paired CI', s['paired_bootstrap_95ci'])
+          PY
+      - name: Upload acceptance report
+        uses: actions/upload-artifact@v4
+        with:
+          name: v41-acceptance-smoke
+          path: |
+            /tmp/v41-acceptance.jsonl
+            /tmp/v41-acceptance-summary.json
+          retention-days: 14
