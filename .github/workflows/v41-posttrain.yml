@@ -32,6 +32,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
+          # fetch_v41_artifact strips GitHub auth when following the signed storage redirect.
           python competition/training/v4/fetch_v41_artifact.py \
             --artifact-id 9164275598 \
             --state-dir /tmp/v41-state
