@@ -8,6 +8,7 @@ import os
 from collections import Counter
 from pathlib import Path
 
+import jax.numpy as jnp
 import numpy as np
 
 from generals import GeneralsEnv
@@ -53,7 +54,7 @@ def collect_game(env: GeneralsEnv, teacher: Path, seed: int, sample_every: int) 
                     rows.append(pad_observation(obs[p]))
                     action_indices.append(action_to_index(np.asarray(actions[p])))
                     players.append(p)
-            state, _ = transition(state, np.asarray(actions, dtype=np.int32))
+            state, _ = transition(state, jnp.asarray(actions, dtype=jnp.int32))
             if int(state.winner) >= 0:
                 break
     finally:
@@ -90,7 +91,7 @@ def collect_game(env: GeneralsEnv, teacher: Path, seed: int, sample_every: int) 
         "players": np.asarray(players, dtype=np.uint8),
         "seed": np.full((len(labels),), seed, dtype=np.int32),
         "winner": np.asarray(winner, dtype=np.int8),
-        "turns": np.asarray(int(state.turn), dtype=np.int16),
+        "turns": np.asarray(int(state.time), dtype=np.int16),
         "action_counts": dict(kinds),
     }
 
