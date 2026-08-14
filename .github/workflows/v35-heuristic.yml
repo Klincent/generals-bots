@@ -1,0 +1,43 @@
+name: V3.5 heuristic verification
+on:
+  push:
+    branches: [v35-heuristic-rebuild]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      SDL_VIDEODRIVER: dummy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build and behavioral tests
+        run: |
+          competition/agents/juraj_v35_cpp/build.sh
+          competition/agents/juraj_v35_cpp/test.sh
+      - name: Materialize exact V3.4 baseline
+        run: |
+          git fetch --no-tags --depth=1 origin juraj-v3.4
+          test "$(git rev-parse FETCH_HEAD)" = 2ed9e8bbcf76b36c5276013afc356118fccc8b6e
+          mkdir -p /tmp/v34
+          git archive FETCH_HEAD competition/agents/juraj_cpp | tar -x -C /tmp/v34
+          /tmp/v34/competition/agents/juraj_cpp/build.sh
+      - name: Install competition engine
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+      - name: Paired 40-game smoke benchmark
+        run: |
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py \
+            --candidate competition/agents/juraj_v35_cpp/run.sh \
+            --baseline /tmp/v34/competition/agents/juraj_cpp/run.sh \
+            --start 12000 --seeds 20 | tee v35-benchmark.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v35-smoke-benchmark
+          path: v35-benchmark.txt
