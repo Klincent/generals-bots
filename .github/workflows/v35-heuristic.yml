@@ -35,9 +35,10 @@ jobs:
         run: |
           git fetch --no-tags --depth=1 origin juraj-v3.4
           test "$(git rev-parse FETCH_HEAD)" = "$BASELINE_SHA"
-          mkdir -p /tmp/v34
-          git archive "$BASELINE_SHA" competition/agents/juraj_cpp | tar -x -C /tmp/v34
-          /tmp/v34/competition/agents/juraj_cpp/build.sh
+          rm -rf .bench-v34
+          mkdir -p .bench-v34
+          git archive "$BASELINE_SHA" competition/agents/juraj_cpp | tar -x -C .bench-v34
+          .bench-v34/competition/agents/juraj_cpp/build.sh
       - name: Install headless competition engine
         run: |
           python -m pip install --upgrade pip
@@ -47,7 +48,7 @@ jobs:
         run: |
           python competition/agents/juraj_v35_cpp/paired_benchmark.py \
             --candidate competition/agents/juraj_v35_cpp/run.sh \
-            --baseline /tmp/v34/competition/agents/juraj_cpp/run.sh \
+            --baseline .bench-v34/competition/agents/juraj_cpp/run.sh \
             --start 21000 --seeds 20 --output benchmark/phase1
           python - <<'PY'
           import json
@@ -59,7 +60,7 @@ jobs:
         run: |
           python competition/agents/juraj_v35_cpp/paired_benchmark.py \
             --candidate competition/agents/juraj_v35_cpp/run.sh \
-            --baseline /tmp/v34/competition/agents/juraj_cpp/run.sh \
+            --baseline .bench-v34/competition/agents/juraj_cpp/run.sh \
             --start 21100 --seeds 50 --output benchmark/phase2
       - uses: actions/upload-artifact@v4
         if: always()
