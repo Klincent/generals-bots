@@ -6,11 +6,28 @@ import argparse
 import io
 import os
 import shutil
+import urllib.parse
 import urllib.request
 import zipfile
 from pathlib import Path
 
 from validate_training_state_v41 import validate_state
+
+
+class SafeRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Never forward the GitHub bearer token to the signed storage host."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        redirected = super().redirect_request(req, fp, code, msg, headers, newurl)
+        if redirected is None:
+            return None
+        old_host = urllib.parse.urlparse(req.full_url).netloc
+        new_host = urllib.parse.urlparse(newurl).netloc
+        if old_host != new_host:
+            redirected.remove_header("Authorization")
+            redirected.remove_header("Accept")
+            redirected.remove_header("X-GitHub-Api-Version")
+        return redirected
 
 
 def main() -> int:
@@ -34,7 +51,8 @@ def main() -> int:
             "X-GitHub-Api-Version": "2022-11-28",
         },
     )
-    with urllib.request.urlopen(req, timeout=180) as r:
+    opener = urllib.request.build_opener(SafeRedirectHandler())
+    with opener.open(req, timeout=180) as r:
         blob = r.read()
 
     tmp = a.state_dir.with_name(a.state_dir.name + ".download-tmp")
@@ -49,7 +67,6 @@ def main() -> int:
         if len(children) == 1 and (children[0] / "checkpoint.json").exists():
             candidate = children[0]
 
-    # Validate before replacing any existing state directory.
     result = validate_state(candidate)
     shutil.rmtree(a.state_dir, ignore_errors=True)
     if candidate == tmp:
