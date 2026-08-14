@@ -6,6 +6,7 @@ on:
     branches: [v41-phase2]
     paths:
       - .github/workflows/v41-ablation-smoke.yml
+      - competition/training/v4/benchmark_v41.py
 
 permissions:
   contents: read
@@ -85,7 +86,7 @@ jobs:
         run: |
           python competition/training/v4/benchmark_v41.py --baseline-run /tmp/v34-agent/run.sh --candidate-run /tmp/v41-off/run.sh --seed-start 20000 --seed-end 20009 --output /tmp/off.jsonl --timeout-seconds 180
           python competition/training/v4/aggregate_benchmark_v41.py /tmp/off.jsonl --output /tmp/off-summary.json --bootstrap-samples 10000
-      - name: Summarize ablations
+      - name: Summarize ablations and enforce OFF/OFF equivalence
         run: |
           python - <<'PY'
           import json
@@ -94,10 +95,16 @@ jobs:
               print(name, 'score', s['score'], 'W/D/L', s['wins'], s['draws'], s['losses'], 'CI', s['paired_bootstrap_95ci'])
               if not s['acceptance_ready']:
                   raise SystemExit(f'{name} has errors/incomplete games')
+          off=json.load(open('/tmp/off-summary.json'))
+          bad=[p for p in off['paired_maps'] if p['score'] != 0.5]
+          if off['score'] != 0.5 or bad:
+              raise SystemExit(f'OFF/OFF is not behaviorally equivalent to V3.4: score={off["score"]}, bad_pairs={bad}')
+          print('OFF/OFF equivalence PASS: every paired map scores exactly 0.5')
           PY
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: v41-ablation-smoke
+          name: v41-ablation-smoke-deterministic
           path: |
             /tmp/policy.jsonl
             /tmp/policy-summary.json
