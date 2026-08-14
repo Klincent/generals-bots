@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -13,6 +14,18 @@ from pathlib import Path
 CAPTURE_RE = re.compile(r"\[matchup\] turn (\d+): player (\d+) captured the enemy general")
 DRAW_RE = re.compile(r"\[matchup\] turn (\d+): truncated at (\d+) turns \(draw\)")
 CASTLE_RE = re.compile(r"\[matchup\] castles built: (\d+) .* vs (\d+)")
+RNG_SALT = 0x41A95EED
+
+
+def agent_rng_seed(map_seed: int) -> int:
+    """Stable common-random-number seed shared by both agents and seat swaps."""
+    x = (int(map_seed) ^ RNG_SALT) & 0xFFFFFFFFFFFFFFFF
+    x ^= x >> 30
+    x = (x * 0xBF58476D1CE4E5B9) & 0xFFFFFFFFFFFFFFFF
+    x ^= x >> 27
+    x = (x * 0x94D049BB133111EB) & 0xFFFFFFFFFFFFFFFF
+    x ^= x >> 31
+    return x
 
 
 def run_game(matchup: Path, baseline: Path, candidate: Path, seed: int,
@@ -21,14 +34,21 @@ def run_game(matchup: Path, baseline: Path, candidate: Path, seed: int,
                       else (baseline, candidate))
     command = [sys.executable, str(matchup), str(agent0), str(agent1),
                "--mode", "competition", "--seed", str(seed)]
+    rng_seed = agent_rng_seed(seed)
+    env = os.environ.copy()
+    # matchup.py inherits its environment into both stdio agent subprocesses.
+    # Use the same agent RNG seed for both sides and for the seat-swapped replay
+    # of one map. This removes random_device/clock noise from paired comparisons.
+    env["JURAJ_RNG_SEED"] = str(rng_seed)
     started = time.perf_counter()
     try:
         proc = subprocess.run(command, text=True, capture_output=True,
-                              timeout=timeout_seconds)
+                              timeout=timeout_seconds, env=env)
         elapsed = time.perf_counter() - started
     except subprocess.TimeoutExpired as exc:
         return {
             "seed": seed, "candidate_seat": candidate_seat,
+            "agent_rng_seed": rng_seed,
             "status": "timeout", "result": None,
             "wall_seconds": time.perf_counter() - started,
             "stdout_tail": (exc.stdout or "")[-4000:] if isinstance(exc.stdout, str) else "",
@@ -38,6 +58,7 @@ def run_game(matchup: Path, baseline: Path, candidate: Path, seed: int,
     row = {
         "seed": seed,
         "candidate_seat": candidate_seat,
+        "agent_rng_seed": rng_seed,
         "status": "ok" if proc.returncode == 0 else "process_error",
         "returncode": proc.returncode,
         "result": None,
@@ -111,7 +132,8 @@ def main() -> None:
                                candidate_seat, args.timeout_seconds)
                 out.write(json.dumps(row, sort_keys=True) + "\n")
                 print(json.dumps({k: row.get(k) for k in
-                                  ("seed", "candidate_seat", "status", "result", "turns")},
+                                  ("seed", "candidate_seat", "agent_rng_seed",
+                                   "status", "result", "turns")},
                                  sort_keys=True), flush=True)
 
 
