@@ -9,6 +9,7 @@ int main(){
  auto c=plan_castles(g,general),d=plan_castles(g,general);assert(c.c1>=0&&c.c2>=0&&c.c1!=c.c2&&c.total==c.cost1+c.cost2&&c.c1==d.c1);
  // 2 deadlines and 3 just-in-time funding.
  auto f=forecast(100,150,40,10,{{31,10}});assert(f.feasible&&!f.must_fund);auto late=forecast(f.latest_start,150,40,10,{{31,10}});assert(late.must_fund);
+ auto work=forecast(100,150,40,0,{{15,5},{15,6},{15,7}},false);assert(work.required_actions==5+6+7+1+1);assert(work.latest_start==150-work.required_actions-5);
  // 4 production candidates remain in their explicit tier.
  assert(schedule({{4,1,2,0,99,Reason::SEARCH_PROGRESS},{3,2,3,0,1,Reason::PRODUCTION_TICK}}).reason==Reason::PRODUCTION_TICK);
  // 5 corner and 6 dead-end evacuation select the highest tier, FULL by default.
