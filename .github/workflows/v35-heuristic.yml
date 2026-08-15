@@ -44,24 +44,24 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install numpy jax jaxlib
           python -m pip install -e . --no-deps
-      - name: Recovery 40-game gate (21400-21419)
+      - name: Fresh Phase 1 gate (21600-21619)
         run: |
           python competition/agents/juraj_v35_cpp/paired_benchmark.py \
             --candidate competition/agents/juraj_v35_cpp/run.sh \
             --baseline .bench-v34/competition/agents/juraj_cpp/run.sh \
-            --start 21400 --seeds 20 --output benchmark/phase1
+            --start 21600 --seeds 20 --output benchmark/phase1
           python - <<'PY'
           import json
           s=json.load(open('benchmark/phase1/summary.json'))
           assert s['errors']==0 and s['illegal_actions']==0
-          assert s['score'] >= .40, f"catastrophic Phase-1 score: {s['score']}"
+          assert s['score'] >= .52, f"Phase-1 score below 52% gate: {s['score']}"
           PY
-      - name: Audited 100-game reference (21100-21149)
+      - name: Fresh Phase 2 (21650-21699)
         run: |
           python competition/agents/juraj_v35_cpp/paired_benchmark.py \
             --candidate competition/agents/juraj_v35_cpp/run.sh \
             --baseline .bench-v34/competition/agents/juraj_cpp/run.sh \
-            --start 21100 --seeds 50 --output benchmark/phase2
+            --start 21650 --seeds 50 --output benchmark/phase2
       - uses: actions/upload-artifact@v4
         if: always()
         with:

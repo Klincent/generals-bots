@@ -105,3 +105,44 @@ fallback can alter long-game packet flow despite its one-ply safety checks.
 Deadline attainment and post-800 outcomes remain empirically unmeasured. Do
 **not** proceed to final heldout: complete the three smokes and 40-game gate,
 then run 100 games only if the score meets the documented threshold.
+
+
+## Targeted frontier-feed and minimum-defense iteration (2026-08-15)
+
+### Revisions
+
+- Starting SHA: `54631b747391f23ac18dbd00aeae8446bd484405`.
+- Stage A (persistent productive frontier feed): `906b0afb95268ba0d35492ca05bad71a85be2b26`.
+- Stage B (minimum-sufficient general defense): `9d72e4523c1a703281e52bc779aeb499b7a24e0a`.
+- Exact V3.4 reference: `2ed9e8bbcf76b36c5276013afc356118fccc8b6e`.
+
+### Reused-range evidence (not a fresh validation)
+
+The pre-iteration candidate scored **57.0%** over the previously used
+`21100..21149` range, with **0 errors** and **0 illegal actions**. This is
+explicitly retained only as reused-range context; it is not evidence for the
+Stage A+B candidate. The supplied audit did not include W/D/L, seat split,
+paired CI, aggregate PASS/frontier-feed/defense actions, or aggregate land
+snapshots, so none are inferred here.
+
+### Fresh validation configured
+
+The workflow now runs Phase 1 on `21600..21619` (20 maps / 40 paired games) and
+requires zero errors, zero illegal actions, and score >=52%. Only after that
+assertion succeeds does it run Phase 2 on `21650..21699` (50 maps / 100 paired
+games). The always-running artifact step uploads Phase-1 output even when the
+gate fails.
+
+| Metric | Phase 1 (`21600..21619`) | Phase 2 (`21650..21699`) |
+|---|---:|---:|
+| W/D/L | Pending fresh Actions run | Pending Phase-1 gate |
+| Score / seat split | Pending fresh Actions run | Pending Phase-1 gate |
+| Paired 95% CI | Pending fresh Actions run | Pending Phase-1 gate |
+| PASS rate | Pending artifact | Pending Phase-1 gate |
+| Frontier-feed actions | Pending artifact | Pending Phase-1 gate |
+| Defense actions | Pending artifact | Pending Phase-1 gate |
+| Land snapshots | Pending artifact | Pending Phase-1 gate |
+| Errors / illegal actions | Pending fresh Actions run | Pending Phase-1 gate |
+
+No fresh benchmark result is claimed before GitHub Actions executes this
+workflow. No final-heldout seed or seed in `30000..30499` is used.
