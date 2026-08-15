@@ -21,5 +21,15 @@ int main(){
  {Agent a(0,21,21);auto o=board();o.owner[0]=1;o.army[0]=25;o.my_land=2;o.my_army=37;auto q=a.decide(o);size_t before=a.packet_count();apply(o,q);a.decide(o);assert(before<=1&&a.packet_count()>=1&&a.objective_changes()<=2);}
  // Confirmed general remains exact despite later fog.
  {Agent a(0,21,21);auto o=board();o.type[230]=4;o.owner[230]=2;o.army[230]=3;o.owner[229]=1;o.army[229]=1;a.decide(o);assert(a.enemy_general_confirmed()&&a.enemy_general_cell()==230);o.turn++;o.type[230]=-1;o.owner[230]=-1;a.decide(o);assert(a.enemy_general_cell()==230);}
+ // Distant enemy visibility cannot strand an internal surplus behind an owned corridor.
+ {Agent a(0,21,21);auto o=board();std::fill(o.type.begin(),o.type.end(),2);for(int x:{0,220,221,222,223})o.type[x]=1;o.type[220]=4;for(int x:{221,222})o.owner[x]=1,o.army[x]=1;o.owner[223]=0;o.army[223]=0;o.owner[0]=2;o.army[0]=1;o.my_land=3;o.my_army=14;o.opp_land=o.opp_army=1;auto q=a.decide(o);assert(q.kind==0&&src(q)==220&&o.owner[dst(q)]==1);assert(a.action_stats().frontier_feed_actions==1&&a.meaningful_contact_turn()<0);}
+ // The same peaceful position is unchanged when the distant enemy is not visible.
+ {Agent seen(0,21,21),unseen(0,21,21);auto o=board();std::fill(o.type.begin(),o.type.end(),2);for(int x:{0,220,221,222,223})o.type[x]=1;o.type[220]=4;for(int x:{221,222})o.owner[x]=1,o.army[x]=1;o.owner[223]=0;o.army[223]=0;o.owner[0]=2;o.army[0]=1;auto p=o;p.owner[0]=0;p.army[0]=0;auto a=seen.decide(o),b=unseen.decide(p);assert(a.kind==b.kind&&src(a)==src(b)&&dst(a)==dst(b));}
+ // A later real contact supersedes frontier feed with war mobilization.
+ {Agent a(0,21,21);auto o=board();o.army[220]=40;o.my_army=42;std::fill(o.type.begin(),o.type.end(),2);for(int x:{0,220,221,222,223})o.type[x]=1;o.type[220]=4;for(int x:{221,222})o.owner[x]=1,o.army[x]=1;o.owner[223]=0;o.army[223]=0;auto q=a.decide(o);apply(o,q);o.type[224]=1;o.owner[224]=2;o.army[224]=8;o.owner[223]=1;o.army[223]=2;o.opp_land=1;o.opp_army=8;a.decide(o);assert(a.active_fronts()==1&&a.meaningful_contact_turn()==o.turn);}
+ // With no productive cell in the general's component, PASS remains the legal result.
+ {Agent a(0,21,21);auto o=board();std::fill(o.type.begin(),o.type.end(),2);o.type[220]=4;auto q=a.decide(o);assert(q.kind==1&&a.action_stats().passes==1);}
+ // Seed-21125-shaped branch: surplus is fed down the trunk before boundary conquest.
+ {Agent a(0,21,21);auto o=board();std::fill(o.type.begin(),o.type.end(),2);for(int x:{220,221,222,223,224})o.type[x]=1;o.type[220]=4;for(int x:{221,222,223})o.owner[x]=1,o.army[x]=1;o.owner[224]=0;o.army[224]=0;o.my_land=440;o.my_army=15;for(int i=0;i<3;++i){auto q=a.decide(o);apply(o,q);}assert(a.action_stats().frontier_feed_actions>=2&&a.action_stats().passes==0);}
  std::cout<<"v35 agent recovery scenarios passed\n";
 }
