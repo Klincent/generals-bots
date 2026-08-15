@@ -158,7 +158,7 @@ but not the minimum-sufficient general-defense change.
 
 - Starting HEAD: `21a9594dc4228170600b327c7c169f342b04f611`.
 - Stage-B revert: `62e96b7` (`Revert "v35: plan minimum sufficient general defense"`).
-- Final tested SHA: the workflow-triggering commit containing this report.
+- Final tested SHA: `9b628f91143787e48586b91a4ccc22d22b57a572`.
 - Exact V3.4 baseline: `2ed9e8bbcf76b36c5276013afc356118fccc8b6e`.
 
 ### Fresh Phase 1 (`21700..21719`)
@@ -169,19 +169,23 @@ is gated on a Phase-1 score of at least 52% plus technical health.
 
 | Metric | Phase 1 |
 |---|---:|
-| W/D/L | Pending fresh Actions run |
-| Score | Pending fresh Actions run |
-| Seat 0 / seat 1 | Pending fresh Actions run |
-| Paired 95% CI | Pending fresh Actions run |
-| Errors / illegal actions | Pending fresh Actions run |
-| PASS count / rate | Pending artifact |
-| Frontier-feed actions | Pending artifact |
-| Defense actions | Pending artifact |
-| Land snapshots | Pending artifact |
+| W/D/L | 13 / 5 / 22 |
+| Score | 38.75% |
+| Seat 0 / seat 1 | 40.0% / 37.5% |
+| Paired 95% CI | [27.5%, 50.0%] |
+| Errors / illegal actions | 0 / 0 |
+| PASS count / rate | 247 / 0.864% of 28,601 turns |
+| Frontier-feed actions | 5,053 (2,711 assignments; 2,625 completed) |
+| Defense actions | 455 |
+| Land snapshots | mean 21.10 @50; 33.73 @100; 40.77 @150; 52.15 @200; 65.83 @250; 79.47 @300; 98.79 @400; 138.12 @600; 175.62 @800 |
+
+GitHub Actions run `31909970537` completed Phase 1 and uploaded the artifact.
+The 38.75% result is below the 45% diagnostic threshold, so Stage A is
+probably also harmful. This is a causal-isolation result only; no strategy or
+constant was changed in response.
 
 ### Optional Phase 2 (`21750..21799`)
 
-The 50-map / 100-game phase runs automatically only when Phase 1 reaches the
-52% gate with zero errors and illegal actions. Its W/D/L, score, seat split,
-paired CI, errors, and illegal actions are pending that gate. No seed in the
-final-heldout `30000..30499` range is used.
+The 50-map / 100-game phase was correctly skipped because Phase 1 did not
+reach the 52% score gate. No Phase-2 W/D/L or other result is claimed. No seed
+in the final-heldout `30000..30499` range was used.
