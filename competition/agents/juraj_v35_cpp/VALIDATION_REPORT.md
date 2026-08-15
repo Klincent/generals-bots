@@ -146,3 +146,42 @@ gate fails.
 
 No fresh benchmark result is claimed before GitHub Actions executes this
 workflow. No final-heldout seed or seed in `30000..30499` is used.
+
+## Stage A isolation test
+
+Stage B was reverted to isolate Stage A without changing strategy. A direct
+production-code comparison with the Stage A commit is empty for `main.cpp` and
+`core.hpp`, confirming that the tested agent retains productive frontier feed
+but not the minimum-sufficient general-defense change.
+
+### Revisions
+
+- Starting HEAD: `21a9594dc4228170600b327c7c169f342b04f611`.
+- Stage-B revert: `62e96b7` (`Revert "v35: plan minimum sufficient general defense"`).
+- Final tested SHA: the workflow-triggering commit containing this report.
+- Exact V3.4 baseline: `2ed9e8bbcf76b36c5276013afc356118fccc8b6e`.
+
+### Fresh Phase 1 (`21700..21719`)
+
+The workflow always completes all 20 maps / 40 paired-seat games, checks for
+zero errors and illegal actions, and uploads the benchmark artifact. Phase 2
+is gated on a Phase-1 score of at least 52% plus technical health.
+
+| Metric | Phase 1 |
+|---|---:|
+| W/D/L | Pending fresh Actions run |
+| Score | Pending fresh Actions run |
+| Seat 0 / seat 1 | Pending fresh Actions run |
+| Paired 95% CI | Pending fresh Actions run |
+| Errors / illegal actions | Pending fresh Actions run |
+| PASS count / rate | Pending artifact |
+| Frontier-feed actions | Pending artifact |
+| Defense actions | Pending artifact |
+| Land snapshots | Pending artifact |
+
+### Optional Phase 2 (`21750..21799`)
+
+The 50-map / 100-game phase runs automatically only when Phase 1 reaches the
+52% gate with zero errors and illegal actions. Its W/D/L, score, seat split,
+paired CI, errors, and illegal actions are pending that gate. No seed in the
+final-heldout `30000..30499` range is used.
