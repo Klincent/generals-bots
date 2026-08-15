@@ -1,44 +1,60 @@
-# V3.5 Validation Report
+# V3.5 Focused Recovery Validation Report
 
 ## Revision
 
 - Branch: `v35-heuristic-rebuild`
-- Starting revision: `a81eb35177c5db6fb07cb70fc14791068c9647d8`
-- Report/source revision: see the commit containing this report (`git rev-parse HEAD`; a Git commit cannot embed its own SHA without changing it).
-- Exact reference: `juraj-v3.4` at `2ed9e8bbcf76b36c5276013afc356118fccc8b6e`.
+- Starting revision: `94dbf8ae66640b4bc197e70544105e16275661a7`
+- Recovery implementation commit: `51fed1fdae6c3ca4ecba364c86de9de9a748c691`
+- Exact V3.4 reference: `2ed9e8bbcf76b36c5276013afc356118fccc8b6e`
+- Report revision: the commit containing this document (a commit cannot contain its own SHA without changing that SHA).
 
-## Production data-flow audit and implementation
+## Previous real failure
 
-This iteration fixes the most serious audit defect: logistics packets are now owned by `Agent`, reconciled after real observations, retain IDs, roles, objectives, front IDs, assignment event/version, army, idle/revisit counters, and bounded paths. Actual moves update these packets; disappeared flows are retired. Route cycle rejection is therefore applied to runtime history rather than a one-turn temporary object. Objective and reversal counters report real runtime events.
+GitHub Actions run **31843200843** completed 40 games with **0 W / 9 D / 31 L**, score **11.25%**, seat-0 **10.0%**, seat-1 **12.5%**, paired 95% CI **[5.0%, 18.75%]**, zero errors and zero illegal actions. Candidate mean final land was approximately 36 versus approximately 165 for V3.4; all games ended in `SEVERE_DEFICIT`. Decision p99 was approximately 1.26 ms, ruling out infrastructure and latency as root causes.
 
-A persistent `FrontManager` clusters contacts within graph distance four, retains anchors through fog, and transitions ACTIVE to STALE and CLOSED with hysteresis. Front add/close changes the strategic event version, and logistics assignments retain a front ID.
+## Root causes reproduced from production data flow
 
-The runtime now confirms a legally visible enemy general and pins belief mass to it. Confirmed information cannot subsequently be eliminated or overwritten by flow back-projection. Zero-mass unconfirmed belief recovers from its valid initial support rather than selecting cell zero accidentally.
+1. Ordinary mobilization was permanently tier 2 while expansion was tier 3/4, so any live war candidate lexicographically starved production.
+2. Every visible enemy-owned cell created contact/front/war mode, including static distant territory.
+3. Static one-army enemy garrisons were counted as packets and produced false SMALL_PACKET_SWARM and MULTI_FRONT evidence.
+4. Candidate generation called `assignment()`, mutating every hypothetical packet objective and inflating objective/cycle counters.
+5. C1 and C2 future costs reduced the same present army pool; C1 was also reserved long before its actual transport latest start.
+6. There was no explicit ordinary enemy capture path beyond enemy-general capture and incidental routing.
 
-Opponent evidence now uses retained land/army history (5/10/20/50-turn slopes), a real visible size median, opponent-only castle observations, active front count, and visible concentration. Missing visibility uses low evidence rather than fabricating a packet average. Existing probabilistic archetype adaptation now affects expansion/search/war/defense allocation and candidate availability, although the reaction fingerprint remains incomplete.
+## Structural recovery changes
 
-Strategic objectives use a separate tactical next-hop filter. It rejects visible losing captures and cells immediately counterattacked by a stronger visible enemy. Rear evacuation and war mobilization are persistent FULL-1 assignments. Resource categories cap generated expansion/search/war assignments rather than merely being printed.
+- Replaced ordinary tier starvation with persistent action credits for OFFENSE, EXPANSION, SEARCH and LOGISTICS. Credits accrue from desired action shares and are debited only when a category actually acts. Productive expansion has a four-turn anti-starvation bound outside immediate danger. `SEVERE_DEFICIT` raises the expansion share to 62%, removes optional search and halves war allocation.
+- Retained hard tiers only for terminal capture, immediate defense, mathematically safe visible capture, and unavoidable castle build/funding.
+- Added explicit favorable ordinary capture and penetration candidates. Combat requires `moving_army > defender`, and rejects a capture when a visible adjacent counterattack can immediately destroy the remainder. Losing 5-vs-20 moves are not emitted.
+- Split `enemy_seen`, meaningful contact, immediate threat, active front and confirmed war. Front observations now require movement, adjacency/interaction, or a real general threat. Distant static territory does not create war.
+- Opponent packet evidence now comes from temporally moving stacks or meaningful stacks of at least six army. Static one-army territory supplies no swarm sample. No-current-evidence decays confidence toward the prior rather than classifying TURTLE/HOARDER.
+- Candidate generation is read-only. Packet creation/objective mutation occurs only after selection. Direct executed-action history backs packet history for reverse/short-cycle detection.
+- C2 reserves zero current army until C1 is built and C2 reaches its true JIT start. C1 reserves only at its JIT start. Forecast uses a nearest-first minimum sufficient feeder set and does not subtract feeder reserve twice.
+- Added per-game `[v35_actions]`, `[v35_land]`, `[v35_budget]`, `[v35_front]`, `[v35_cycles]`, `[v35_logistics]`, and `[v35_timing]` summaries.
 
-Castle C1/C2 state is sequential: C2 does not fund/build until C1 is observed BUILT, and a built castle has zero remaining funding. JIT lifecycle states are updated in runtime. Full unsafe-site replanning is still partial.
+## Agent-level tests
 
-## Tests
+`competition/agents/juraj_v35_cpp/test.sh` passes 20 retained core checks and real-Agent scenarios for:
 
-- `competition/agents/juraj_v35_cpp/build.sh`: passed.
-- `competition/agents/juraj_v35_cpp/test.sh`: passed (20 core checks plus real-Agent scenarios across observation boundaries).
-- Agent scenarios cover persistent rear movement, packet reconciliation, confirmed enemy-general targeting state, production emergency behavior, and front hysteresis through fog.
+- safe 20-vs-5 enemy capture;
+- rejection of unsafe 5-vs-20 combat;
+- distant static enemy territory not creating contact/front/war;
+- one broad interacting enemy region clustering into one front;
+- expansion receiving actions across multiple turns despite an active front;
+- severe-deficit recovery allocation producing neutral captures;
+- packet creation only for selected actions and persistence across observations;
+- confirmed enemy-general belief surviving later fog;
+- static one-army territory not triggering swarm confidence.
 
-## Benchmark / Actions
+## Recovery benchmark
 
-- GitHub Actions workflow: `.github/workflows/v35-heuristic.yml` builds both binaries once, then launches fresh processes for paired games.
-- Actions run ID: pending for this pushed revision.
-- 40-game Phase 1 (`21000..21019`): pending GitHub Actions; W/D/L, score, seat split, paired CI, timing, illegal actions and errors are therefore not yet claimed.
-- 100-game Phase 2 (`21100..21149`): gated on Phase 1 score >=40%; pending.
-- No seed in the forbidden `30000..30499` range was used.
+The pushed workflow uses the fresh non-heldout range **21300..21319** (20 maps / 40 paired-seat games). The 100-game step remains gated behind the Phase-1 zero-error, zero-illegal, score >=40% assertion.
 
-## Remaining limitations / risks
+- New Actions run ID: pending push.
+- New W/D/L and score: pending.
+- Land snapshots/action distribution/castle turns/front classification/cycle metrics: emitted by the new runtime; pending Actions artifact.
+- Forbidden seeds `30000..30499`: not used.
 
-This is an honest incremental production repair, not a claim that every requested mechanism is complete. Reaction latency/overreaction tracking, deterministic unsafe castle replanning, full merge/split identity, detailed +10/+25/+50 front snapshots, complete per-archetype Agent action scenario coverage, and broad V3.4 tactical parity remain partial. The current one-ply safety rule is deliberately conservative and does not yet reproduce all V3.4 combat simulation. Representative win/loss analysis and qualitative benchmark metrics must be filled from the new Actions artifacts before submission review.
+## Remaining risks and next action
 
-## Next action
-
-Inspect the Phase 1 Actions artifact. If score is below 40%, classify at least five trace losses and repair the dominant tactical/expansion failure before using a fresh non-heldout range. If the gate passes, inspect Phase 2 and update this report with exact results and representative games.
+The tactical selector is intentionally much smaller than the full V3.4 combat machinery. Castle site acquisition/replanning and merge identity remain partial. The recovery benchmark must establish whether the structural scheduling fix restores land acquisition. If the fresh 40-game score remains below 40%, inspect at least five losses from `games.jsonl`, classify the dominant next failure, repair it, and rerun another fresh nonheldout 20-map range. Do not launch or interpret the 100-game reference unless the gate passes.
