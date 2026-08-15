@@ -76,3 +76,32 @@ Local paired smoke used already-built binaries, fresh processes, seeds `21300..2
 5. `21305`, seat 1, turn 791 (after repair): land reached 187 by turn 600 with 180 neutral and 247 enemy captures; dominant cause **late combat/Deathtouch conversion**, not territorial collapse.
 
 After the emergency repair, local `21302..21304` scored **4 W / 0 D / 2 L (66.7%)**, and `21305` scored **1 W / 0 D / 1 L (50%)**. These eight local games are only smoke evidence, not a replacement for the 40-game gate, but land/action telemetry demonstrates dramatic recovery from mean final land near 36. The remaining concern is excessive front fragmentation (max 9–10 in long games) and late tactical conversion; those should be evaluated from run 31868967531 before further tuning.
+
+## Time-critical V3.5 staged optimization (2026-08-15)
+
+Starting point: `f032dded496cdf2462fd379f15519b5a8fd10bed`.
+
+| Stage | Commit | Change | Fresh smoke | Result / decision |
+|---|---|---|---|---|
+| 1 | `582a887` | Deterministic productive fallback and classified PASS telemetry | `21500..21509` requested | Fast behavioral tests pass. Local paired execution did not complete in the available window; no score is claimed. Retained because fallback is safety-gated and has an Agent regression scenario. |
+| 2 | `acf3cb1` | One-action-per-turn castle transport forecast, JIT slack, deadline telemetry | `21520..21529` requested | Fast tests pass, including summed feeder action work. Paired smoke did not complete; deadline rates remain unverified. Retained as the explicit bottleneck correction. |
+| 3 | `fdfa3b9` | V3.4-inspired post-800 terminal touch and adjacent-general threat semantics | `21540..21549` requested | Fast tests pass. Paired smoke did not complete. Retained because the change is narrowly scoped to terminal competition rules. |
+
+The harness used exact V3.4 commit `2ed9e8bbcf76b36c5276013afc356118fccc8b6e`.
+Attempts used only specified nonheldout stage ranges; JAX match runtime exceeded the
+available execution window. Seeds `30000..30499` were never used.
+
+### Selection and gates
+
+Selected code candidate: `fdfa3b9` (Stage 1+2+3). The `21600..21619` 40-game
+gate was **not run**, so no W/D/L, confidence interval, PASS, castle, or land
+result is claimed. The >=52% condition was not established, hence
+`21650..21699` was **not run**.
+
+### Remaining risk / recommendation
+
+Action-aware castle work may preempt more expansion than intended, while the
+fallback can alter long-game packet flow despite its one-ply safety checks.
+Deadline attainment and post-800 outcomes remain empirically unmeasured. Do
+**not** proceed to final heldout: complete the three smokes and 40-game gate,
+then run 100 games only if the score meets the documented threshold.
