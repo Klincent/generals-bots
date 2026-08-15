@@ -9,6 +9,8 @@ int main(){
  // Favorable ordinary conquest is explicit; losing head-on combat is never selected.
  {Agent a(0,21,21);auto o=board();o.owner[40]=1;o.army[40]=20;o.owner[41]=2;o.army[41]=5;for(int z:{19,39,61})o.owner[z]=1,o.army[z]=1;auto q=a.decide(o);assert(q.kind==0&&src(q)==40&&dst(q)==41);}
  {Agent a(0,21,21);auto o=board();o.owner[40]=1;o.army[40]=5;o.owner[41]=2;o.army[41]=20;for(int z:{19,39,61})o.owner[z]=1,o.army[z]=1;auto q=a.decide(o);assert(!(q.kind==0&&src(q)==40&&dst(q)==41));}
+ // A useful owned-territory consolidation replaces the old scheduler PASS.
+ {Agent a(0,21,21);auto o=board();for(int x=0;x<441;++x)if(o.type[x]!=4)o.owner[x]=1,o.army[x]=1;o.owner[0]=2;o.army[0]=1;o.army[221]=14;o.my_land=440;o.my_army=454;o.opp_land=1;o.opp_army=1;auto q=a.decide(o);assert(q.kind==0);assert(a.action_stats().passes==0);}
  // Distant static territory is intelligence, not contact/front/war.
  {Agent a(0,21,21);auto o=board();for(int x=0;x<12;++x)o.owner[x]=2,o.army[x]=1;o.opp_land=12;o.opp_army=12;a.decide(o);assert(a.active_fronts()==0&&a.meaningful_contact_turn()<0);assert(a.confidence()[(int)Archetype::SMALL_PACKET_SWARM]<.2);}
  // Interaction adjacent to our territory creates exactly one clustered front.
