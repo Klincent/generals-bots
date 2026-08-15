@@ -58,3 +58,21 @@ The pushed workflow uses the fresh non-heldout range **21300..21319** (20 maps /
 ## Remaining risks and next action
 
 The tactical selector is intentionally much smaller than the full V3.4 combat machinery. Castle site acquisition/replanning and merge identity remain partial. The recovery benchmark must establish whether the structural scheduling fix restores land acquisition. If the fresh 40-game score remains below 40%, inspect at least five losses from `games.jsonl`, classify the dominant next failure, repair it, and rerun another fresh nonheldout 20-map range. Do not launch or interpret the 100-game reference unless the gate passes.
+
+## Evidence-driven repair iteration
+
+The first recovery Actions gate, run **31868337537** on `21300..21319`, completed below the 40% gate (100-game step correctly skipped). Artifact download was unavailable in this environment, so the same compiled agents were sampled locally with fresh processes. Two seed-21300 losses exposed a second systemic defect: the broad `distance <= 5` emergency predicate caused 201 and 596 defense actions, 200/593 executed reversals, and 991/3296 repeatedly counted short cycles. Front counts also reached 15/10. This was false emergency defense—not expansion starvation—and explained continued collapse in one seat.
+
+Commit `4bc39db2566ed2a092fe74c9e51b6b03c7971fb5` repairs that evidence: immediate defense now requires a strong enemy within two cells or a tracked moving stack within five; front clustering uses a wider stable conflict region; executed cycle telemetry counts an executed action once instead of once per matching historical edge. A second fresh Actions gate, run **31868967531** on `21400..21419`, was started; result was still in progress when this report update was committed.
+
+### Five representative loss audit
+
+Local paired smoke used already-built binaries, fresh processes, seeds `21300..21305`, zero errors and zero illegal actions. Five losses were inspected:
+
+1. `21300`, seat 0, turn 600 (before emergency repair): healthy land growth (19/48/73/87/107/116/123 through turn 400) but 201 false defense actions and 200 reversals; dominant cause **false defense/cycling**.
+2. `21300`, seat 1, turn 745 (before repair): land peaked at 64 on turn 150 then fell to 44 by turn 600; 596 defense actions and 593 reversals; dominant cause **false defense leading to territorial collapse**.
+3. `21302`, seat 1, turn 447 (after repair): land reached 141 by turn 400, with 116 expansion and 112 enemy captures; only six defense actions; dominant remaining cause **late tactical loss**, not production starvation.
+4. `21304`, seat 1, turn 163 (after repair): land reached 66 by turn 150 with 56 neutral captures; short loss with 14 defense actions; dominant cause **early tactical/general defense**, not economy starvation.
+5. `21305`, seat 1, turn 791 (after repair): land reached 187 by turn 600 with 180 neutral and 247 enemy captures; dominant cause **late combat/Deathtouch conversion**, not territorial collapse.
+
+After the emergency repair, local `21302..21304` scored **4 W / 0 D / 2 L (66.7%)**, and `21305` scored **1 W / 0 D / 1 L (50%)**. These eight local games are only smoke evidence, not a replacement for the 40-game gate, but land/action telemetry demonstrates dramatic recovery from mean final land near 36. The remaining concern is excessive front fragmentation (max 9–10 in long games) and late tactical conversion; those should be evaluated from run 31868967531 before further tuning.
