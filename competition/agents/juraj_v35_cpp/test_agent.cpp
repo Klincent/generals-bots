@@ -31,13 +31,5 @@ int main(){
  {Agent a(0,21,21);auto o=board();std::fill(o.type.begin(),o.type.end(),2);o.type[220]=4;auto q=a.decide(o);assert(q.kind==1&&a.action_stats().passes==1);}
  // Seed-21125-shaped branch: surplus is fed down the trunk before boundary conquest.
  {Agent a(0,21,21);auto o=board();std::fill(o.type.begin(),o.type.end(),2);for(int x:{220,221,222,223,224})o.type[x]=1;o.type[220]=4;for(int x:{221,222,223})o.owner[x]=1,o.army[x]=1;o.owner[224]=0;o.army[224]=0;o.my_land=440;o.my_army=15;for(int i=0;i<3;++i){auto q=a.decide(o);apply(o,q);}assert(a.action_stats().frontier_feed_actions>=2&&a.action_stats().passes==0);}
- // Minimum-sufficient defense selects the nearby interceptor, never the distant reserve.
- {Agent a(0,21,21);auto o=board();o.army[220]=5;o.owner[219]=1;o.army[219]=1;o.owner[221]=1;o.army[221]=15;o.owner[300]=1;o.army[300]=50;o.owner[218]=2;o.army[218]=10;o.opp_army=10;auto q=a.decide(o);assert(q.kind==0&&src(q)==221);assert(a.planned_defenders().size()==1&&a.planned_defenders()[0]==221);}
- // An insufficient nearest packet recruits exactly one additional interceptor.
- {Agent a(0,21,21);auto o=board();o.army[220]=5;o.owner[219]=1;o.army[219]=1;o.owner[221]=1;o.army[221]=4;o.owner[241]=1;o.army[241]=10;o.owner[300]=1;o.army[300]=50;o.owner[218]=2;o.army[218]=11;o.opp_army=11;a.decide(o);assert(a.planned_defenders().size()==2);assert(std::find(a.planned_defenders().begin(),a.planned_defenders().end(),300)==a.planned_defenders().end());}
- // Destroying the threat releases emergency assignments immediately.
- {Agent a(0,21,21);auto o=board();o.army[220]=5;o.owner[219]=1;o.army[219]=1;o.owner[221]=1;o.army[221]=15;o.owner[218]=2;o.army[218]=10;a.decide(o);assert(!a.planned_defenders().empty());o.turn++;o.owner[218]=0;o.army[218]=0;a.decide(o);assert(a.planned_defenders().empty());}
- // Post-800 adjacent deathtouch retains terminal defense priority.
- {Agent a(0,21,21);auto o=board(801);o.owner[221]=1;o.army[221]=22;o.owner[219]=2;o.army[219]=20;o.opp_army=20;auto q=a.decide(o);assert(q.kind==0&&src(q)==221&&dst(q)==220);assert(a.action_stats().defense==1);}
  std::cout<<"v35 agent recovery scenarios passed\n";
 }
