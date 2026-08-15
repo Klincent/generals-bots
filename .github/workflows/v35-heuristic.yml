@@ -44,12 +44,12 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install numpy jax jaxlib
           python -m pip install -e . --no-deps
-      - name: Recovery 40-game gate (21300-21319)
+      - name: Recovery 40-game gate (21400-21419)
         run: |
           python competition/agents/juraj_v35_cpp/paired_benchmark.py \
             --candidate competition/agents/juraj_v35_cpp/run.sh \
             --baseline .bench-v34/competition/agents/juraj_cpp/run.sh \
-            --start 21300 --seeds 20 --output benchmark/phase1
+            --start 21400 --seeds 20 --output benchmark/phase1
           python - <<'PY'
           import json
           s=json.load(open('benchmark/phase1/summary.json'))
