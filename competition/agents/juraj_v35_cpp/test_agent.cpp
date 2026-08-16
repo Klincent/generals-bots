@@ -6,6 +6,14 @@ static Observation board(int turn=1){Observation o;o.turn=turn;o.type.assign(441
 static int src(const Action&a){return a.row*21+a.col;}static int dst(const Action&a){if(a.kind)return -1;static int dr[4]={-1,1,0,0},dc[4]={0,0,-1,1};return (a.row+dr[a.dir])*21+a.col+dc[a.dir];}
 static void apply(Observation&o,const Action&a){if(a.kind!=0){++o.turn;return;}int x=src(a),y=dst(a),m=o.army[x]-1;if(o.owner[y]==2)m-=o.army[y];o.owner[y]=1;o.army[y]=std::max(1,m);o.army[x]=1;o.my_land=std::count(o.owner.begin(),o.owner.end(),1);o.my_army=0;for(int z=0;z<441;++z)if(o.owner[z]==1)o.my_army+=o.army[z];++o.turn;}
 int main(){
+ // Live pricing uses Manhattan distance and every currently owned structure.
+ {Observation o;o.type.assign(25,1);o.owner.assign(25,0);o.army.assign(25,0);assert(live_castle_cost(o,12,5)==35);o.type[10]=3;o.owner[10]=1;assert(live_castle_cost(o,12,5)==45);o.type[10]=1;o.owner[10]=0;o.type[14]=3;o.owner[14]=1;assert(live_castle_cost(o,12,5)==45);}
+ // A captured enemy castle contributes as soon as its observed owner is us.
+ {Observation o;o.type.assign(25,1);o.owner.assign(25,0);o.army.assign(25,0);o.type[10]=3;o.owner[10]=2;assert(live_castle_cost(o,12,5)==35);o.owner[10]=1;assert(live_castle_cost(o,12,5)==45);}
+ // The selected C1 BUILD is suppressed below live price and emitted at price.
+ {Agent a(0,21,21);auto o=board();a.decide(o);int site=a.planned_castle(0);assert(site>=0);o.owner[site]=1;o.type[site]=1;int cost=live_castle_cost(o,site,21);o.army[site]=cost-1;assert(!a.build_is_legal(o,site));auto low=a.decide(o);assert(low.kind!=2);o.turn++;o.army[site]=live_castle_cost(o,site,21);auto exact=a.decide(o);assert(exact.kind==2&&src(exact)==site);}
+ // Ownership and structure-type changes are revalidated at emission time.
+ {Agent a(0,21,21);auto o=board();a.decide(o);int site=a.planned_castle(0);o.army[site]=100;o.owner[site]=2;o.type[site]=1;assert(!a.build_is_legal(o,site));o.owner[site]=1;o.type[site]=3;assert(!a.build_is_legal(o,site));}
  // Favorable ordinary conquest is explicit; losing head-on combat is never selected.
  {Agent a(0,21,21);auto o=board();o.owner[40]=1;o.army[40]=20;o.owner[41]=2;o.army[41]=5;for(int z:{19,39,61})o.owner[z]=1,o.army[z]=1;auto q=a.decide(o);assert(q.kind==0&&src(q)==40&&dst(q)==41);}
  {Agent a(0,21,21);auto o=board();o.owner[40]=1;o.army[40]=5;o.owner[41]=2;o.army[41]=20;for(int z:{19,39,61})o.owner[z]=1,o.army[z]=1;auto q=a.decide(o);assert(!(q.kind==0&&src(q)==40&&dst(q)==41));}
