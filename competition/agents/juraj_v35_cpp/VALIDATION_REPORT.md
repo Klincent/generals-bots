@@ -189,3 +189,73 @@ constant was changed in response.
 The 50-map / 100-game phase was correctly skipped because Phase 1 did not
 reach the 52% score gate. No Phase-2 W/D/L or other result is claimed. No seed
 in the final-heldout `30000..30499` range was used.
+
+## Pre-Stage-A/B candidate fresh validation
+
+### Revisions and equivalence proof
+
+- Starting HEAD: `430e0829dffa476bf8fd0d443ed2d1e4f9250fe6`.
+- Stage-A revert: `11022908c6d42c990021ee067848b4dce50b606b`
+  (`Revert "v35: keep surplus moving toward productive frontiers"`).
+- Final tested SHA: `af17634f006b793e63afdc19ef893d57eedf6636`.
+- Pre-Stage-A/B reference: `54631b747391f23ac18dbd00aeae8446bd484405`.
+- Exact V3.4 baseline: `2ed9e8bbcf76b36c5276013afc356118fccc8b6e`.
+
+The following production-code comparison produced no output, proving that the
+tested `main.cpp` and `core.hpp` match the pre-Stage-A/B gameplay source:
+
+```text
+git diff 54631b747391f23ac18dbd00aeae8446bd484405 -- \
+  competition/agents/juraj_v35_cpp/main.cpp \
+  competition/agents/juraj_v35_cpp/core.hpp
+```
+
+Only the validation workflow changed between the revert and the tested SHA.
+No gameplay was modified in response to either fresh result.
+
+### Fresh Phase 1 (`21800..21819`)
+
+Phase 1 covered 20 maps / 40 paired-seat games. GitHub Actions run
+`31932565202` passed the technical-health and 52% score gate, so Phase 2 ran
+automatically. A deterministic local replay was used to aggregate the retained
+per-game telemetry; its complete result matched the Actions gate outcome.
+
+| Metric | Phase 1 |
+|---|---:|
+| W/D/L | 19 / 7 / 14 |
+| Score | 56.25% |
+| Seat 0 / seat 1 | 55.0% / 57.5% |
+| Paired 95% CI | [45.0%, 67.5%] |
+| Errors / illegal actions | 0 / 0 |
+| Turns | 31,308 total; 782.70 mean/game |
+| Decision timing | p50 1.53 ms; p95 1.81 ms; p99 1.90 ms; max 54.09 ms (local replay) |
+| PASS count / rate | 551 / 1.760% of turns |
+| Defense actions | 253 |
+| Castle actions / completed castle records | 27 / 17 across 15 games |
+
+Mean land snapshots (with the number of games reaching each snapshot in
+parentheses): **17.93 @50 (40), 40.58 @100 (40), 59.02 @150 (40), 76.92 @200
+(40), 92.26 @250 (39), 104.39 @300 (38), 126.21 @400 (34), 169.54 @600
+(28), and 206.90 @800 (21)**.
+
+This 56.25% result is above the strong 55% diagnostic threshold on Phase 1.
+
+### Automatic Phase 2 (`21850..21899`)
+
+The Phase-1 gate correctly started the 50-map / 100-game extension. The games
+completed, but the health assertion failed because three candidate illegal
+actions were recorded. This is reported as measured; no strategy, constant,
+or gameplay response was made.
+
+| Metric | Phase 2 |
+|---|---:|
+| W/D/L | 53 / 6 / 41 |
+| Score | 56.0% |
+| Seat 0 / seat 1 | 61.0% / 51.0% |
+| Paired 95% CI | [46.5%, 65.5%] |
+| Errors / illegal actions | 0 / 3 |
+| Turns | 64,968 total; 649.68 mean/game |
+| Decision timing | p50 1.53 ms; p95 1.72 ms; p99 1.79 ms; max 64.10 ms (local replay) |
+
+The Phase-2 technical-health requirement was therefore **not** met despite the
+56.0% score. No seed in the protected `30000..30499` range was used.
