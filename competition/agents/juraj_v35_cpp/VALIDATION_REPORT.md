@@ -259,3 +259,92 @@ or gameplay response was made.
 
 The Phase-2 technical-health requirement was therefore **not** met despite the
 56.0% score. No seed in the protected `30000..30499` range was used.
+
+## V3.5 technical-health and loss-conversion iteration (2026-08-16)
+
+### Revisions and selected candidate
+
+- Starting HEAD: `bfdadb47b88e2607f83b34395cf9a80b7fd7efce`.
+- Gameplay-equivalent reference: `54631b747391f23ac18dbd00aeae8446bd484405`.
+- Exact V3.4 baseline: `2ed9e8bbcf76b36c5276013afc356118fccc8b6e`.
+- Live-cost/legality commit: `ad9515c92cad83a20825a3a7fe69cc70b4ec1f88`.
+- Narrow recovery commit: `67672295b590b8d2ba6962ce30905c6bc7a6d0a3`.
+- Selected candidate at report time: `67672295b590b8d2ba6962ce30905c6bc7a6d0a3`.
+
+### Illegal-action root cause and correction
+
+A deterministic replay used seed 21891, candidate seat 0, competition RNG seed
+1640696520. At the starting HEAD it reproduced the original 435-turn loss,
+three candidate illegal actions, five emitted castle actions, and two completed
+castles. Thus all three illegals are exactly the three emitted BUILD actions
+which the engine rejected (the only discrepancy between emitted castle actions
+and completed builds). The old deadline telemetry still reported both planned
+prices as 35 after C1 existed.
+
+The corrected replay produced zero illegal actions. Runtime pricing now scans
+the observation for every currently owned general/castle and applies the exact
+Manhattan surcharge. Forecast requirements, hard reservations, eligibility,
+reported C1/C2 prices, and final emission validation all use that current
+price. A final guard also checks bounds, ownership, plain type, non-general,
+non-castle, and sufficient observed army. Telemetry counts positions where the
+old static check would have emitted BUILD but the live check blocks it.
+
+### Full Phase-2 loss split
+
+The retained 100-game result contains 53 wins, 6 draws, and 41 losses. Applying
+`land100 < 30 AND PASS > 5%` gives exactly 17 early-stall losses and 24
+healthy-economy tactical losses. No win satisfies either individual condition.
+
+| Cohort | Games | land50 | land100 | land150 | land200 | PASS rate |
+|---|---:|---:|---:|---:|---:|---:|
+| Early-stall losses | 17 | 4.06 | 6.94 | — | — | 39.8% |
+| Healthy losses | 24 | 19.33 | 42.54 | 61.25 | 77.46 | 1.2% |
+| Wins | 53 | 19.55 | 42.32 | 60.36 | 77.23 | 0.7% |
+
+Seventeen healthy losses ended by turn 500 and seven ended later. Mean defense
+action rate was approximately 2.6% in healthy losses versus 0.6% in wins. This
+supports investigation, not a broad defense rewrite.
+
+### Tactical forensics status and recurring causes
+
+The requested action-level replay/classification of the 17 representative
+healthy losses was not completed in this time-limited local run. Consequently
+no tactical cause count is asserted and no tactical gameplay change was made.
+This is deliberately recorded rather than inventing classifications without
+the last-30-action evidence. The representative table and recurring-cause count
+remain an explicit follow-up risk.
+
+### Narrow otherwise-PASS recovery
+
+Recovery runs only after the normal scheduler and the unchanged fallback order
+(enemy, neutral, persistent, rear, consolidate, explore) are empty for two
+consecutive turns. It is disabled during immediate general threat, hard castle
+funding, and from turn 250 onward. It excludes the general, uses only surplus
+above `reserve()`, travels one cycle-safe step through owned territory toward a
+neutral/fog frontier, and yields immediately when any normal action returns.
+Only one recovery target can exist. Trigger/action/completion/normal-abort and
+maximum would-PASS streak telemetry are emitted alongside the original PASS
+counters.
+
+### Validation status
+
+The exact diagnostic replay of 21891 is not fresh validation and is reported
+only as root-cause evidence. A Phase-1 attempt began on 21900 and completed the
+paired games for 21900..21903 plus one game for 21904 before the local run was
+stopped; this incomplete sample is intentionally not scored or claimed as the
+required 40-game gate. Therefore Phase 1 and Phase 2 are **not complete**, and
+no W/D/L, CI, aggregate health statistic, or score gate is claimed. The final
+heldout range 30000..30499 was not used.
+
+### Exact remaining risks
+
+1. The recovery commit has deterministic agent tests but has not passed the
+   required complete fresh 40-game score/health gate; it must be reverted if
+   that gate scores below 50%, and should be treated conservatively at 50–54%.
+2. Seeds 21900..21904 have now been touched and cannot be presented as wholly
+   fresh validation in a resumed run; use a new nonheldout range.
+3. The complete 41-loss artifact audit and representative tactical
+   classifications remain unfinished; no tactical fix is justified yet.
+4. Dynamic pricing can reserve more army and delay C2 relative to the old,
+   illegal behavior. This is necessary technical correctness but remains a
+   gameplay-score risk.
