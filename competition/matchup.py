@@ -52,7 +52,11 @@ def build_agent(run_sh: Path) -> None:
     build = run_sh.parent / "build.sh"
     if not build.exists():
         return
-    print(f"[matchup] building {build.relative_to(REPO_ROOT)}", file=sys.stderr)
+    try:
+        label = build.relative_to(REPO_ROOT)
+    except ValueError:
+        label = build
+    print(f"[matchup] building {label}", file=sys.stderr)
     result = subprocess.run(["bash", str(build)], cwd=str(build.parent))
     if result.returncode != 0:
         sys.exit(f"[matchup] build failed: {build}")
@@ -192,6 +196,8 @@ def main():
                         "ruleset and overrides --grid-size/--truncation/--perfect-info")
     parser.add_argument("--audit-json", type=Path,
                         help="write protocol, legality, outcome, and round-trip timing audit")
+    parser.add_argument("--diagnostic-json", type=Path,
+                        help="write full-state/action turns for deterministic used-seed forensics")
     args = parser.parse_args()
 
     a0_path = Path(args.agent0).resolve()
@@ -244,6 +250,7 @@ def main():
     prev_castles = state.castles
     winner = -1
     turn = 0
+    diagnostic_turns = []
     try:
         while turn < env.truncation:
             obs_0 = get_obs(state, 0)
@@ -255,6 +262,17 @@ def main():
             started = time.perf_counter()
             a_1 = ask_agent(agents[1], obs_1)
             decision_ms[1].append((time.perf_counter() - started) * 1000)
+
+            if args.diagnostic_json:
+                diagnostic_turns.append({
+                    "turn": turn,
+                    "armies": np.asarray(state.armies).tolist(),
+                    "ownership": np.asarray(state.ownership).astype(np.int8).tolist(),
+                    "generals": np.asarray(state.generals).astype(np.int8).tolist(),
+                    "castles": np.asarray(state.castles).astype(np.int8).tolist(),
+                    "actions": [np.asarray(a_0, dtype=np.int64).tolist(),
+                                np.asarray(a_1, dtype=np.int64).tolist()],
+                })
 
             def valid_action(action, obs, pid):
                 values = np.asarray(action, dtype=np.int64)
@@ -332,6 +350,13 @@ def main():
             "labels": labels, "illegal_actions": illegal, "castles_built": built,
             "decision_ms": [timing(x) for x in decision_ms],
         }, sort_keys=True) + "\n")
+
+    if args.diagnostic_json:
+        args.diagnostic_json.parent.mkdir(parents=True, exist_ok=True)
+        args.diagnostic_json.write_text(json.dumps({
+            "schema": 1, "seed": args.seed, "winner": winner, "turns": turn,
+            "labels": labels, "frames": diagnostic_turns,
+        }, separators=(",", ":")) + "\n")
 
     if record:
         replay(states_log, infos_log, agent_ids=labels, fps=args.fps)

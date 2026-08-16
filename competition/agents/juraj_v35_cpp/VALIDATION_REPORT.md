@@ -442,3 +442,129 @@ to the `220xx` tables above, and is not used to assess the recovery score.
 No seed in `21900..21904` or the protected final-heldout range
 `30000..30499` was used for this validation. No submission archive was
 created, and no gameplay was changed after either phase.
+## Recovery exact-seed A/B (used diagnostic seeds; not fresh validation)
+
+- Variant C: `ad9515c92cad83a20825a3a7fe69cc70b4ec1f88`.
+- Variant R: `67672295b590b8d2ba6962ce30905c6bc7a6d0a3`.
+- Exact V3.4: `2ed9e8bbcf76b36c5276013afc356118fccc8b6e`.
+- Used range: `22050..22099`, 50 maps / 100 paired-seat games.
+- Both local variants were materialized with `git archive` at the exact commit; the baseline, engine, truncation, seat order, and `seed * 0x9E3779B1 + 0x35` RNG derivation were identical.
+
+| Variant | W | D | L | Score |
+|---|---:|---:|---:|---:|
+| C | 45 | 18 | 37 | 54.00% |
+| R | 45 | 18 | 37 | 54.00% |
+
+### Match-by-match flip matrix
+
+| C to R | Games |
+|---|---:|
+| draw->draw | 18 |
+| loss->loss | 36 |
+| loss->win | 1 |
+| win->loss | 1 |
+| win->win | 44 |
+
+Recovery added **+0.0 points**: 1 improved, 1 regressed, and 98 unchanged games.
+
+| Seat | Net points | Improved | Regressed |
+|---:|---:|---:|---:|
+| 0 | -1.0 | 0 | 1 |
+| 1 | +1.0 | 1 | 0 |
+
+### Early-stall causal transitions
+
+| C to R | Games | Net points | Improved | Regressed |
+|---|---:|---:|---:|---:|
+| early-stall->early-stall | 12 | +0.0 | 1 | 1 |
+| healthy->healthy | 88 | +0.0 | 0 | 0 |
+
+**Recovery recommendation: UNPROVEN.** Prefer the simpler castle-only C candidate; recovery produced one improvement and one regression and did not cure an early-stall game. The mandatory live castle-cost fix remains required regardless of this decision.
+
+## Phase-2 loss forensics
+
+The table audits all 37 losses from the deterministic R replay. Classifications are based on protocol-visible state/action facts; the tooling explicitly marks internal candidate/objective facts that production does not emit as unobservable.
+
+| Seed | Seat | Turn | Early stall | Primary cause | Evidence |
+|---:|---:|---:|:---:|---|---|
+| 22050 | 0 | 516 | yes | EARLY_STALL | land100=5; PASS=24.6% |
+| 22050 | 1 | 829 | yes | EARLY_STALL | land100=3; PASS=15.9% |
+| 22051 | 0 | 584 | no | DEFENSE_UNDERCOMMITTED | visible threat warning=25; final threat-general margin=27 |
+| 22052 | 0 | 767 | no | DEFENSE_UNDERCOMMITTED | visible threat warning=5; final threat-general margin=14 |
+| 22052 | 1 | 801 | no | INTERCEPT_AVAILABLE_NOT_USED | legal winning adjacent interceptor observed; 30-turn warning |
+| 22053 | 0 | 420 | no | INTERCEPT_AVAILABLE_NOT_USED | legal winning adjacent interceptor observed; 30-turn warning |
+| 22054 | 1 | 610 | no | INTERCEPT_AVAILABLE_NOT_USED | legal winning adjacent interceptor observed; 28-turn warning |
+| 22055 | 1 | 750 | no | DEFENSE_UNDERCOMMITTED | visible threat warning=9; final threat-general margin=78 |
+| 22056 | 0 | 814 | yes | EARLY_STALL | land100=9; PASS=13.5% |
+| 22056 | 1 | 464 | yes | EARLY_STALL | land100=5; PASS=26.9% |
+| 22058 | 0 | 639 | no | INTERCEPT_AVAILABLE_NOT_USED | legal winning adjacent interceptor observed; 30-turn warning |
+| 22060 | 0 | 807 | no | ECONOMICALLY_OUTPLAYED | no locally winning interceptor/counter-race observed; land100=46 |
+| 22062 | 1 | 634 | no | DEFENSE_UNDERCOMMITTED | visible threat warning=5; final threat-general margin=19 |
+| 22064 | 1 | 320 | no | DEFENSE_UNDERCOMMITTED | visible threat warning=7; final threat-general margin=16 |
+| 22066 | 0 | 688 | no | INTERCEPT_AVAILABLE_NOT_USED | legal winning adjacent interceptor observed; 5-turn warning |
+| 22067 | 1 | 243 | no | INTERCEPT_AVAILABLE_NOT_USED | legal winning adjacent interceptor observed; 26-turn warning |
+| 22069 | 1 | 1107 | no | DEFENSE_UNDERCOMMITTED | visible threat warning=7; final threat-general margin=98 |
+| 22071 | 0 | 443 | yes | EARLY_STALL | land100=5; PASS=28.7% |
+| 22072 | 1 | 444 | no | INTERCEPT_AVAILABLE_NOT_USED | legal winning adjacent interceptor observed; 30-turn warning |
+| 22075 | 0 | 393 | yes | EARLY_STALL | land100=6; PASS=31.8% |
+| 22075 | 1 | 521 | yes | EARLY_STALL | land100=5; PASS=23.6% |
+| 22076 | 0 | 355 | no | INTERCEPT_AVAILABLE_NOT_USED | legal winning adjacent interceptor observed; 30-turn warning |
+| 22078 | 1 | 720 | no | DEFENSE_UNDERCOMMITTED | visible threat warning=23; final threat-general margin=7 |
+| 22079 | 0 | 570 | no | DEFENSE_UNDERCOMMITTED | visible threat warning=20; final threat-general margin=4 |
+| 22079 | 1 | 211 | yes | EARLY_STALL | land100=5; PASS=60.7% |
+| 22081 | 0 | 277 | no | INTERCEPT_AVAILABLE_NOT_USED | legal winning adjacent interceptor observed; 29-turn warning |
+| 22081 | 1 | 170 | no | INTERCEPT_AVAILABLE_NOT_USED | legal winning adjacent interceptor observed; 30-turn warning |
+| 22082 | 0 | 788 | no | DEFENSE_UNDERCOMMITTED | visible threat warning=7; final threat-general margin=32 |
+| 22083 | 1 | 915 | no | DEFENSE_UNDERCOMMITTED | visible threat warning=14; final threat-general margin=7 |
+| 22086 | 1 | 738 | no | DEFENSE_UNDERCOMMITTED | visible threat warning=5; final threat-general margin=25 |
+| 22087 | 1 | 348 | no | DEFENSE_UNDERCOMMITTED | visible threat warning=9; final threat-general margin=32 |
+| 22089 | 1 | 570 | no | DEFENSE_UNDERCOMMITTED | visible threat warning=30; final threat-general margin=10 |
+| 22094 | 0 | 202 | yes | EARLY_STALL | land100=7; PASS=72.8% |
+| 22095 | 1 | 784 | yes | EARLY_STALL | land100=7; PASS=16.5% |
+| 22096 | 1 | 255 | no | DEFENSE_UNDERCOMMITTED | visible threat warning=5; final threat-general margin=21 |
+| 22098 | 0 | 788 | no | MISSED_COUNTERATTACK | known enemy general had a nearby stronger friendly stack |
+| 22099 | 1 | 575 | yes | EARLY_STALL | land100=5; PASS=23.3% |
+
+### Primary-cause counts
+
+| Cause | Losses |
+|---|---:|
+| DEFENSE_UNDERCOMMITTED | 14 |
+| EARLY_STALL | 11 |
+| INTERCEPT_AVAILABLE_NOT_USED | 10 |
+| ECONOMICALLY_OUTPLAYED | 1 |
+| MISSED_COUNTERATTACK | 1 |
+
+Recurring observed classes (at least five losses): **DEFENSE_UNDERCOMMITTED (14)**, **EARLY_STALL (11)**, **INTERCEPT_AVAILABLE_NOT_USED (10)**.
+No gameplay correction is implemented here. A class count alone does not satisfy the required local-correction and Agent-test gates.
+
+### Comparable-win controls and next-correction gate
+
+Three winning R games were replayed with the same full-state tracer, selected
+by nearest land100 and game length for the three recurring cohorts:
+
+| Loss cohort | Comparable win | land100 | Turns | First contact | Observable difference |
+|---|---:|---:|---:|---:|---|
+| EARLY_STALL | 22071 seat 1 | 3 | 1060 | 238 | Still early-stalled, but 10 recovery actions preceded land 44 at turn 200 and eventual enemy-general capture; this is the single C-loss to R-win flip. |
+| DEFENSE_UNDERCOMMITTED | 22059 seat 1 | 45 | 676 | 102 | No qualifying threat to our general was observed; the candidate reached and captured the enemy general instead. |
+| INTERCEPT_AVAILABLE_NOT_USED | 22080 seat 1 | 41 | 393 | 73 | No qualifying threat to our general was observed; the candidate reached and captured the enemy general instead. |
+
+These controls establish direction more narrowly than aggregate defense-action
+correlation: the two healthy comparable wins avoided the terminal defensive
+state by winning the general race, while the loss traces entered a visible
+last-30-turn threat state. They do **not** prove that globally increasing
+"defense" would help.
+
+The highest-value *testable next hypothesis* is
+`INTERCEPT_AVAILABLE_NOT_USED` (10 independent losses): when a qualifying
+visible general threat exists and an adjacent friendly move can defeat that
+threat, prefer the winning local interceptor. This is deterministic, local,
+representable with Agent-level board tests, and requires no scheduler redesign.
+It therefore meets the stated eligibility gates for a future iteration, but is
+only a recommendation here; no gameplay was changed. The broader
+`DEFENSE_UNDERCOMMITTED` class (14) has no single proven local correction yet
+and does not independently justify defense retuning.
+
+### Protected ranges
+
+`22100..22119` and `22150..22199` remain reserved for later fresh validation. No seed in `30000..30499` was used.
