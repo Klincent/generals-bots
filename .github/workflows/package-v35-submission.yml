@@ -10,11 +10,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 3
       - name: Build exact candidate and package minimal submission
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD^)" = "cf51ae7be3194d48266557d8d589ac72efa6c58c"
+          git diff --exit-code cf51ae7be3194d48266557d8d589ac72efa6c58c HEAD -- \
+            competition/agents/juraj_v35_cpp/main.cpp \
+            competition/agents/juraj_v35_cpp/core.hpp \
+            competition/agents/juraj_v35_cpp/build.sh \
+            competition/agents/juraj_v35_cpp/run.sh
           rm -rf juraj_v35 juraj_v35_submission_cf51ae7.zip
           mkdir juraj_v35
           cp competition/agents/juraj_v35_cpp/main.cpp juraj_v35/
