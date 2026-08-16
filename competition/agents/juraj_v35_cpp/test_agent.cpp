@@ -27,6 +27,9 @@ int main(){
  {Agent a(0,21,21);auto o=board();o.army[220]=5;o.owner[219]=2;o.army[219]=10;o.owner[218]=1;o.army[218]=12;o.type[41]=4;o.owner[41]=2;o.army[41]=2;o.owner[40]=1;o.army[40]=5;auto q=a.decide(o);assert(q.kind==0&&src(q)==40&&dst(q)==41);}
  // A useful owned-territory consolidation replaces the old scheduler PASS.
  {Agent a(0,21,21);auto o=board();for(int x=0;x<441;++x)if(o.type[x]!=4)o.owner[x]=1,o.army[x]=1;o.owner[0]=2;o.army[0]=1;o.army[221]=14;o.my_land=440;o.my_army=454;o.opp_land=1;o.opp_army=1;auto q=a.decide(o);assert(q.kind==0);assert(a.action_stats().passes==0);}
+ // Catastrophic low-land stagnation needs a sustained window, then borrows a
+ // bounded productive expansion step rather than reacting to one or two PASSes.
+ {Agent a(0,21,21);auto o=board(60);o.army[220]=1;o.my_army=1;for(int i=0;i<20;++i){a.decide(o);++o.turn;}assert(a.legacy_escape_started()==0);o.owner[200]=1;o.army[200]=12;o.my_land=2;o.my_army=13;auto q=a.decide(o);assert(a.legacy_escape_started()==1&&a.legacy_escape_actions()==1&&q.kind==0);}
  // Distant static territory is intelligence, not contact/front/war.
  {Agent a(0,21,21);auto o=board();for(int x=0;x<12;++x)o.owner[x]=2,o.army[x]=1;o.opp_land=12;o.opp_army=12;a.decide(o);assert(a.active_fronts()==0&&a.meaningful_contact_turn()<0);assert(a.confidence()[(int)Archetype::SMALL_PACKET_SWARM]<.2);}
  // Interaction adjacent to our territory creates exactly one clustered front.
