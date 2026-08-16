@@ -21,6 +21,8 @@ int main(){
  {Agent a(0,21,21);auto o=board();o.army[220]=5;o.owner[219]=2;o.army[219]=10;o.owner[218]=1;o.army[218]=12;o.owner[198]=1;o.army[198]=25;auto q=a.decide(o);assert(q.kind==0&&src(q)==218&&dst(q)==219);}
  // An insufficient interceptor is not forced, and a remote garrison is not a threat.
  {Agent a(0,21,21);auto o=board();o.owner[219]=2;o.army[219]=10;o.owner[218]=1;o.army[218]=10;auto q=a.decide(o);assert(!(q.kind==0&&src(q)==218&&dst(q)==219));}
+ // A nearby sufficient defender stages onto the approach before the threat.
+ {Agent a(0,21,21);auto o=board();o.owner[216]=2;o.army[216]=11;o.owner[239]=1;o.army[239]=12;a.decide(o);o.turn++;o.owner[216]=0;o.army[216]=0;o.owner[217]=2;o.army[217]=10;auto q=a.decide(o);assert(q.kind==0&&src(q)==239&&dst(q)==218);assert(a.local_blocks()==1&&a.threat_plans_created()==1);o.turn++;o.owner[217]=0;o.army[217]=0;a.decide(o);assert(a.threat_plans_released()==1);}
  // Immediate terminal capture remains above an emergency intercept.
  {Agent a(0,21,21);auto o=board();o.army[220]=5;o.owner[219]=2;o.army[219]=10;o.owner[218]=1;o.army[218]=12;o.type[41]=4;o.owner[41]=2;o.army[41]=2;o.owner[40]=1;o.army[40]=5;auto q=a.decide(o);assert(q.kind==0&&src(q)==40&&dst(q)==41);}
  // A useful owned-territory consolidation replaces the old scheduler PASS.
