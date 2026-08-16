@@ -568,3 +568,68 @@ and does not independently justify defense retuning.
 ### Protected ranges
 
 `22100..22119` and `22150..22199` remain reserved for later fresh validation. No seed in `30000..30499` was used.
+
+## V3.5 evidence-driven local-response iteration (2026-08-16)
+
+### Revisions
+
+- Expected starting revision: `d62f97bd26dcb3be574da526b6412dd06a69ec8d` (verified before editing).
+- Recovery revert: `29b6052` (`v35: remove unproven stall recovery`).
+- Winning local intercept: `8d188d5`.
+- Staged local threat response: `b1d36af`.
+- Catastrophic early-stall escape: `4f0fac7`.
+- Exact V3.4 reference: `2ed9e8bbcf76b36c5276013afc356118fccc8b6e`.
+- Selected gameplay candidate: `4f0fac7`.
+
+The recovery revert leaves `main.cpp` and `core.hpp` byte-equivalent to the
+mandatory live-cost revision `ad9515c9` before the three new gameplay layers.
+The intercept is a tier-0, exact-combat, adjacent capture of a qualified visible
+general threat, with terminal enemy-general capture retaining higher utility.
+The defense layer retains one ephemeral primary threat, prefers an exact kill,
+then a conservative credible race, then a minimum sufficient local path block,
+and only then short-ETA general reinforcement. The escape layer requires a
+20-observation low-land/high-PASS stagnation window and is capped at ten actions,
+eight land, threat/war preemption, and a 30-turn cooldown.
+
+### Deterministic evidence
+
+The fast suite passes 20 core checks plus Agent-level scenarios covering exact
+winning intercept selection, insufficient-interceptor rejection, terminal-win
+priority, incoming-stack local blocking and plan release, remote static contact,
+and sustained-stall activation. This provides mechanism-level evidence only;
+it is not match-level causal evidence.
+
+### Used-seed causal diagnostics (`22050..22099`)
+
+No score is claimed. The full diagnostic replay could not be completed in this
+execution window. Consequently target-loss conversions, unrelated regressions,
+and per-layer match points remain **unmeasured**. The layers remain separately
+revertible commits so this required selection can be completed without retuning.
+
+### Fresh Phase 1 (`22100..22119`)
+
+No W/D/L or score is claimed. The first harness attempt correctly produced 40
+infrastructure errors because `jax` and then the repository import path were
+absent. After installing `jax` and setting `PYTHONPATH=.`, games ran correctly
+but required roughly 40 seconds each in this container; the run was interrupted
+after approximately two games rather than publishing an incomplete 40-game
+result. Therefore the Phase-1 health/score gate is **not established**.
+
+### Fresh Phase 2 (`22150..22199`) and loss classes
+
+Not run, because Phase 1 did not complete. The protected `30000..30499` range
+was not touched. New EARLY_STALL, INTERCEPT_AVAILABLE_NOT_USED,
+DEFENSE_UNDERCOMMITTED, and other counts are unmeasured.
+
+### Exact remaining risks
+
+- The visible-stack identity heuristic is observation-based; crossing stacks can
+  still make direction evidence ambiguous.
+- Race selection deliberately requires an existing ATTACK packet and conservative
+  army/ETA margin, so it can miss a real race rather than invent one.
+- Local blocking uses current shortest-path geometry and exact current combat but
+  cannot model an unseen supporting stack.
+- Stall thresholds have deterministic safety tests but have not yet been checked
+  against all 11 historical traces or healthy controls.
+- Match-level value and regression counts are pending; do not treat this candidate
+  as benchmark-selected until the used-seed causal replay and fresh gates finish.
