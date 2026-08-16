@@ -157,7 +157,7 @@ but not the minimum-sufficient general-defense change.
 ### Revisions
 
 - Starting HEAD: `21a9594dc4228170600b327c7c169f342b04f611`.
-- Stage-B revert: `62e96b7` (`Revert "v35: plan minimum sufficient general defense"`).
+- Stage-B revert: `62e96b7ade40665ba3b979329ecc4284e16ed51a` (`Revert "v35: plan minimum sufficient general defense"`).
 - Final tested SHA: `9b628f91143787e48586b91a4ccc22d22b57a572`.
 - Exact V3.4 baseline: `2ed9e8bbcf76b36c5276013afc356118fccc8b6e`.
 
