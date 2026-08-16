@@ -633,3 +633,53 @@ DEFENSE_UNDERCOMMITTED, and other counts are unmeasured.
   against all 11 historical traces or healthy controls.
 - Match-level value and regression counts are pending; do not treat this candidate
   as benchmark-selected until the used-seed causal replay and fresh gates finish.
+
+## V3.5 fresh 221xx generalization validation
+
+### Immutable experiment identity
+
+- Selected gameplay commit: `4f0fac768a8fc4479d45347a3ecbdbfedd6aef05`.
+- Validation starting commit: `cf51ae7be3194d48266557d8d589ac72efa6c58c`.
+- Exact V3.4 baseline: `2ed9e8bbcf76b36c5276013afc356118fccc8b6e`.
+- Workflow/report commit: the commit containing this section; the workflow also
+  writes its full checked-out SHA to `benchmark/source-identity.txt`.
+- Gameplay blobs at the validation start:
+  - `main.cpp`: `42537039beac08f4ddb0113f7b53fa21997e4ec1`
+  - `core.hpp`: `8c3a96028499e429c4a0b23c89d43fd95c67ef33`
+  - `build.sh`: `8337d45f494bb04e385138f215a6ba55ef4d6d60`
+  - `run.sh`: `fe8fa0e5a53678a06541833af361bf97f8d20bf0`
+
+The validation-only diff from `cf51ae7` contains no change to any of those four
+files. The three gameplay layers (`8d188d5`, `b1d36af`, and `4f0fac7`) remain
+untouched and combined.
+
+### Evidence separation and fresh protocol
+
+The `22000..22019` result (**21 W / 5 D / 14 L, 58.75%**) and the
+`22050..22099` result (**53 W / 18 D / 29 L, 62.0%**) are USED diagnostic
+evidence only. They are not pooled with this experiment.
+
+The workflow runs fresh Phase 1 only on `22100..22119` (40 paired-seat games),
+requires zero errors, zero illegal actions, and score at least 54%, and only
+then runs fresh Phase 2 on `22150..22199` (100 paired-seat games). The artifact
+is always uploaded as `v35-fresh-221xx-validation`, including per-game audits,
+stderr telemetry, summaries, seed/seat metadata, source identity, and Phase-2
+full-state traces/loss forensics when the gate passes. No seed in
+`30000..30499` is used.
+
+### Results
+
+Results pending execution of the validation workflow. No local partial run is
+reported as a fresh measurement.
+
+| Evidence | Phase 1 | Phase 2 | Health |
+|---|---:|---:|---|
+| Old fresh pre-fix | 56.25% | 56.0% | Phase 2 had 3 illegal actions |
+| Recovery candidate | 56.25% | 54.0% | clean |
+| New candidate USED 220xx | 58.75% | 62.0% | clean; diagnostic only |
+| New candidate FRESH 221xx | pending | gated/pending | pending |
+
+Phase results, seat split, paired CI, timing, land/PASS, threat, escape, castle,
+defense telemetry, and fresh Phase-2 loss-class counts will be copied verbatim
+from the uploaded JSON artifact after the workflow completes. Gameplay will not
+be changed in response to the result.
