@@ -348,3 +348,97 @@ heldout range 30000..30499 was not used.
 4. Dynamic pricing can reserve more army and delay C2 relative to the old,
    illegal behavior. This is necessary technical correctness but remains a
    gameplay-score risk.
+
+## V3.5 fresh health/recovery validation (2026-08-16)
+
+### Revisions and evidence separation
+
+- Tested workflow SHA: `452fc1d146732d7ee503d854a5ca9e92792ab191`.
+- Selected gameplay commit: `67672295b590b8d2ba6962ce30905c6bc7a6d0a3`.
+- Mandatory live-cost fix: `ad9515c92cad83a20825a3a7fe69cc70b4ec1f88`.
+- Exact V3.4 baseline: `2ed9e8bbcf76b36c5276013afc356118fccc8b6e`.
+- Fresh GitHub Actions run: `31952572211`.
+- Preserved fresh artifact: `v35-reference-validation` (artifact `9265524313`,
+  SHA-256 digest
+  `8d85a98dbc621dc7094c8bd459d9bc8b8ed2b8d00f4ca4c4639cc3fb90e0d5ed`).
+
+The fresh Actions run completed successfully. Therefore Phase 1 met all three
+workflow gates (score at least 54%, zero errors, and zero illegal actions),
+Phase 2 ran automatically, and its zero-error/zero-illegal health assertion
+also passed. The complete artifact is retained for the requested future
+tactical-loss audit. A deterministic local replay of the same candidate,
+baseline, maps, seats, and RNG seeds supplied the detailed aggregates below;
+it is analysis of the fresh run, not an additional fresh seed claim.
+
+### Fresh Phase 1 (`22000..22019`)
+
+Phase 1 covered 20 maps / 40 paired-seat games and cleared the 54% automatic
+continuation gate.
+
+| Metric | Result |
+|---|---:|
+| W / D / L | 21 / 3 / 16 |
+| Score | 56.25% |
+| Seat 0 / seat 1 | 70.0% / 42.5% |
+| Paired bootstrap 95% CI | [40.0%, 72.5%] |
+| Errors / illegal actions | 0 / 0 |
+| PASS count / rate | 1,171 / 3.916% of 29,903 turns |
+| Stall triggers / actions | 22 / 22 |
+| Stall completed / normal-action aborts | 18 / 4 |
+| Maximum consecutive would-PASS | 49 |
+| Live-cost prevented invalid builds | 0 |
+| Defense actions | 501 |
+| Castle actions / castles completed | 23 / 23 |
+
+Mean candidate land was **15.93 @50 (40 games), 35.02 @100 (40), 53.15
+@150 (40), and 74.08 @200 (39)**. Eight games had land100 below 30, eight
+had PASS rate above 5%, and the same eight met both conditions. All eight of
+the combined-condition games were losses.
+
+### Fresh Phase 2 (`22050..22099`)
+
+Phase 2 covered 50 maps / 100 paired-seat games. Its 54.0% score is
+**acceptable** under the specified interpretation, and both hard health
+requirements passed.
+
+| Metric | Result |
+|---|---:|
+| W / D / L | 45 / 18 / 37 |
+| Score | 54.0% |
+| Seat 0 / seat 1 | 59.0% / 49.0% |
+| Paired bootstrap 95% CI | [46.0%, 62.0%] |
+| Errors / illegal actions | 0 / 0 |
+| PASS count / rate | 1,967 / 2.649% of 74,250 turns |
+| Stall triggers / actions | 35 / 35 |
+| Stall completed / normal-action aborts | 28 / 7 |
+| Maximum consecutive would-PASS | 49 |
+| Live-cost prevented invalid builds | 0 |
+| Defense actions | 827 |
+| Castle actions / castles completed | 53 / 53 |
+
+Mean candidate land was **17.04 @50 (100 games), 37.75 @100 (100), 55.70
+@150 (100), and 72.72 @200 (99)**. Fourteen games had land100 below 30,
+twelve had PASS rate above 5%, and twelve met both conditions. Eleven of the
+twelve combined-condition games were losses.
+
+The prior fresh Phase-2 reference had **17 of 41 losses** meeting the combined
+early-stall condition. The new phase has **11 of 37 losses**, a reduction of
+six such losses in absolute count and from 41.5% to 29.7% as a share of losses.
+This is consistent with the narrow recovery reducing the targeted failure
+mode while the overall score remains at the acceptable threshold. It is not a
+tactical-cause classification: the artifact must be preserved and the 37
+losses audited before any tactical code is changed.
+
+### DIAGNOSTIC REPLAY / USED SEEDS
+
+Actions run `31951877460` tested the already-used `21800..21819` and
+`21850..21899` ranges at SHA
+`357401b9590fb62e3ff0dedd4c8635d9058fb71f`. It completed successfully, so
+both phases had zero errors and zero illegal actions and seed 21891 was
+technically clean in this replay. This supports the live-cost fix's technical
+effect, but it is **not fresh validation**, contributes no games or telemetry
+to the `220xx` tables above, and is not used to assess the recovery score.
+
+No seed in `21900..21904` or the protected final-heldout range
+`30000..30499` was used for this validation. No submission archive was
+created, and no gameplay was changed after either phase.
