@@ -17,6 +17,12 @@ int main(){
  // Favorable ordinary conquest is explicit; losing head-on combat is never selected.
  {Agent a(0,21,21);auto o=board();o.owner[40]=1;o.army[40]=20;o.owner[41]=2;o.army[41]=5;for(int z:{19,39,61})o.owner[z]=1,o.army[z]=1;auto q=a.decide(o);assert(q.kind==0&&src(q)==40&&dst(q)==41);}
  {Agent a(0,21,21);auto o=board();o.owner[40]=1;o.army[40]=5;o.owner[41]=2;o.army[41]=20;for(int z:{19,39,61})o.owner[z]=1,o.army[z]=1;auto q=a.decide(o);assert(!(q.kind==0&&src(q)==40&&dst(q)==41));}
+ // A real adjacent-general threat is intercepted by the minimum winning stack.
+ {Agent a(0,21,21);auto o=board();o.army[220]=5;o.owner[219]=2;o.army[219]=10;o.owner[218]=1;o.army[218]=12;o.owner[198]=1;o.army[198]=25;auto q=a.decide(o);assert(q.kind==0&&src(q)==218&&dst(q)==219);}
+ // An insufficient interceptor is not forced, and a remote garrison is not a threat.
+ {Agent a(0,21,21);auto o=board();o.owner[219]=2;o.army[219]=10;o.owner[218]=1;o.army[218]=10;auto q=a.decide(o);assert(!(q.kind==0&&src(q)==218&&dst(q)==219));}
+ // Immediate terminal capture remains above an emergency intercept.
+ {Agent a(0,21,21);auto o=board();o.army[220]=5;o.owner[219]=2;o.army[219]=10;o.owner[218]=1;o.army[218]=12;o.type[41]=4;o.owner[41]=2;o.army[41]=2;o.owner[40]=1;o.army[40]=5;auto q=a.decide(o);assert(q.kind==0&&src(q)==40&&dst(q)==41);}
  // A useful owned-territory consolidation replaces the old scheduler PASS.
  {Agent a(0,21,21);auto o=board();for(int x=0;x<441;++x)if(o.type[x]!=4)o.owner[x]=1,o.army[x]=1;o.owner[0]=2;o.army[0]=1;o.army[221]=14;o.my_land=440;o.my_army=454;o.opp_land=1;o.opp_army=1;auto q=a.decide(o);assert(q.kind==0);assert(a.action_stats().passes==0);}
  // Distant static territory is intelligence, not contact/front/war.
