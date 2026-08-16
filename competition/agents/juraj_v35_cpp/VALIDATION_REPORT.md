@@ -669,17 +669,71 @@ full-state traces/loss forensics when the gate passes. No seed in
 
 ### Results
 
-Results pending execution of the validation workflow. No local partial run is
-reported as a fresh measurement.
+Workflow execution `31971238087` validated commit
+`79cc3bd65b3dfa7d7944c3e85d7f23cc452853de` successfully. Phase 1 cleared the
+54% continuation gate, so Phase 2 ran automatically. Both phases had zero
+errors and zero illegal actions.
 
 | Evidence | Phase 1 | Phase 2 | Health |
 |---|---:|---:|---|
 | Old fresh pre-fix | 56.25% | 56.0% | Phase 2 had 3 illegal actions |
 | Recovery candidate | 56.25% | 54.0% | clean |
 | New candidate USED 220xx | 58.75% | 62.0% | clean; diagnostic only |
-| New candidate FRESH 221xx | pending | gated/pending | pending |
+| **New candidate FRESH 221xx** | **60.0%** | **70.0%** | **clean** |
 
-Phase results, seat split, paired CI, timing, land/PASS, threat, escape, castle,
-defense telemetry, and fresh Phase-2 loss-class counts will be copied verbatim
-from the uploaded JSON artifact after the workflow completes. Gameplay will not
-be changed in response to the result.
+#### Fresh Phase 1 (`22100..22119`)
+
+- **21 W / 6 D / 13 L; score 60.0%.**
+- Seat 0: 55.0%; seat 1: 65.0%; paired 95% bootstrap CI:
+  **[48.75%, 70.03%]**.
+- Errors: 0; illegal actions: 0; mean game length: 797.025 turns.
+- Decision timing (median per-game percentiles): p50 1.033 ms, p95 1.090 ms,
+  p99 1.136 ms, max 12.594 ms.
+- PASS: 1,419 / 31,881 turns (4.451%).
+- Mean land: 15.575 @50; 34.325 @100; 53.675 @150; 72.538 @200
+  (39 games reached turn 200; all 40 reached earlier snapshots).
+- Threat response: 27 winning intercepts, 34 local blocks, 6 race wins selected,
+  200 general reinforcements, 245 plans created, 232 released, and 261 incoming
+  threat observations.
+- Stall escape: 9 severe stalls detected, 9 escapes started, 87 escape actions,
+  67 land gained, and 9 successful escapes.
+- Castles: 31 castle actions and 31 completed castles; 0 invalid live-cost builds
+  prevented. Defense actions: 261.
+
+#### Fresh Phase 2 (`22150..22199`)
+
+- **67 W / 6 D / 27 L; score 70.0%.** This is an excellent generalization
+  result under the predeclared interpretation bands.
+- Seat 0: 68.0%; seat 1: 72.0%; paired 95% bootstrap CI: **[60.5%, 79.0%]**.
+- Errors: 0; illegal actions: 0; mean game length: 716.3 turns.
+- Decision timing (median per-game percentiles): p50 1.041 ms, p95 1.108 ms,
+  p99 1.164 ms, max 12.820 ms.
+- PASS: 2,742 / 71,630 turns (3.828%).
+- Mean land: 16.47 @50; 36.76 @100; 56.35 @150; 76.95 @200 (all 100 games).
+- Threat response: 76 winning intercepts, 107 local blocks, 6 race wins selected,
+  438 general reinforcements, 587 plans created, 560 released, and 621 incoming
+  threat observations.
+- Stall escape: 18 severe stalls detected, 18 escapes started, 168 escape
+  actions, 113 land gained, and 17 successful escapes.
+- Castles: 73 castle actions and 73 completed castles; 0 invalid live-cost builds
+  prevented. Defense actions: 621.
+
+#### Fresh Phase-2 loss modes
+
+The existing conservative full-state forensic classifier assigned all 27 losses:
+
+| Class | Old USED pre-fix (`22050..22099`) | New FRESH (`22150..22199`) |
+|---|---:|---:|
+| EARLY_STALL | 11 | 12 |
+| INTERCEPT_AVAILABLE_NOT_USED | 10 | 4 |
+| DEFENSE_UNDERCOMMITTED | 14 | 11 |
+| MISSED_COUNTERATTACK | included in old other | 0 |
+| ECONOMICALLY_OUTPLAYED | included in old other | 0 |
+| OTHER | 2 | 0 |
+
+These loss counts are descriptive and were not used to tune gameplay. USED
+220xx and FRESH 221xx percentages remain separate; no pooled headline score is
+reported. The complete 5.64 MB artifact, including audits, telemetry, source
+identity, Phase-2 traces, and forensic JSON, is retained as
+`v35-fresh-221xx-validation` with SHA-256
+`3db09b79fe4a0ef4d36e767e3e8b80f63bd70c4e810adfb328159f50706b0278`.
