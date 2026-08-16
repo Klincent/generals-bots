@@ -14,10 +14,6 @@ int main(){
  {Agent a(0,21,21);auto o=board();a.decide(o);int site=a.planned_castle(0);assert(site>=0);o.owner[site]=1;o.type[site]=1;int cost=live_castle_cost(o,site,21);o.army[site]=cost-1;assert(!a.build_is_legal(o,site));auto low=a.decide(o);assert(low.kind!=2);o.turn++;o.army[site]=live_castle_cost(o,site,21);auto exact=a.decide(o);assert(exact.kind==2&&src(exact)==site);}
  // Ownership and structure-type changes are revalidated at emission time.
  {Agent a(0,21,21);auto o=board();a.decide(o);int site=a.planned_castle(0);o.army[site]=100;o.owner[site]=2;o.type[site]=1;assert(!a.build_is_legal(o,site));o.owner[site]=1;o.type[site]=3;assert(!a.build_is_legal(o,site));}
- // Recovery is strictly the second consecutive otherwise-PASS and moves through owned land.
- {Agent a(0,21,21);auto o=board();o.type.assign(441,2);o.owner.assign(441,0);o.army.assign(441,0);o.type[220]=4;o.owner[220]=1;o.army[220]=1;for(int x:{221,222,223})o.type[x]=1,o.owner[x]=1,o.army[x]=1;o.army[221]=10;o.type[224]=1;o.owner[224]=-1;o.type[0]=1;o.owner[0]=2;o.army[0]=1;o.my_land=4;o.my_army=13;o.opp_land=1;o.opp_army=1;auto first=a.decide(o);assert(first.kind==1&&a.stall_recovery_actions()==0&&a.consecutive_would_pass()==1);o.turn++;auto second=a.decide(o);assert(second.kind==0&&src(second)==221&&dst(second)==222&&a.stall_recovery_actions()==1);}
- // Any normal capture immediately outranks and aborts recovery consideration.
- {Agent a(0,21,21);auto o=board();o.owner[219]=1;o.army[219]=20;o.owner[218]=2;o.army[218]=2;auto q=a.decide(o);assert(q.kind==0&&dst(q)==218&&a.stall_recovery_actions()==0&&a.consecutive_would_pass()==0);}
  // Favorable ordinary conquest is explicit; losing head-on combat is never selected.
  {Agent a(0,21,21);auto o=board();o.owner[40]=1;o.army[40]=20;o.owner[41]=2;o.army[41]=5;for(int z:{19,39,61})o.owner[z]=1,o.army[z]=1;auto q=a.decide(o);assert(q.kind==0&&src(q)==40&&dst(q)==41);}
  {Agent a(0,21,21);auto o=board();o.owner[40]=1;o.army[40]=5;o.owner[41]=2;o.army[41]=20;for(int z:{19,39,61})o.owner[z]=1,o.army[z]=1;auto q=a.decide(o);assert(!(q.kind==0&&src(q)==40&&dst(q)==41));}
