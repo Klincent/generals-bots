@@ -1,0 +1,98 @@
+name: V3.5 materialize defense-only candidate
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [v35-defense-fresh]
+    paths:
+      - '.github/workflows/v35-defense-materialize.yml'
+
+permissions:
+  contents: write
+
+env:
+  CHAMPION_SHA: 4f0fac768a8fc4479d45347a3ecbdbfedd6aef05
+
+jobs:
+  materialize:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: v35-defense-fresh
+
+      - name: Prove clean champion gameplay base
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in main.cpp core.hpp build.sh run.sh test.sh test_core.cpp test_agent.cpp; do
+            cmp "competition/agents/juraj_v35_cpp/$f" <(git show "$CHAMPION_SHA:competition/agents/juraj_v35_cpp/$f")
+          done
+          ! grep -q 'castle_opportunity_' competition/agents/juraj_v35_cpp/main.cpp
+          ! grep -q 'castle_target_' competition/agents/juraj_v35_cpp/main.cpp
+          ! grep -q 'CastleOpportunity' competition/agents/juraj_v35_cpp/core.hpp
+
+      - name: Apply exactly defense-only gameplay delta
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('competition/agents/juraj_v35_cpp/main.cpp')
+          s = p.read_text()
+          changes = [
+              (
+                  '(moving&&eta<=5&&o.army[x]>=6)',
+                  '(moving&&eta<=6&&o.army[x]>=6&&last_army_[x]<=o.army[x]+2)',
+                  'defense threat horizon',
+              ),
+              (
+                  'if(dx<primary_eta&&o.army[x]-1>o.army[primary_threat])',
+                  'if(dx<=primary_eta&&o.army[x]-1>o.army[primary_threat])',
+                  'defense blocker timing',
+              ),
+          ]
+          for old, new, label in changes:
+              if s.count(old) != 1:
+                  raise SystemExit(f'{label}: expected one old form')
+              if new in s:
+                  raise SystemExit(f'{label}: new form already present')
+              s = s.replace(old, new, 1)
+          p.write_text(s)
+          for old, new, label in changes:
+              if old in s or s.count(new) != 1:
+                  raise SystemExit(f'{label}: post-patch identity failure')
+          forbidden = ('castle_opportunity_', 'castle_target_', 'CastleOpportunity')
+          for token in forbidden:
+              if token in s:
+                  raise SystemExit(f'forbidden dynamic-castle token: {token}')
+          PY
+
+          git diff --check
+          git diff -- competition/agents/juraj_v35_cpp/main.cpp
+          test "$(git diff --name-only "$CHAMPION_SHA" -- competition/agents/juraj_v35_cpp | tr '\n' ' ')" = "competition/agents/juraj_v35_cpp/main.cpp "
+
+      - name: Fast suite and build
+        shell: bash
+        run: |
+          set -euo pipefail
+          competition/agents/juraj_v35_cpp/test.sh
+          competition/agents/juraj_v35_cpp/build.sh
+          test -x competition/agents/juraj_v35_cpp/agent
+          rm -f competition/agents/juraj_v35_cpp/agent competition/agents/juraj_v35_cpp/test_core competition/agents/juraj_v35_cpp/test_agent
+          git status --short
+
+      - name: Commit immutable gameplay candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add competition/agents/juraj_v35_cpp/main.cpp
+          test "$(git diff --cached --name-only)" = "competition/agents/juraj_v35_cpp/main.cpp"
+          git commit -m 'v35: harden defense threat response'
+          git push origin HEAD:v35-defense-fresh
+          echo "GAMEPLAY_COMMIT=$(git rev-parse HEAD)"
+          sha256sum competition/agents/juraj_v35_cpp/main.cpp
