@@ -1,0 +1,123 @@
+name: V3.5 champion same-seed control 22350
+
+on:
+  push:
+    branches: [v35-defense-fresh]
+    paths:
+      - '.github/workflows/v35-champion-control-22350.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  SDL_VIDEODRIVER: dummy
+  CHAMPION_SHA: 4f0fac768a8fc4479d45347a3ecbdbfedd6aef05
+  DEFENSE_SHA: 092781e08dd75bb88d20d745f445626301704b3b
+  BASELINE_SHA: 2ed9e8bbcf76b36c5276013afc356118fccc8b6e
+  DEFENSE_SCORE_SAME_SEEDS: '0.55'
+
+jobs:
+  control:
+    name: Champion control — 22350..22399
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Prove benchmark harness identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmp competition/agents/juraj_v35_cpp/paired_benchmark.py <(git show "$CHAMPION_SHA":competition/agents/juraj_v35_cpp/paired_benchmark.py)
+          echo "benchmark_sha256=$(sha256sum competition/agents/juraj_v35_cpp/paired_benchmark.py | awk '{print $1}')"
+
+      - name: Materialize exact champion and exact V3.4
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .control-champion .control-v34 control-22350
+          mkdir -p .control-champion .control-v34 control-22350
+          git archive "$CHAMPION_SHA" competition/agents/juraj_v35_cpp | tar -x -C .control-champion
+          git archive "$BASELINE_SHA" competition/agents/juraj_cpp | tar -x -C .control-v34
+          {
+            echo "champion_sha=$CHAMPION_SHA"
+            echo "defense_candidate_sha=$DEFENSE_SHA"
+            echo "baseline_sha=$BASELINE_SHA"
+            echo 'seeds=22350..22399'
+            echo 'defense_score_same_seeds=0.55'
+            echo 'final_holdout_untouched=30000..30499'
+          } | tee control-22350/MANIFEST.txt
+
+      - name: Build exact agents
+        shell: bash
+        run: |
+          set -euo pipefail
+          .control-champion/competition/agents/juraj_v35_cpp/test.sh
+          .control-champion/competition/agents/juraj_v35_cpp/build.sh
+          .control-v34/competition/agents/juraj_cpp/build.sh
+          test -x .control-champion/competition/agents/juraj_v35_cpp/agent
+          test -x .control-v34/competition/agents/juraj_cpp/agent
+
+      - name: Install benchmark engine
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy jax jaxlib
+          python -m pip install -e . --no-deps
+
+      - name: Same-seed champion benchmark
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python competition/agents/juraj_v35_cpp/paired_benchmark.py \
+            --candidate .control-champion/competition/agents/juraj_v35_cpp/run.sh \
+            --baseline .control-v34/competition/agents/juraj_cpp/run.sh \
+            --start 22350 --seeds 50 --output control-22350
+
+      - name: Health check and causal comparison
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          s=json.loads(Path('control-22350/summary.json').read_text())
+          assert s['games']==100 and s['maps']==50, s
+          assert s['seed_start']==22350 and s['seed_end']==22399, s
+          assert s['errors']==0 and s['illegal_actions']==0, s
+          champion=float(s['score'])
+          defense=float(os.environ['DEFENSE_SCORE_SAME_SEEDS'])
+          delta=defense-champion
+          if delta >= .05: verdict='DEFENSE CLEARLY BETTER ON SAME SEEDS'
+          elif delta >= .02: verdict='DEFENSE MODESTLY BETTER ON SAME SEEDS'
+          elif delta > -.02: verdict='EFFECT ESSENTIALLY NEUTRAL ON SAME SEEDS'
+          elif delta > -.05: verdict='DEFENSE MODESTLY WORSE ON SAME SEEDS'
+          else: verdict='DEFENSE CLEARLY WORSE ON SAME SEEDS'
+          lines=[
+            '# V3.5 champion same-seed causal control','',
+            f"Seeds: **22350..22399** — {s['maps']} maps / {s['games']} games",
+            f"Champion `{os.environ['CHAMPION_SHA']}` W/D/L: **{s['W']}/{s['D']}/{s['L']}**",
+            f"Champion score: **{100*champion:.2f}%**",
+            f"Champion seat0/seat1: **{100*s['seat_score']['0']:.2f}% / {100*s['seat_score']['1']:.2f}%**",
+            f"Champion CI95: **[{100*s['paired_ci95'][0]:.2f}%, {100*s['paired_ci95'][1]:.2f}%]**",
+            f"Champion errors/illegal: **{s['errors']}/{s['illegal_actions']}**",'',
+            f"Defense-only `{os.environ['DEFENSE_SHA']}` score on the exact same seeds: **{100*defense:.2f}%**",
+            f"Defense-only minus champion: **{100*delta:+.2f} percentage points**",
+            f"Causal verdict: **{verdict}**",'',
+            '```json',json.dumps(s,indent=2,sort_keys=True),'```']
+          Path('control-22350/REPORT.md').write_text('\n'.join(lines)+'\n')
+          print('\n'.join(lines[:12]))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v35-champion-control-22350
+          path: control-22350/
+          if-no-files-found: error
