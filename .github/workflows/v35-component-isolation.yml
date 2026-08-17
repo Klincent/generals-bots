@@ -1,0 +1,172 @@
+name: V3.5 non-castle component isolation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [v35-heuristic-rebuild]
+    paths:
+      - '.github/workflows/v35-component-isolation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  isolate:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        variant:
+          - champion
+          - opening
+          - defense
+          - conversion
+          - opening-defense
+          - opening-conversion
+          - defense-conversion
+          - all3
+    name: isolate (${{ matrix.variant }})
+    env:
+      SDL_VIDEODRIVER: dummy
+      CHAMPION_SHA: 4f0fac768a8fc4479d45347a3ecbdbfedd6aef05
+      BASELINE_SHA: 2ed9e8bbcf76b36c5276013afc356118fccc8b6e
+      VARIANT: ${{ matrix.variant }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Materialize exact champion and exact V3.4
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .iso-candidate .iso-v34
+          mkdir -p .iso-candidate .iso-v34
+          git archive "$CHAMPION_SHA" competition/agents/juraj_v35_cpp | tar -x -C .iso-candidate
+          git archive "$BASELINE_SHA" competition/agents/juraj_cpp | tar -x -C .iso-v34
+          cp .iso-candidate/competition/agents/juraj_v35_cpp/main.cpp /tmp/champion-main.cpp
+          sha256sum \
+            .iso-candidate/competition/agents/juraj_v35_cpp/main.cpp \
+            .iso-candidate/competition/agents/juraj_v35_cpp/core.hpp \
+            .iso-candidate/competition/agents/juraj_v35_cpp/build.sh \
+            .iso-candidate/competition/agents/juraj_v35_cpp/run.sh
+
+      - name: Apply only requested non-castle layer(s)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os
+          from pathlib import Path
+
+          p = Path('.iso-candidate/competition/agents/juraj_v35_cpp/main.cpp')
+          s = p.read_text()
+          variant = os.environ['VARIANT']
+
+          def repl(old, new, label):
+              global s
+              n = s.count(old)
+              if n != 1:
+                  raise SystemExit(f'{label}: expected exactly one match, got {n}')
+              s = s.replace(old, new, 1)
+
+          def opening():
+              repl(
+                  'double u=100-o.army[y]*12+g_.degree(y)*5+(until<=8?30:0);',
+                  'int fresh_frontier=0;for(int nd=0;nd<4;++nd){int z=g_.neighbor(y,nd);fresh_frontier+=z>=0&&o.owner[z]==0;}double u=100-o.army[y]*14+g_.degree(y)*5+fresh_frontier*9+(until<=8?30:0)-(o.owner[x]==1&&g_.degree(x)>2?0:4);',
+                  'opening frontier scoring')
+              repl(
+                  'bool severe=o.turn>=60&&o.turn<=180&&o.my_land<=10&&stall_window_.size()>=20&&o.my_land-window_min_land<=2&&window_pass>=5;',
+                  'double land_trajectory=slope(land_hist_,20);bool severe=o.turn>=50&&o.turn<=180&&o.my_land<=12&&stall_window_.size()>=20&&o.my_land-window_min_land<=3&&land_trajectory<.12&&window_pass>=4;',
+                  'opening stall detector')
+
+          def defense():
+              repl(
+                  '(moving&&eta<=5&&o.army[x]>=6)',
+                  '(moving&&eta<=6&&o.army[x]>=6&&last_army_[x]<=o.army[x]+2)',
+                  'defense threat horizon')
+              repl(
+                  'if(dx<primary_eta&&o.army[x]-1>o.army[primary_threat])',
+                  'if(dx<=primary_eta&&o.army[x]-1>o.army[primary_threat])',
+                  'defense blocker timing')
+
+          def conversion():
+              repl(
+                  'auto b=budget(o.my_army,general_>=0?o.army[general_]:0,c1reserve,c2reserve,confirmed_war,adapt.attack);',
+                  'bool economic_lead=o.my_land>=o.opp_land*3/2&&o.my_army>=o.opp_army*4/3;auto b=budget(o.my_army,general_>=0?o.army[general_]:0,c1reserve,c2reserve,confirmed_war||economic_lead,adapt.attack);',
+                  'conversion economic lead budget')
+              repl(
+                  'std::vector<Candidate>c;for(int x=0;x<n_;++x)if(source(o,x))',
+                  'bool advantage=o.my_land>=o.opp_land*3/2&&o.my_army>=o.opp_army*4/3;std::vector<Candidate>c;for(int x=0;x<n_;++x)if(source(o,x))',
+                  'conversion advantage state')
+              repl(
+                  'if(confirmed_war&&b.war>0)c.push_back({2,x,y,0,double(surplus)/std::max(1,g_.dist[x][target]),Reason::WAR_MOBILIZATION,false,ActionClass::LOGISTICS,target,front?front->id:-1,PacketRole::FRONT});',
+                  'if((confirmed_war||advantage)&&b.war>0)c.push_back({advantage&&belief_.confirmed()?1:2,x,y,0,double(surplus)*(advantage?2.:1.)/std::max(1,g_.dist[x][target]),belief_.confirmed()?Reason::GENERAL_DISCOVERED:Reason::WAR_MOBILIZATION,false,ActionClass::LOGISTICS,target,front?front->id:-1,PacketRole::FRONT});',
+                  'conversion pressure routing')
+
+          if variant in ('opening','opening-defense','opening-conversion','all3'):
+              opening()
+          if variant in ('defense','opening-defense','defense-conversion','all3'):
+              defense()
+          if variant in ('conversion','opening-conversion','defense-conversion','all3'):
+              conversion()
+
+          p.write_text(s)
+          print('variant=', variant)
+          PY
+
+          # Prove that the catastrophic dynamic-castle rewrite is absent.
+          ! grep -q 'castle_opportunity_' .iso-candidate/competition/agents/juraj_v35_cpp/main.cpp
+          ! grep -q 'castle_target_' .iso-candidate/competition/agents/juraj_v35_cpp/main.cpp
+          ! grep -q 'CastleOpportunity' .iso-candidate/competition/agents/juraj_v35_cpp/core.hpp
+
+          # Non-main gameplay files must be byte-identical to the champion.
+          cmp .iso-candidate/competition/agents/juraj_v35_cpp/core.hpp <(git show "$CHAMPION_SHA":competition/agents/juraj_v35_cpp/core.hpp)
+          cmp .iso-candidate/competition/agents/juraj_v35_cpp/build.sh <(git show "$CHAMPION_SHA":competition/agents/juraj_v35_cpp/build.sh)
+          cmp .iso-candidate/competition/agents/juraj_v35_cpp/run.sh <(git show "$CHAMPION_SHA":competition/agents/juraj_v35_cpp/run.sh)
+
+          echo 'Candidate diff from champion:'
+          diff -u /tmp/champion-main.cpp .iso-candidate/competition/agents/juraj_v35_cpp/main.cpp || true
+
+      - name: Build candidates
+        shell: bash
+        run: |
+          set -euo pipefail
+          .iso-candidate/competition/agents/juraj_v35_cpp/build.sh
+          .iso-v34/competition/agents/juraj_cpp/build.sh
+
+      - name: Install benchmark engine
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy jax jaxlib
+          python -m pip install -e . --no-deps
+
+      - name: Reused-seed component benchmark
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="component-isolation/$VARIANT"
+          mkdir -p "$OUT"
+          PYTHONPATH=. python competition/agents/juraj_v35_cpp/paired_benchmark.py \
+            --candidate .iso-candidate/competition/agents/juraj_v35_cpp/run.sh \
+            --baseline .iso-v34/competition/agents/juraj_cpp/run.sh \
+            --start 22200 --seeds 20 --output "$OUT" --diagnostics
+          python - <<'PY'
+          import json, os
+          p=f"component-isolation/{os.environ['VARIANT']}/summary.json"
+          s=json.load(open(p))
+          print('COMPONENT_ISOLATION', os.environ['VARIANT'], json.dumps(s, sort_keys=True))
+          assert s['errors']==0
+          assert s['illegal_actions']==0
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v35-component-${{ matrix.variant }}
+          path: component-isolation/${{ matrix.variant }}/
+          if-no-files-found: error
