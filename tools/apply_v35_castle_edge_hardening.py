@@ -22,18 +22,19 @@ c = repl(c, 'if(eligible(a,150))', 'if(eligible(a,160))', 'C1 planning deadline 
 m = repl(m, 'forecast(o.turn,150,cost1', 'forecast(o.turn,160,cost1', 'C1 forecast deadline 160')
 m = repl(m, 'if(o.turn>150&&castle_build_[0]<0)', 'if(o.turn>175&&castle_build_[0]<0)', 'C1 hard miss boundary 175')
 
-# From turn 120 the planned C1 route is no longer optional.  Emergency defense
-# (tier 0) still outranks it; ordinary expansion/search/logistics do not.  Once
-# the site is funded we allow the build from 145 onward, with the practical aim
-# of landing it around turn 155-165 instead of drifting past 200.
+# From turn 120 the planned C1 route is no longer optional. Emergency defense
+# remains tier 0, but once C1 is legally buildable its build action is promoted
+# to tier 0 with utility 7500: below terminal capture / direct reaction / choke
+# interception, but above ordinary funding, expansion, search and logistics.
+# This prevents a C1 funding move from beating the actual build on the same turn.
 old_castle = '''for(auto [site,f,index]:{std::tuple{castles_.c1,f1,0},std::tuple{castles_.c2,f2,1}})if(site>=0&&castle_state_[index]!=CastleState::BUILT&&(index==0||castle_state_[0]==CastleState::BUILT)){if(legal_build(o,site))c.push_back({1,site,site,2,100,Reason::CASTLE_DEADLINE,false,ActionClass::HARD,site,-1,index?PacketRole::CASTLE_C2:PacketRole::CASTLE_C1});else if(f.must_fund)for(int x=0;x<n_;++x)if(source(o,x)){int y=tactical_next(o,x,site);if(y>=0)c.push_back({1,x,y,0,double(o.army[x])/std::max(1,g_.dist[x][site]),Reason::CASTLE_DEADLINE,false,ActionClass::HARD,site,-1,index?PacketRole::CASTLE_C2:PacketRole::CASTLE_C1});}}'''
-new_castle = '''for(auto [site,f,index]:{std::tuple{castles_.c1,f1,0},std::tuple{castles_.c2,f2,1}})if(site>=0&&castle_state_[index]!=CastleState::BUILT&&(index==0||castle_state_[0]==CastleState::BUILT)){bool c1=index==0,build_window=!c1||o.turn>=145,force_c1=c1&&o.turn>=120&&o.turn<=175;if(legal_build(o,site)&&build_window)c.push_back({1,site,site,2,c1?500.:100.,Reason::CASTLE_DEADLINE,false,ActionClass::HARD,site,-1,index?PacketRole::CASTLE_C2:PacketRole::CASTLE_C1});else if(f.must_fund||force_c1)for(int x=0;x<n_;++x)if(source(o,x)){int y=tactical_next(o,x,site);if(y>=0)c.push_back({1,x,y,0,(force_c1?500.:0.)+double(o.army[x])/std::max(1,g_.dist[x][site]),Reason::CASTLE_DEADLINE,false,ActionClass::HARD,site,-1,index?PacketRole::CASTLE_C2:PacketRole::CASTLE_C1});}}'''
-m = repl(m, old_castle, new_castle, 'C1 forced acquisition/funding window')
+new_castle = '''for(auto [site,f,index]:{std::tuple{castles_.c1,f1,0},std::tuple{castles_.c2,f2,1}})if(site>=0&&castle_state_[index]!=CastleState::BUILT&&(index==0||castle_state_[0]==CastleState::BUILT)){bool c1=index==0,build_window=!c1||o.turn>=145,force_c1=c1&&o.turn>=120&&o.turn<=175;if(legal_build(o,site)&&build_window)c.push_back({c1?0:1,site,site,2,c1?7500.:100.,Reason::CASTLE_DEADLINE,false,ActionClass::HARD,site,-1,index?PacketRole::CASTLE_C2:PacketRole::CASTLE_C1});else if(f.must_fund||force_c1)for(int x=0;x<n_;++x)if(source(o,x)){int y=tactical_next(o,x,site);if(y>=0)c.push_back({1,x,y,0,(force_c1?500.:0.)+double(o.army[x])/std::max(1,g_.dist[x][site]),Reason::CASTLE_DEADLINE,false,ActionClass::HARD,site,-1,index?PacketRole::CASTLE_C2:PacketRole::CASTLE_C1});}}'''
+m = repl(m, old_castle, new_castle, 'C1 forced acquisition/funding and strict build priority')
 
-# Add explicit two-rally pre-contact edge collection.  Rally points are selected
+# Add explicit two-rally pre-contact edge collection. Rally points are selected
 # deterministically from currently owned interior cells, with the second rally
-# biased to be spatially separated from the first.  Boundary stacks move FULL-1
-# only through owned safe cells toward the nearer rally.  This creates one or
+# biased to be spatially separated from the first. Boundary stacks move FULL-1
+# only through owned safe cells toward the nearer rally. This creates one or
 # two chunks instead of leaving 2/3/4-army crumbs on top/right/bottom/left edges.
 anchor = '''const Front*front=fronts_.primary();int sink=belief_.confirmed()?belief_.confirmed_cell():(front?front->anchor:belief_.top());for(int x=0;x<n_;++x)if(source(o,x)){int surplus=o.army[x]-reserve(o,x);if(surplus<=0)continue;int edge=std::min({x/w_,h_-1-x/w_,x%w_,w_-1-x%w_});bool rear=edge<=1||g_.degree(x)<=1;int target=sink==x?general_:sink,y=target>=0?tactical_next(o,x,target):-1;if(y<0)continue;if(confirmed_war&&b.war>0)c.push_back({2,x,y,0,double(surplus)/std::max(1,g_.dist[x][target]),Reason::WAR_MOBILIZATION,false,ActionClass::LOGISTICS,target,front?front->id:-1,PacketRole::FRONT});else if(rear&&b.free+b.search>0)c.push_back({2,x,y,0,double(surplus),Reason::REAR_EVACUATION,false,ActionClass::LOGISTICS,target,-1,PacketRole::FREE_SURPLUS_RELOCATION});else if(!enemy_seen&&b.search>0)c.push_back({3,x,y,0,double(surplus)/std::max(1,g_.dist[x][target]),Reason::SEARCH_PROGRESS,false,ActionClass::SEARCH,target,-1,PacketRole::SEARCH});}'''
 replacement = '''const Front*front=fronts_.primary();int sink=belief_.confirmed()?belief_.confirmed_cell():(front?front->anchor:belief_.top());
@@ -43,7 +44,7 @@ m = repl(m, anchor, replacement, 'two-rally edge consolidation')
 
 # When edge collection candidates exist before contact, give logistics enough
 # scheduler share to actually execute them; the expansion starvation guard and
-# all tier-0/tier-1 tactical/castle actions remain authoritative.
+# all hard tactical/castle actions remain authoritative.
 old_share = '''bool expansion_available=std::any_of(filtered.begin(),filtered.end(),[](auto&q){return q.action_class==ActionClass::EXPANSION;});std::array<double,5>share{{0,confirmed_war?.30:.12,production_==ProductionState::SEVERE_DEFICIT?.62:production_==ProductionState::SOFT_DEFICIT?.45:.35,!enemy_seen?.20:.08,confirmed_war?.22:.15}};'''
 new_share = '''bool expansion_available=std::any_of(filtered.begin(),filtered.end(),[](auto&q){return q.action_class==ActionClass::EXPANSION;});bool edge_pull_available=!enemy_seen&&std::any_of(filtered.begin(),filtered.end(),[](auto&q){return q.reason==Reason::REAR_EVACUATION&&q.action_class==ActionClass::LOGISTICS;});double logistics_share=edge_pull_available?.32:(confirmed_war?.22:.15);std::array<double,5>share{{0,confirmed_war?.30:.12,production_==ProductionState::SEVERE_DEFICIT?.62:production_==ProductionState::SOFT_DEFICIT?.45:.35,!enemy_seen?.20:.08,logistics_share}};'''
 m = repl(m, old_share, new_share, 'pre-contact logistics scheduler share')
