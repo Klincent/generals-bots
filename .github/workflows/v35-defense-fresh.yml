@@ -13,6 +13,8 @@ permissions:
 env:
   SDL_VIDEODRIVER: dummy
   CHAMPION_SHA: 4f0fac768a8fc4479d45347a3ecbdbfedd6aef05
+  CANDIDATE_SHA: 092781e08dd75bb88d20d745f445626301704b3b
+  CANDIDATE_MAIN_SHA256: b481ee490d9e4cdc80d2c14ce2e580b4c36e0b22f3e732685ba0f4ee7016fb27
   BASELINE_SHA: 2ed9e8bbcf76b36c5276013afc356118fccc8b6e
 
 jobs:
@@ -22,7 +24,6 @@ jobs:
     timeout-minutes: 45
     outputs:
       continue: ${{ steps.gate.outputs.continue }}
-      candidate_sha256: ${{ steps.identity.outputs.candidate_sha256 }}
       score: ${{ steps.gate.outputs.score }}
     steps:
       - uses: actions/checkout@v4
@@ -33,92 +34,56 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Materialize exact champion and exact V3.4
+      - name: Prove exact immutable candidate identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t changed < <(git diff --name-only "$CHAMPION_SHA" "$CANDIDATE_SHA" -- competition/agents/juraj_v35_cpp)
+          test "${#changed[@]}" -eq 1
+          test "${changed[0]}" = 'competition/agents/juraj_v35_cpp/main.cpp'
+
+          git diff --check "$CHAMPION_SHA" "$CANDIDATE_SHA" -- competition/agents/juraj_v35_cpp/main.cpp
+          git diff "$CHAMPION_SHA" "$CANDIDATE_SHA" -- competition/agents/juraj_v35_cpp/main.cpp | tee /tmp/defense-only.patch
+
+          git show "$CANDIDATE_SHA":competition/agents/juraj_v35_cpp/main.cpp | grep -Fq '(moving&&eta<=6&&o.army[x]>=6&&last_army_[x]<=o.army[x]+2)'
+          git show "$CANDIDATE_SHA":competition/agents/juraj_v35_cpp/main.cpp | grep -Fq 'if(dx<=primary_eta&&o.army[x]-1>o.army[primary_threat])'
+          ! git show "$CANDIDATE_SHA":competition/agents/juraj_v35_cpp/main.cpp | grep -Fq '(moving&&eta<=5&&o.army[x]>=6)'
+          ! git show "$CANDIDATE_SHA":competition/agents/juraj_v35_cpp/main.cpp | grep -Fq 'if(dx<primary_eta&&o.army[x]-1>o.army[primary_threat])'
+          ! git show "$CANDIDATE_SHA":competition/agents/juraj_v35_cpp/main.cpp | grep -Eq 'castle_opportunity_|castle_target_'
+          ! git show "$CANDIDATE_SHA":competition/agents/juraj_v35_cpp/core.hpp | grep -Fq 'CastleOpportunity'
+
+      - name: Materialize candidate and exact V3.4 baseline
         shell: bash
         run: |
           set -euo pipefail
           rm -rf .fresh-candidate .fresh-v34 fresh-validation
           mkdir -p .fresh-candidate .fresh-v34 fresh-validation/phase1 fresh-validation/candidate
-          git archive "$CHAMPION_SHA" competition/agents/juraj_v35_cpp | tar -x -C .fresh-candidate
+          git archive "$CANDIDATE_SHA" competition/agents/juraj_v35_cpp | tar -x -C .fresh-candidate
           git archive "$BASELINE_SHA" competition/agents/juraj_cpp | tar -x -C .fresh-v34
-          cp .fresh-candidate/competition/agents/juraj_v35_cpp/main.cpp /tmp/champion-main.cpp
 
-      - name: Apply exactly defense-only hardening
-        shell: bash
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          from pathlib import Path
-          p = Path('.fresh-candidate/competition/agents/juraj_v35_cpp/main.cpp')
-          s = p.read_text()
-          changes = [
-              (
-                  '(moving&&eta<=5&&o.army[x]>=6)',
-                  '(moving&&eta<=6&&o.army[x]>=6&&last_army_[x]<=o.army[x]+2)',
-                  'defense threat horizon',
-              ),
-              (
-                  'if(dx<primary_eta&&o.army[x]-1>o.army[primary_threat])',
-                  'if(dx<=primary_eta&&o.army[x]-1>o.army[primary_threat])',
-                  'defense blocker timing',
-              ),
-          ]
-          for old, new, label in changes:
-              n = s.count(old)
-              if n != 1:
-                  raise SystemExit(f'{label}: expected exactly one source match, got {n}')
-              if new in s:
-                  raise SystemExit(f'{label}: replacement already present before patch')
-              s = s.replace(old, new, 1)
-          p.write_text(s)
-          for old, new, label in changes:
-              if old in s or s.count(new) != 1:
-                  raise SystemExit(f'{label}: post-patch identity failure')
-          forbidden = ('castle_opportunity_', 'castle_target_', 'CastleOpportunity')
-          for token in forbidden:
-              if token in s:
-                  raise SystemExit(f'forbidden dynamic-castle token present: {token}')
-          print('Applied exactly two defense-only replacements.')
-          PY
-
-          # Everything except main.cpp is byte-identical to the exact champion.
+          MAIN=.fresh-candidate/competition/agents/juraj_v35_cpp/main.cpp
+          test "$(sha256sum "$MAIN" | awk '{print $1}')" = "$CANDIDATE_MAIN_SHA256"
           cmp .fresh-candidate/competition/agents/juraj_v35_cpp/core.hpp <(git show "$CHAMPION_SHA":competition/agents/juraj_v35_cpp/core.hpp)
           cmp .fresh-candidate/competition/agents/juraj_v35_cpp/build.sh <(git show "$CHAMPION_SHA":competition/agents/juraj_v35_cpp/build.sh)
           cmp .fresh-candidate/competition/agents/juraj_v35_cpp/run.sh <(git show "$CHAMPION_SHA":competition/agents/juraj_v35_cpp/run.sh)
-          cmp .fresh-candidate/competition/agents/juraj_v35_cpp/test.sh <(git show "$CHAMPION_SHA":competition/agents/juraj_v35_cpp/test.sh)
-          cmp .fresh-candidate/competition/agents/juraj_v35_cpp/test_core.cpp <(git show "$CHAMPION_SHA":competition/agents/juraj_v35_cpp/test_core.cpp)
-          cmp .fresh-candidate/competition/agents/juraj_v35_cpp/test_agent.cpp <(git show "$CHAMPION_SHA":competition/agents/juraj_v35_cpp/test_agent.cpp)
 
-          diff -u /tmp/champion-main.cpp .fresh-candidate/competition/agents/juraj_v35_cpp/main.cpp > fresh-validation/candidate/defense-only.patch || true
-          cp .fresh-candidate/competition/agents/juraj_v35_cpp/main.cpp fresh-validation/candidate/main.cpp
+          cp /tmp/defense-only.patch fresh-validation/candidate/defense-only.patch
+          cp "$MAIN" fresh-validation/candidate/main.cpp
           cp .fresh-candidate/competition/agents/juraj_v35_cpp/core.hpp fresh-validation/candidate/core.hpp
           cp .fresh-candidate/competition/agents/juraj_v35_cpp/build.sh fresh-validation/candidate/build.sh
           cp .fresh-candidate/competition/agents/juraj_v35_cpp/run.sh fresh-validation/candidate/run.sh
-
-      - name: Candidate identity and manifest
-        id: identity
-        shell: bash
-        run: |
-          set -euo pipefail
-          MAIN=.fresh-candidate/competition/agents/juraj_v35_cpp/main.cpp
-          CORE=.fresh-candidate/competition/agents/juraj_v35_cpp/core.hpp
-          BUILD=.fresh-candidate/competition/agents/juraj_v35_cpp/build.sh
-          RUN=.fresh-candidate/competition/agents/juraj_v35_cpp/run.sh
-          CANDIDATE_SHA=$(sha256sum "$MAIN" | awk '{print $1}')
-          echo "candidate_sha256=$CANDIDATE_SHA" >> "$GITHUB_OUTPUT"
           {
-            echo "base_champion=$CHAMPION_SHA"
-            echo "baseline_v34=$BASELINE_SHA"
-            echo "candidate_main_sha256=$CANDIDATE_SHA"
-            sha256sum "$CORE" "$BUILD" "$RUN"
-            echo "phase1_seeds=22300..22319"
-            echo "phase2_seeds=22350..22399"
-            echo "final_holdout_untouched=30000..30499"
+            echo "champion_sha=$CHAMPION_SHA"
+            echo "candidate_sha=$CANDIDATE_SHA"
+            echo "candidate_main_sha256=$CANDIDATE_MAIN_SHA256"
+            echo "baseline_sha=$BASELINE_SHA"
+            echo 'candidate_delta=exactly two defense-only edits in main.cpp'
+            echo 'phase1_seeds=22300..22319'
+            echo 'phase2_seeds=22350..22399'
+            echo 'final_holdout_untouched=30000..30499'
           } | tee fresh-validation/candidate/MANIFEST.txt
-          echo 'Defense-only patch:'
-          cat fresh-validation/candidate/defense-only.patch
 
-      - name: Build and run C++ fast suite
+      - name: C++ fast suite and builds
         shell: bash
         run: |
           set -euo pipefail
@@ -141,9 +106,9 @@ jobs:
           PYTHONPATH=. python competition/agents/juraj_v35_cpp/paired_benchmark.py \
             --candidate .fresh-candidate/competition/agents/juraj_v35_cpp/run.sh \
             --baseline .fresh-v34/competition/agents/juraj_cpp/run.sh \
-            --start 22300 --seeds 20 --output fresh-validation/phase1 --diagnostics
+            --start 22300 --seeds 20 --output fresh-validation/phase1
 
-      - name: Health gate and Phase 1 report
+      - name: Health gate and report
         id: gate
         shell: bash
         run: |
@@ -151,38 +116,27 @@ jobs:
           python - <<'PY'
           import json, os
           from pathlib import Path
-          p = Path('fresh-validation/phase1/summary.json')
-          s = json.loads(p.read_text())
-          assert s['games'] == 40, s
-          assert s['maps'] == 20, s
-          assert s['seed_start'] == 22300 and s['seed_end'] == 22319, s
-          assert s['errors'] == 0, s
-          assert s['illegal_actions'] == 0, s
-          score = float(s['score'])
-          cont = score >= 0.54
-          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
-              f.write(f'score={score:.6f}\n')
-              f.write(f'continue={str(cont).lower()}\n')
-          report = [
-              '# V3.5 defense-only fresh validation — Phase 1',
-              '',
-              f"- Exact base champion: `{os.environ['CHAMPION_SHA']}`",
-              f"- Exact V3.4 baseline: `{os.environ['BASELINE_SHA']}`",
-              '- Candidate delta: exactly two defense-only replacements',
-              '- Seeds: `22300..22319` (20 maps / 40 paired games)',
-              f"- W/D/L: **{s['W']}/{s['D']}/{s['L']}**",
-              f"- Score: **{100*score:.2f}%**",
-              f"- Seat 0 / Seat 1: **{100*s['seat_score']['0']:.2f}% / {100*s['seat_score']['1']:.2f}%**",
-              f"- Paired CI95: **[{100*s['paired_ci95'][0]:.2f}%, {100*s['paired_ci95'][1]:.2f}%]**",
-              f"- Errors / illegal: **{s['errors']} / {s['illegal_actions']}**",
-              f"- Continue gate (>=54%): **{cont}**",
-              '',
-              '```json',
-              json.dumps(s, indent=2, sort_keys=True),
-              '```',
-          ]
-          Path('fresh-validation/phase1/REPORT.md').write_text('\n'.join(report) + '\n')
-          print('\n'.join(report[:12]))
+          s=json.loads(Path('fresh-validation/phase1/summary.json').read_text())
+          assert s['games']==40 and s['maps']==20, s
+          assert s['seed_start']==22300 and s['seed_end']==22319, s
+          assert s['errors']==0 and s['illegal_actions']==0, s
+          score=float(s['score']); cont=score>=0.54
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:
+              f.write(f'score={score:.6f}\ncontinue={str(cont).lower()}\n')
+          lines=[
+            '# V3.5 defense-only fresh Phase 1','',
+            f"Candidate `{os.environ['CANDIDATE_SHA']}` from champion `{os.environ['CHAMPION_SHA']}`.",
+            'Only the two audited defense edits are present.','',
+            f"Seeds: **22300..22319** — {s['maps']} maps / {s['games']} games",
+            f"W/D/L: **{s['W']}/{s['D']}/{s['L']}**",
+            f"Score: **{100*score:.2f}%**",
+            f"Seat0/Seat1: **{100*s['seat_score']['0']:.2f}% / {100*s['seat_score']['1']:.2f}%**",
+            f"Paired CI95: **[{100*s['paired_ci95'][0]:.2f}%, {100*s['paired_ci95'][1]:.2f}%]**",
+            f"Errors/illegal: **{s['errors']}/{s['illegal_actions']}**",
+            f"Phase2 gate >=54%: **{cont}**",'',
+            '```json',json.dumps(s,indent=2,sort_keys=True),'```']
+          Path('fresh-validation/phase1/REPORT.md').write_text('\n'.join(lines)+'\n')
+          print('\n'.join(lines[:12]))
           PY
 
       - uses: actions/upload-artifact@v4
@@ -207,51 +161,36 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Re-materialize exact candidate and exact V3.4
+      - name: Re-prove and materialize exact candidate
         shell: bash
         run: |
           set -euo pipefail
+          mapfile -t changed < <(git diff --name-only "$CHAMPION_SHA" "$CANDIDATE_SHA" -- competition/agents/juraj_v35_cpp)
+          test "${#changed[@]}" -eq 1
+          test "${changed[0]}" = 'competition/agents/juraj_v35_cpp/main.cpp'
+          ! git show "$CANDIDATE_SHA":competition/agents/juraj_v35_cpp/main.cpp | grep -Eq 'castle_opportunity_|castle_target_'
+          ! git show "$CANDIDATE_SHA":competition/agents/juraj_v35_cpp/core.hpp | grep -Fq 'CastleOpportunity'
+
           rm -rf .fresh-candidate .fresh-v34 fresh-validation
           mkdir -p .fresh-candidate .fresh-v34 fresh-validation/phase2 fresh-validation/candidate
-          git archive "$CHAMPION_SHA" competition/agents/juraj_v35_cpp | tar -x -C .fresh-candidate
+          git archive "$CANDIDATE_SHA" competition/agents/juraj_v35_cpp | tar -x -C .fresh-candidate
           git archive "$BASELINE_SHA" competition/agents/juraj_cpp | tar -x -C .fresh-v34
-          python - <<'PY'
-          from pathlib import Path
-          p = Path('.fresh-candidate/competition/agents/juraj_v35_cpp/main.cpp')
-          s = p.read_text()
-          changes = [
-              ('(moving&&eta<=5&&o.army[x]>=6)', '(moving&&eta<=6&&o.army[x]>=6&&last_army_[x]<=o.army[x]+2)'),
-              ('if(dx<primary_eta&&o.army[x]-1>o.army[primary_threat])', 'if(dx<=primary_eta&&o.army[x]-1>o.army[primary_threat])'),
-          ]
-          for old, new in changes:
-              if s.count(old) != 1 or new in s:
-                  raise SystemExit('defense-only source identity failure')
-              s = s.replace(old, new, 1)
-          if any(t in s for t in ('castle_opportunity_', 'castle_target_', 'CastleOpportunity')):
-              raise SystemExit('forbidden dynamic-castle code present')
-          p.write_text(s)
-          PY
-          CANDIDATE_SHA=$(sha256sum .fresh-candidate/competition/agents/juraj_v35_cpp/main.cpp | awk '{print $1}')
-          test "$CANDIDATE_SHA" = "${{ needs.phase1.outputs.candidate_sha256 }}"
-          echo "Reproduced exact candidate SHA256: $CANDIDATE_SHA"
-          cp .fresh-candidate/competition/agents/juraj_v35_cpp/main.cpp fresh-validation/candidate/main.cpp
-          cp .fresh-candidate/competition/agents/juraj_v35_cpp/core.hpp fresh-validation/candidate/core.hpp
-          cp .fresh-candidate/competition/agents/juraj_v35_cpp/build.sh fresh-validation/candidate/build.sh
-          cp .fresh-candidate/competition/agents/juraj_v35_cpp/run.sh fresh-validation/candidate/run.sh
+          test "$(sha256sum .fresh-candidate/competition/agents/juraj_v35_cpp/main.cpp | awk '{print $1}')" = "$CANDIDATE_MAIN_SHA256"
+          git diff "$CHAMPION_SHA" "$CANDIDATE_SHA" -- competition/agents/juraj_v35_cpp/main.cpp > fresh-validation/candidate/defense-only.patch
           {
-            echo "base_champion=$CHAMPION_SHA"
-            echo "baseline_v34=$BASELINE_SHA"
-            echo "candidate_main_sha256=$CANDIDATE_SHA"
-            echo "phase2_seeds=22350..22399"
-            echo "phase1_score=${{ needs.phase1.outputs.score }}"
-            echo "final_holdout_untouched=30000..30499"
+            echo "champion_sha=$CHAMPION_SHA"
+            echo "candidate_sha=$CANDIDATE_SHA"
+            echo "candidate_main_sha256=$CANDIDATE_MAIN_SHA256"
+            echo "baseline_sha=$BASELINE_SHA"
+            echo 'phase1_score=${{ needs.phase1.outputs.score }}'
+            echo 'phase2_seeds=22350..22399'
+            echo 'final_holdout_untouched=30000..30499'
           } > fresh-validation/candidate/MANIFEST.txt
 
-      - name: Build and run C++ fast suite again
+      - name: Builds
         shell: bash
         run: |
           set -euo pipefail
-          .fresh-candidate/competition/agents/juraj_v35_cpp/test.sh
           .fresh-candidate/competition/agents/juraj_v35_cpp/build.sh
           .fresh-v34/competition/agents/juraj_cpp/build.sh
 
@@ -268,49 +207,39 @@ jobs:
           PYTHONPATH=. python competition/agents/juraj_v35_cpp/paired_benchmark.py \
             --candidate .fresh-candidate/competition/agents/juraj_v35_cpp/run.sh \
             --baseline .fresh-v34/competition/agents/juraj_cpp/run.sh \
-            --start 22350 --seeds 50 --output fresh-validation/phase2 --diagnostics
+            --start 22350 --seeds 50 --output fresh-validation/phase2
 
-      - name: Final health check and Phase 2 report
+      - name: Final health check and report
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
           import json, os
           from pathlib import Path
-          p = Path('fresh-validation/phase2/summary.json')
-          s = json.loads(p.read_text())
-          assert s['games'] == 100, s
-          assert s['maps'] == 50, s
-          assert s['seed_start'] == 22350 and s['seed_end'] == 22399, s
-          assert s['errors'] == 0, s
-          assert s['illegal_actions'] == 0, s
-          score = float(s['score'])
-          if score < .52: verdict = 'SERIOUS REGRESSION'
-          elif score < .54: verdict = 'WEAK / BASELINE-ISH'
-          elif score < .56: verdict = 'PREVIOUS LEVEL'
-          elif score < .58: verdict = 'CLEAR IMPROVEMENT'
-          elif score < .60: verdict = 'MAJOR IMPROVEMENT'
-          else: verdict = 'EXCELLENT'
-          report = [
-              '# V3.5 defense-only fresh validation — Phase 2',
-              '',
-              f"- Exact base champion: `{os.environ['CHAMPION_SHA']}`",
-              f"- Exact V3.4 baseline: `{os.environ['BASELINE_SHA']}`",
-              '- Candidate delta: exactly two defense-only replacements',
-              '- Seeds: `22350..22399` (50 maps / 100 paired games)',
-              f"- W/D/L: **{s['W']}/{s['D']}/{s['L']}**",
-              f"- Score: **{100*score:.2f}%**",
-              f"- Seat 0 / Seat 1: **{100*s['seat_score']['0']:.2f}% / {100*s['seat_score']['1']:.2f}%**",
-              f"- Paired CI95: **[{100*s['paired_ci95'][0]:.2f}%, {100*s['paired_ci95'][1]:.2f}%]**",
-              f"- Errors / illegal: **{s['errors']} / {s['illegal_actions']}**",
-              f"- Verdict: **{verdict}**",
-              '',
-              '```json',
-              json.dumps(s, indent=2, sort_keys=True),
-              '```',
-          ]
-          Path('fresh-validation/phase2/REPORT.md').write_text('\n'.join(report) + '\n')
-          print('\n'.join(report[:12]))
+          s=json.loads(Path('fresh-validation/phase2/summary.json').read_text())
+          assert s['games']==100 and s['maps']==50, s
+          assert s['seed_start']==22350 and s['seed_end']==22399, s
+          assert s['errors']==0 and s['illegal_actions']==0, s
+          score=float(s['score'])
+          if score<.52: verdict='SERIOUS REGRESSION'
+          elif score<.54: verdict='WEAK / BASELINE-ISH'
+          elif score<.56: verdict='PREVIOUS LEVEL'
+          elif score<.58: verdict='CLEAR IMPROVEMENT'
+          elif score<.60: verdict='MAJOR IMPROVEMENT'
+          else: verdict='EXCELLENT'
+          lines=[
+            '# V3.5 defense-only fresh Phase 2','',
+            f"Candidate `{os.environ['CANDIDATE_SHA']}` from champion `{os.environ['CHAMPION_SHA']}`.",'',
+            f"Seeds: **22350..22399** — {s['maps']} maps / {s['games']} games",
+            f"W/D/L: **{s['W']}/{s['D']}/{s['L']}**",
+            f"Score: **{100*score:.2f}%**",
+            f"Seat0/Seat1: **{100*s['seat_score']['0']:.2f}% / {100*s['seat_score']['1']:.2f}%**",
+            f"Paired CI95: **[{100*s['paired_ci95'][0]:.2f}%, {100*s['paired_ci95'][1]:.2f}%]**",
+            f"Errors/illegal: **{s['errors']}/{s['illegal_actions']}**",
+            f"Verdict: **{verdict}**",'',
+            '```json',json.dumps(s,indent=2,sort_keys=True),'```']
+          Path('fresh-validation/phase2/REPORT.md').write_text('\n'.join(lines)+'\n')
+          print('\n'.join(lines[:11]))
           PY
 
       - uses: actions/upload-artifact@v4
