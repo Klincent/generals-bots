@@ -16,7 +16,7 @@ constexpr int INF=1000000;
 enum class PacketRole {GENERAL_DEFENSE,REACTION,CASTLE_C1,CASTLE_C2,EXPANSION,SEARCH,FRONT,ATTACK,COUNTERATTACK,FREE_SURPLUS_RELOCATION};
 enum class Reason {NONE,TERMINAL_CAPTURE,GENERAL_EMERGENCY,CASTLE_DEADLINE,PRODUCTION_TICK,WAR_MOBILIZATION,REAR_EVACUATION,SEARCH_PROGRESS,TOPOLOGY_CHANGED,OPPONENT_EXPLOIT,FRONT_CHANGED,GENERAL_DISCOVERED,PRODUCTION_EMERGENCY,CASTLE_INVALIDATED,DEATHTOUCH};
 enum class ProductionState {HEALTHY,SOFT_DEFICIT,SEVERE_DEFICIT};
-enum class CastleState {PLANNED,ACQUIRING_SITE,WAITING_FOR_JIT,FUNDING,BUILDABLE,BUILT,INVALIDATED,ABORTED_EMERGENCY};
+enum class CastleState {NONE,TARGET_SELECTED,ACQUIRING_SITE,FUNDING,BUILDABLE,BUILT,ABANDONED,REPLAN};
 enum class FrontStatus {ACTIVE,STALE,CLOSED};
 enum class Archetype {EXPANSION_RUSHER,PRODUCTION_ECONOMY,CASTLE_BUILDER,DOOMSTACK,SMALL_PACKET_SWARM,GENERAL_RUSH,TURTLE,MULTI_FRONT,HOARDER,DEATHTOUCH_PREP,COUNT};
 struct Graph {int h=0,w=0;std::vector<char> passable;std::vector<std::vector<int>> dist,next;
@@ -25,6 +25,15 @@ struct Graph {int h=0,w=0;std::vector<char> passable;std::vector<std::vector<int
  int degree(int x)const{int z=0;for(int d=0;d<4;++d){int y=neighbor(x,d);z+=y>=0&&passable[y];}return z;}
 };
 struct CastleChoice {int c1=-1,c2=-1,c3=-1,cost1=0,cost2=0,total=INF;};
+struct CastleOpportunity {int site=-1,cost=0,site_army=0,additional=0,transport_actions=0,front_distance=INF;double payback_turns=INF,roi=-1e9;bool safe=false,buildable=false;};
+// A live, marginal evaluation. Castles produce one army every two turns; ROI
+// deliberately charges army and actions now rather than relying on a deadline.
+inline CastleOpportunity castle_opportunity(int turn,int horizon,int owned_castles,int site,int cost,int site_army,int transport_actions,int front_distance,int degree){
+ CastleOpportunity o;o.site=site;o.cost=cost;o.site_army=site_army;o.additional=std::max(0,cost-site_army);o.transport_actions=transport_actions;o.front_distance=front_distance;o.safe=front_distance>=6;o.buildable=site_army>=cost;
+ int remaining=std::max(0,horizon-turn),productive_ticks=remaining/2;double strategic=degree*2.+std::min(12,front_distance)*.6;double risk=o.safe?0.:18.+std::max(0,6-front_distance)*4;double marginal=owned_castles>=2?10.*(owned_castles-1):0.;o.roi=productive_ticks+strategic-o.additional-transport_actions*1.5-risk-marginal;o.payback_turns=2.*(o.additional+transport_actions*1.5+marginal-strategic);return o;
+}
+inline bool worthwhile_castle(const CastleOpportunity&o,int turn,int owned_castles){if(o.site<0||!o.safe)return false;double threshold=owned_castles==0?(turn<180?8.:2.):owned_castles==1?10.:24.;return o.roi>=threshold&&o.payback_turns<=std::max(0,900-turn);}
+inline CastleOpportunity select_castle_opportunity(const std::vector<CastleOpportunity>&v,int turn,int owned_castles){CastleOpportunity best;for(const auto&o:v)if(worthwhile_castle(o,turn,owned_castles)&&(best.site<0||std::tuple(-o.roi,o.additional,o.transport_actions,o.site)<std::tuple(-best.roi,best.additional,best.transport_actions,best.site)))best=o;return best;}
 inline int castle_cost(const Graph&g,int general,int x,const std::vector<int>&structures){int md=std::abs(x/g.w-general/g.w)+std::abs(x%g.w-general%g.w);int c=35+std::max(0,14-2*md);for(int s:structures){int d=std::abs(x/g.w-s/g.w)+std::abs(x%g.w-s%g.w);c+=std::max(0,14-2*d);}return c;}
 inline CastleChoice plan_castles(const Graph&g,int general){CastleChoice best;int n=g.h*g.w;auto eligible=[&](int x,int deadline){return x!=general&&g.passable[x]&&g.dist[general][x]>=5&&g.dist[general][x]<INF&&g.dist[general][x]+35<=deadline&&g.degree(x)>1;};for(int a=0;a<n;++a)if(eligible(a,150))for(int b=0;b<n;++b)if(b!=a&&eligible(b,250)){int ca=castle_cost(g,general,a,{}),cb=castle_cost(g,general,b,{a});auto key=std::tuple(ca+cb,std::max(g.dist[general][a],g.dist[general][b]),-(g.degree(a)+g.degree(b)),a,b);auto old=std::tuple(best.total,best.c1<0?INF:std::max(g.dist[general][best.c1],g.dist[general][best.c2]),best.c1<0?0:-(g.degree(best.c1)+g.degree(best.c2)),best.c1,best.c2);if(key<old)best={a,b,-1,ca,cb,ca+cb};}for(int x=0;x<n;++x)if(eligible(x,350)&&x!=best.c1&&x!=best.c2){best.c3=x;break;}return best;}
 struct FundingForecast {int required=0,turns=0,capacity=0,latest_start=0,transport_actions=0,site_actions=0,build_actions=1,required_actions=0,slack=0;bool feasible=false,must_fund=false;};

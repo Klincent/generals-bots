@@ -36,5 +36,30 @@ int main(){
  auto large=open_graph(21,21);Belief belief;belief.initialise(large,220);double before=belief.entropy();belief.back_project(large,220,221);assert(belief.entropy()!=before&&belief.top()>=0);
  // 20 scheduler output is deterministic and graph moves are legal-adjacent.
  auto q=schedule({{3,1,2,0,1,Reason::SEARCH_PROGRESS},{3,1,3,0,1,Reason::SEARCH_PROGRESS}});assert(q.to==2&&g.neighbor(0,1)==9);
- std::cout<<"v35 core: 20 behavioral checks passed\n";
+ // 21-30 live castle planning: missed dates never participate in selection.
+ auto old_site=castle_opportunity(220,900,0,10,45,2,8,12,3);
+ auto funded=castle_opportunity(220,900,0,11,45,45,0,12,3);
+ assert(select_castle_opportunity({old_site,funded},220,0).site==11);
+ // An abandoned first target cannot gate a later marginal castle.
+ assert(select_castle_opportunity({funded},260,0).site==11);
+ auto second=castle_opportunity(260,900,1,12,35,35,0,10,3);
+ assert(select_castle_opportunity({second},260,1).site==12);
+ // A funded midgame opportunity is buildable and strongly positive.
+ assert(funded.buildable&&worthwhile_castle(funded,220,0));
+ // Safety and terminal scheduling remain lexicographically above builds.
+ Candidate build{1,11,11,2,999,Reason::CASTLE_DEADLINE};
+ Candidate defense{0,1,2,0,1,Reason::GENERAL_EMERGENCY};
+ Candidate terminal{0,2,3,0,1,Reason::TERMINAL_CAPTURE};
+ assert(schedule({build,defense}).reason==Reason::GENERAL_EMERGENCY);
+ assert(schedule({build,terminal}).reason==Reason::TERMINAL_CAPTURE);
+ // Late negative payback and a poor third castle are rejected.
+ auto late_bad=castle_opportunity(890,900,0,13,60,1,20,8,2);
+ assert(!worthwhile_castle(late_bad,890,0));
+ auto third_bad=castle_opportunity(500,900,2,14,400,1,30,8,2);
+ assert(!worthwhile_castle(third_bad,500,2));
+ // Dynamic pricing is recomputed from the current structure set.
+ int price_before=castle_cost(g,general,10,{}),after=castle_cost(g,general,10,{11});assert(after>=price_before);
+ // Affordability follows that live price, preventing stale-price builds.
+ auto stale=castle_opportunity(220,900,0,10,after,after-1,0,12,3);assert(!stale.buildable);
+ std::cout<<"v35 core: 30 behavioral checks passed\n";
 }
