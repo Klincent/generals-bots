@@ -1,0 +1,176 @@
+name: v36-search-refactor
+
+on:
+  push:
+    branches: [juraj-v3.6-search-refactor]
+
+permissions:
+  contents: write
+
+env:
+  BASE_SHA: 360699a47370fff831b5e3c60daa59646ba9ca7e
+  SDL_VIDEODRIVER: dummy
+
+jobs:
+  materialize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    outputs:
+      candidate_sha: ${{ steps.sha.outputs.candidate_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: juraj-v3.6-search-refactor
+          fetch-depth: 0
+      - name: Verify picker baseline ancestry
+        run: git merge-base --is-ancestor "$BASE_SHA" HEAD
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply V3.6 search refactor
+        run: python tools/apply_v36_search_refactor.py
+      - name: Install engine dependencies
+        run: pip install -e .
+      - name: Smoke regressions
+        run: bash competition/agents/juraj_v35_cpp/test.sh
+      - name: Build candidate
+        run: bash competition/agents/juraj_v35_cpp/build.sh
+      - name: Commit tested implementation
+        id: sha
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add competition/agents/juraj_v35_cpp/main.cpp \
+                  competition/agents/juraj_v35_cpp/test_search_refactor.cpp \
+                  competition/agents/juraj_v35_cpp/test.sh
+          if ! git diff --cached --quiet; then
+            git commit -m "V3.6: sector coverage search refactor with picker 16"
+            git push origin HEAD:juraj-v3.6-search-refactor
+          fi
+          echo "candidate_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  validate-package:
+    needs: materialize
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: juraj-v3.6-search-refactor
+          fetch-depth: 0
+      - name: Pin exact tested candidate
+        run: |
+          set -euo pipefail
+          git fetch origin juraj-v3.6-search-refactor
+          git checkout --detach "${{ needs.materialize.outputs.candidate_sha }}"
+          test "$(git rev-parse HEAD)" = "${{ needs.materialize.outputs.candidate_sha }}"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install engine dependencies
+        run: pip install -e .
+      - name: Smoke tests and build
+        run: |
+          set -euo pipefail
+          bash competition/agents/juraj_v35_cpp/test.sh | tee /tmp/smoke-tests.txt
+          bash competition/agents/juraj_v35_cpp/build.sh
+      - name: Build picker-16 baseline and wrappers
+        run: |
+          set -euo pipefail
+          git worktree add --detach /tmp/baseline "$BASE_SHA"
+          bash /tmp/baseline/competition/agents/juraj_v35_cpp/build.sh
+          cat > /tmp/run-candidate.sh <<EOF
+          #!/usr/bin/env bash
+          export V35_EDGE_PICKER_THRESHOLD=16
+          export V36_EDGE_PICKER_MIN_EFFICIENCY=2.0
+          exec "$GITHUB_WORKSPACE/competition/agents/juraj_v35_cpp/run.sh" "\$@"
+          EOF
+          cat > /tmp/run-baseline.sh <<EOF
+          #!/usr/bin/env bash
+          export V35_EDGE_PICKER_THRESHOLD=16
+          export V36_EDGE_PICKER_MIN_EFFICIENCY=2.0
+          exec "/tmp/baseline/competition/agents/juraj_v35_cpp/run.sh" "\$@"
+          EOF
+          chmod +x /tmp/run-candidate.sh /tmp/run-baseline.sh
+      - name: Tiny match smoke
+        run: |
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py \
+            --candidate /tmp/run-candidate.sh \
+            --baseline /tmp/run-baseline.sh \
+            --start 23900 --seeds 2 --output /tmp/smoke-match
+      - name: Very short performance check
+        run: |
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py \
+            --candidate /tmp/run-candidate.sh \
+            --baseline /tmp/run-baseline.sh \
+            --start 23910 --seeds 4 --output /tmp/perf
+      - name: Summarize search telemetry
+        run: |
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+          pat=re.compile(r'\[v36_search\] reachable=(\d+) touched=(\d+) swept=(\d+) primary=(-?\d+) secondary=(-?\d+) probe_moves=(\d+) forced_moves=(\d+)')
+          rows=[]
+          for line in Path('/tmp/perf/games.jsonl').read_text().splitlines():
+              g=json.loads(line)
+              for m in pat.finditer(g.get('stderr','')):
+                  rows.append(tuple(map(int,m.groups())))
+          tele={
+              'samples':len(rows),
+              'reachable_mean':sum(r[0] for r in rows)/max(1,len(rows)),
+              'touched_mean':sum(r[1] for r in rows)/max(1,len(rows)),
+              'swept_mean':sum(r[2] for r in rows)/max(1,len(rows)),
+              'probe_moves_mean':sum(r[5] for r in rows)/max(1,len(rows)),
+              'forced_moves_mean':sum(r[6] for r in rows)/max(1,len(rows)),
+              'min_touched':min((r[1] for r in rows),default=0),
+              'max_touched':max((r[1] for r in rows),default=0),
+          }
+          Path('/tmp/search-telemetry.json').write_text(json.dumps(tele,indent=2,sort_keys=True)+'\n')
+          print(json.dumps(tele,sort_keys=True))
+          PY
+      - name: Package minimal submission
+        run: |
+          set -euo pipefail
+          SHORT=$(git rev-parse --short=7 HEAD)
+          OUT="juraj_v36_submission_${SHORT}.zip"
+          rm -rf juraj_v36 "$OUT"
+          mkdir juraj_v36
+          cp competition/agents/juraj_v35_cpp/main.cpp juraj_v36/
+          cp competition/agents/juraj_v35_cpp/core.hpp juraj_v36/
+          cp competition/agents/juraj_v35_cpp/build.sh juraj_v36/
+          cp competition/agents/juraj_v35_cpp/run.sh juraj_v36/
+          chmod +x juraj_v36/build.sh juraj_v36/run.sh
+          (cd juraj_v36 && ./build.sh && test -x agent)
+          rm -f juraj_v36/agent
+          zip -r "$OUT" juraj_v36
+          sha256sum "$OUT" | tee submission.sha256
+          cp /tmp/smoke-tests.txt smoke-tests.txt
+          cp /tmp/smoke-match/summary.json smoke-match-summary.json
+          cp /tmp/perf/summary.json perf-summary.json
+          cp /tmp/search-telemetry.json search-telemetry.json
+          python - <<PY
+          import json, pathlib
+          out={
+            'candidate_sha':'${{ needs.materialize.outputs.candidate_sha }}',
+            'picker_threshold':16,
+            'picker_min_efficiency':2.0,
+            'smoke_match':json.loads(pathlib.Path('smoke-match-summary.json').read_text()),
+            'perf':json.loads(pathlib.Path('perf-summary.json').read_text()),
+            'search':json.loads(pathlib.Path('search-telemetry.json').read_text()),
+            'submission':'$OUT',
+          }
+          pathlib.Path('validation-summary.json').write_text(json.dumps(out,indent=2,sort_keys=True)+'\n')
+          PY
+          unzip -l "$OUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: juraj-v36-search-refactor-submission
+          path: |
+            juraj_v36_submission_*.zip
+            submission.sha256
+            validation-summary.json
+            smoke-tests.txt
+            smoke-match-summary.json
+            perf-summary.json
+            search-telemetry.json
+          if-no-files-found: error
