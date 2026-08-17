@@ -14,6 +14,7 @@ static int pdst(const Action&a){if(a.kind)return -1;static int dr[4]={-1,1,0,0},
 static void recount(Observation&o){o.my_army=o.my_land=o.opp_army=o.opp_land=0;for(int z=0;z<441;++z){if(o.owner[z]==1){++o.my_land;o.my_army+=o.army[z];}else if(o.owner[z]==2){++o.opp_land;o.opp_army+=o.army[z];}}}
 static void apply_picker(Observation&o,const Action&a){if(a.kind!=0){++o.turn;return;}int x=psrc(a),y=pdst(a),m=o.army[x]-1;o.army[x]=1;if(o.owner[y]==1)o.army[y]+=m;else if(o.owner[y]==2){if(m>o.army[y]){o.army[y]=m-o.army[y];o.owner[y]=1;}else{o.army[y]-=m;}}else{o.owner[y]=1;o.army[y]=std::max(1,m-o.army[y]);}recount(o);++o.turn;}
 int main(){
+ setenv("V36_EDGE_PICKER_MIN_EFFICIENCY","0",1);
  {setenv("V35_EDGE_PICKER_THRESHOLD","6",1);Agent a(0,21,21);auto o=picker_board();a.decide(o);assert(a.edge_picker_threshold()==6);assert(a.edge_picker_starts()==0);}
  {setenv("V35_EDGE_PICKER_THRESHOLD","4",1);Agent a(0,21,21);auto o=picker_board();for(int i=0;i<80&&a.edge_picker_completions()==0;++i){auto q=a.decide(o);apply_picker(o,q);}assert(a.edge_picker_threshold()==4);assert(a.edge_picker_starts()==1);assert(a.edge_picker_moves()>=10);assert(a.edge_picker_completions()==1);assert(a.edge_picker_delivered()>=6);assert(a.edge_picker_aborts()==0);}
  // An opportunistic attack from the picker cell must not steal the collector.
