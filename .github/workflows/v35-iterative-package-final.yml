@@ -1,0 +1,84 @@
+name: V3.5 iterative final submission package
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [v35-iterative-1to6]
+    paths:
+      - '.github/workflows/v35-iterative-package-final.yml'
+
+permissions:
+  contents: read
+
+env:
+  GAMEPLAY_SHA: e50123cee7d924f0d643acd372a5300971f93917
+  CHAMPION_SHA: 4f0fac768a8fc4479d45347a3ecbdbfedd6aef05
+
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify immutable candidate and selected stages
+        shell: bash
+        run: |
+          set -euo pipefail
+          git cat-file -e "$GAMEPLAY_SHA^{commit}"
+          test "$GAMEPLAY_SHA" != "$CHAMPION_SHA"
+          git show --no-patch --format='%H %s' "$GAMEPLAY_SHA"
+          git diff --check "$CHAMPION_SHA" "$GAMEPLAY_SHA" -- competition/agents/juraj_v35_cpp
+          echo 'Pinned final report evidence:'
+          echo 'direct_vs_champion=0.575'
+          echo 'oracle_candidate_macro=0.815'
+          echo 'oracle_champion_macro=0.7475'
+          echo 'oracle_worst_delta=-0.05 (float representation was -0.050000000000000044)'
+          echo 'selected_stages=1,2,3,4'
+
+      - name: Build exact candidate before packaging
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/candidate
+          mkdir -p /tmp/candidate
+          git archive "$GAMEPLAY_SHA" competition/agents/juraj_v35_cpp | tar -x -C /tmp/candidate
+          /tmp/candidate/competition/agents/juraj_v35_cpp/build.sh
+          test -x /tmp/candidate/competition/agents/juraj_v35_cpp/agent
+
+      - name: Create minimal submission ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf submission verify juraj_v35_iterative_e50123.zip
+          mkdir -p submission/juraj_v35
+          src=/tmp/candidate/competition/agents/juraj_v35_cpp
+          cp "$src/main.cpp" submission/juraj_v35/main.cpp
+          cp "$src/core.hpp" submission/juraj_v35/core.hpp
+          cp "$src/build.sh" submission/juraj_v35/build.sh
+          cp "$src/run.sh" submission/juraj_v35/run.sh
+          chmod +x submission/juraj_v35/build.sh submission/juraj_v35/run.sh
+          (cd submission && zip -r ../juraj_v35_iterative_e50123.zip juraj_v35 >/dev/null)
+          unzip -l juraj_v35_iterative_e50123.zip
+          sha256sum juraj_v35_iterative_e50123.zip | tee SUBMISSION_SHA256.txt
+
+      - name: Rebuild from the ZIP itself
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir verify
+          (cd verify && unzip ../juraj_v35_iterative_e50123.zip >/dev/null)
+          verify/juraj_v35/build.sh
+          test -x verify/juraj_v35/agent
+          test -x verify/juraj_v35/run.sh
+          echo 'Submission ZIP rebuilt successfully from clean extraction.'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: juraj-v35-iterative-e50123-submission
+          path: |
+            juraj_v35_iterative_e50123.zip
+            SUBMISSION_SHA256.txt
+          if-no-files-found: error
