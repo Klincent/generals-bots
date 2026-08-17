@@ -1,0 +1,371 @@
+name: V3.5 iterative improvements 1-to-6
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [v35-iterative-1to6]
+    paths:
+      - '.github/workflows/v35-iterative-1to6.yml'
+
+permissions:
+  contents: write
+
+env:
+  SDL_VIDEODRIVER: dummy
+  CHAMPION_SHA: 4f0fac768a8fc4479d45347a3ecbdbfedd6aef05
+  V34_SHA: 2ed9e8bbcf76b36c5276013afc356118fccc8b6e
+
+jobs:
+  iterate:
+    name: Sequentially select stages 1-5
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    outputs:
+      gameplay_sha: ${{ steps.commit.outputs.gameplay_sha }}
+      selected_stages: ${{ steps.commit.outputs.selected_stages }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: v35-iterative-1to6
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Verify exact champion runtime base
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in main.cpp core.hpp build.sh run.sh test.sh test_core.cpp test_agent.cpp paired_benchmark.py; do
+            cmp "competition/agents/juraj_v35_cpp/$f" <(git show "$CHAMPION_SHA:competition/agents/juraj_v35_cpp/$f")
+          done
+          ! grep -Eq 'castle_opportunity_|castle_target_|staging_point\(|rear_pressure\(' competition/agents/juraj_v35_cpp/main.cpp
+
+      - name: Install benchmark engine once
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install numpy jax jaxlib
+          python -m pip install -e . --no-deps
+
+      - name: Sequential causal selection
+        id: select
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf iterative-work iterative-results
+          mkdir -p iterative-work/template iterative-work/selected iterative-results
+          git archive "$CHAMPION_SHA" competition/agents/juraj_v35_cpp | tar -x -C iterative-work/template
+          cp iterative-work/template/competition/agents/juraj_v35_cpp/main.cpp iterative-work/selected/main.cpp
+          printf '[]\n' > iterative-results/stages.json
+          : > iterative-results/selected_stages.txt
+
+          for STAGE in 1 2 3 4 5; do
+            echo "===== STAGE $STAGE ====="
+            rm -rf iterative-work/base iterative-work/cand "iterative-results/stage${STAGE}"
+            cp -a iterative-work/template iterative-work/base
+            cp -a iterative-work/template iterative-work/cand
+            cp iterative-work/selected/main.cpp iterative-work/base/competition/agents/juraj_v35_cpp/main.cpp
+            python competition/agents/juraj_v35_cpp/iterative_variants.py \
+              --stage "$STAGE" \
+              --input iterative-work/selected/main.cpp \
+              --output iterative-work/cand/competition/agents/juraj_v35_cpp/main.cpp
+
+            # Every candidate must compile and keep the existing behavioral suite green.
+            iterative-work/cand/competition/agents/juraj_v35_cpp/test.sh
+            iterative-work/cand/competition/agents/juraj_v35_cpp/build.sh
+            iterative-work/base/competition/agents/juraj_v35_cpp/build.sh
+
+            mkdir -p "iterative-results/stage${STAGE}/a" "iterative-results/stage${STAGE}/b"
+            PYTHONPATH=. python competition/agents/juraj_v35_cpp/paired_benchmark.py \
+              --candidate iterative-work/cand/competition/agents/juraj_v35_cpp/run.sh \
+              --baseline iterative-work/base/competition/agents/juraj_v35_cpp/run.sh \
+              --start 22350 --seeds 20 --output "iterative-results/stage${STAGE}/a"
+            PYTHONPATH=. python competition/agents/juraj_v35_cpp/paired_benchmark.py \
+              --candidate iterative-work/cand/competition/agents/juraj_v35_cpp/run.sh \
+              --baseline iterative-work/base/competition/agents/juraj_v35_cpp/run.sh \
+              --start 22200 --seeds 20 --output "iterative-results/stage${STAGE}/b"
+
+            STAGE="$STAGE" python - <<'PY'
+          import json, os
+          from pathlib import Path
+          st=int(os.environ['STAGE'])
+          a=json.loads(Path(f'iterative-results/stage{st}/a/summary.json').read_text())
+          b=json.loads(Path(f'iterative-results/stage{st}/b/summary.json').read_text())
+          for x in (a,b):
+              assert x['games']==40 and x['errors']==0 and x['illegal_actions']==0, x
+          sa=float(a['score']); sb=float(b['score']); avg=(sa+sb)/2
+          # Neutral/rare tactical layers are allowed through, but a clear same-seed regression is not.
+          accept=(avg>=0.50 and min(sa,sb)>=0.475)
+          p=Path('iterative-results/stages.json')
+          arr=json.loads(p.read_text())
+          arr.append({'stage':st,'score_22350':sa,'score_22200':sb,'average':avg,'accepted':accept,
+                      'wdl_22350':[a['W'],a['D'],a['L']], 'wdl_22200':[b['W'],b['D'],b['L']]})
+          p.write_text(json.dumps(arr,indent=2,sort_keys=True)+'\n')
+          Path(f'iterative-results/stage{st}/ACCEPT').write_text('true\n' if accept else 'false\n')
+          print(f'STAGE_{st} score22350={sa:.4f} score22200={sb:.4f} avg={avg:.4f} accept={accept}')
+          PY
+
+            if grep -qx true "iterative-results/stage${STAGE}/ACCEPT"; then
+              cp iterative-work/cand/competition/agents/juraj_v35_cpp/main.cpp iterative-work/selected/main.cpp
+              echo "$STAGE" >> iterative-results/selected_stages.txt
+              echo "PROMOTED stage $STAGE"
+            else
+              echo "REJECTED stage $STAGE"
+            fi
+          done
+
+          cp iterative-work/selected/main.cpp competition/agents/juraj_v35_cpp/main.cpp
+          git diff --check -- competition/agents/juraj_v35_cpp/main.cpp
+          echo '=== sequential results ==='
+          cat iterative-results/stages.json
+          echo '=== selected stages ==='
+          cat iterative-results/selected_stages.txt || true
+
+      - name: Commit selected runtime candidate
+        id: commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          SELECTED=$(paste -sd, iterative-results/selected_stages.txt || true)
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if git diff --quiet "$CHAMPION_SHA" -- competition/agents/juraj_v35_cpp/main.cpp; then
+            GAMEPLAY_SHA="$CHAMPION_SHA"
+            echo 'No stage survived selection; champion remains exact.'
+          else
+            git add competition/agents/juraj_v35_cpp/main.cpp
+            test "$(git diff --cached --name-only)" = 'competition/agents/juraj_v35_cpp/main.cpp'
+            git commit -m "v35: select iterative tactical layers ${SELECTED:-none}"
+            git push origin HEAD:v35-iterative-1to6
+            GAMEPLAY_SHA=$(git rev-parse HEAD)
+          fi
+          echo "gameplay_sha=$GAMEPLAY_SHA" >> "$GITHUB_OUTPUT"
+          echo "selected_stages=$SELECTED" >> "$GITHUB_OUTPUT"
+          echo "GAMEPLAY_SHA=$GAMEPLAY_SHA SELECTED_STAGES=$SELECTED"
+          sha256sum competition/agents/juraj_v35_cpp/main.cpp
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v35-iterative-stage-selection
+          path: iterative-results/
+          if-no-files-found: error
+
+  final-direct:
+    name: Final selected vs original champion
+    needs: iterate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    outputs:
+      score: ${{ steps.out.outputs.score }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Materialize agents
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .cand .champ result && mkdir -p .cand .champ result
+          git archive '${{ needs.iterate.outputs.gameplay_sha }}' competition/agents/juraj_v35_cpp | tar -x -C .cand
+          git archive "$CHAMPION_SHA" competition/agents/juraj_v35_cpp | tar -x -C .champ
+          .cand/competition/agents/juraj_v35_cpp/build.sh
+          .champ/competition/agents/juraj_v35_cpp/build.sh
+      - name: Install engine
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy jax jaxlib
+          python -m pip install -e . --no-deps
+      - name: 100-game direct paired control
+        run: |
+          PYTHONPATH=. python competition/agents/juraj_v35_cpp/paired_benchmark.py \
+            --candidate .cand/competition/agents/juraj_v35_cpp/run.sh \
+            --baseline .champ/competition/agents/juraj_v35_cpp/run.sh \
+            --start 22350 --seeds 50 --output result
+      - name: Result
+        id: out
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,os
+          s=json.load(open('result/summary.json'))
+          assert s['games']==100 and s['errors']==0 and s['illegal_actions']==0,s
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write(f"score={float(s['score']):.6f}\n")
+          print('FINAL_DIRECT',json.dumps(s,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v35-iterative-final-direct
+          path: result/
+
+  oracle:
+    name: Oracle — ${{ matrix.name }}
+    needs: iterate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: v34_exact
+            ref: 2ed9e8bbcf76b36c5276013afc356118fccc8b6e
+            path: competition/agents/juraj_cpp
+          - name: v33_1
+            ref: origin/juraj-v3.3.1
+            path: competition/agents/juraj_cpp
+          - name: v275_final
+            ref: origin/juraj-v2.7.5-final
+            path: competition/agents/juraj_cpp
+          - name: v25
+            ref: origin/juraj-v2.5
+            path: competition/agents/juraj_cpp
+          - name: expander_cpp
+            ref: 4f0fac768a8fc4479d45347a3ecbdbfedd6aef05
+            path: competition/agents/expander_cpp
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Materialize candidate, champion and opponent
+        shell: bash
+        env:
+          OPP_REF: ${{ matrix.ref }}
+          OPP_PATH: ${{ matrix.path }}
+        run: |
+          set -euo pipefail
+          rm -rf .cand .champ .opp cand-result champ-result oracle-out
+          mkdir -p .cand .champ .opp cand-result champ-result oracle-out
+          git archive '${{ needs.iterate.outputs.gameplay_sha }}' competition/agents/juraj_v35_cpp | tar -x -C .cand
+          git archive "$CHAMPION_SHA" competition/agents/juraj_v35_cpp | tar -x -C .champ
+          git archive "$OPP_REF" "$OPP_PATH" | tar -x -C .opp
+          .cand/competition/agents/juraj_v35_cpp/build.sh
+          .champ/competition/agents/juraj_v35_cpp/build.sh
+          ".opp/$OPP_PATH/build.sh"
+      - name: Install engine
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install numpy jax jaxlib
+          python -m pip install -e . --no-deps
+      - name: Candidate and champion against same opponent/seeds
+        shell: bash
+        env:
+          OPP_PATH: ${{ matrix.path }}
+        run: |
+          set -euo pipefail
+          PYTHONPATH=. python competition/agents/juraj_v35_cpp/paired_benchmark.py \
+            --candidate .cand/competition/agents/juraj_v35_cpp/run.sh \
+            --baseline ".opp/$OPP_PATH/run.sh" \
+            --start 22050 --seeds 20 --output cand-result
+          PYTHONPATH=. python competition/agents/juraj_v35_cpp/paired_benchmark.py \
+            --candidate .champ/competition/agents/juraj_v35_cpp/run.sh \
+            --baseline ".opp/$OPP_PATH/run.sh" \
+            --start 22050 --seeds 20 --output champ-result
+      - name: Record oracle delta
+        shell: bash
+        env:
+          NAME: ${{ matrix.name }}
+          REF: ${{ matrix.ref }}
+        run: |
+          python - <<'PY'
+          import json,os
+          c=json.load(open('cand-result/summary.json')); h=json.load(open('champ-result/summary.json'))
+          for x in (c,h): assert x['games']==40 and x['errors']==0 and x['illegal_actions']==0,x
+          out={'name':os.environ['NAME'],'ref':os.environ['REF'],
+               'candidate_score':float(c['score']),'champion_score':float(h['score']),
+               'delta':float(c['score'])-float(h['score']),
+               'candidate_wdl':[c['W'],c['D'],c['L']], 'champion_wdl':[h['W'],h['D'],h['L']]}
+          open('oracle-out/summary.json','w').write(json.dumps(out,indent=2,sort_keys=True)+'\n')
+          print('ORACLE',json.dumps(out,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: oracle-${{ matrix.name }}
+          path: oracle-out/
+
+  aggregate-package:
+    name: Aggregate oracle and package only if gates pass
+    needs: [iterate, final-direct, oracle]
+    if: always() && needs.iterate.result == 'success' && needs.final-direct.result == 'success' && needs.oracle.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: oracle-*
+          path: oracle-results
+      - uses: actions/download-artifact@v4
+        with:
+          name: v35-iterative-final-direct
+          path: direct-result
+      - name: Aggregate and gate
+        id: gate
+        shell: bash
+        env:
+          SELECTED_STAGES: ${{ needs.iterate.outputs.selected_stages }}
+          GAMEPLAY_SHA: ${{ needs.iterate.outputs.gameplay_sha }}
+        run: |
+          python - <<'PY'
+          import glob,json,os
+          from pathlib import Path
+          rows=[]
+          for f in glob.glob('oracle-results/**/summary.json',recursive=True): rows.append(json.load(open(f)))
+          if len(rows)!=5: raise SystemExit(f'expected 5 oracle rows, got {len(rows)}')
+          rows.sort(key=lambda x:x['name'])
+          direct=json.load(open('direct-result/summary.json'))
+          macro=sum(r['candidate_score'] for r in rows)/len(rows)
+          champ_macro=sum(r['champion_score'] for r in rows)/len(rows)
+          deltas=[r['delta'] for r in rows]
+          macro_delta=macro-champ_macro; worst=min(deltas)
+          direct_score=float(direct['score'])
+          ok=(direct_score>=0.50 and macro_delta>=-0.01 and worst>=-0.05)
+          report={'gameplay_sha':os.environ['GAMEPLAY_SHA'],'selected_stages':os.environ['SELECTED_STAGES'],
+                  'direct_vs_champion':direct_score,'oracle_candidate_macro':macro,
+                  'oracle_champion_macro':champ_macro,'oracle_macro_delta':macro_delta,
+                  'oracle_worst_delta':worst,'oracle_rows':rows,'package':ok}
+          Path('ITERATIVE_FINAL_REPORT.json').write_text(json.dumps(report,indent=2,sort_keys=True)+'\n')
+          print(json.dumps(report,indent=2,sort_keys=True))
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write(f"ok={str(ok).lower()}\n")
+          PY
+      - name: Build verified minimal submission ZIP
+        if: steps.gate.outputs.ok == 'true'
+        shell: bash
+        env:
+          GAMEPLAY_SHA: ${{ needs.iterate.outputs.gameplay_sha }}
+        run: |
+          set -euo pipefail
+          rm -rf submission verify
+          mkdir -p submission verify
+          for f in main.cpp core.hpp build.sh run.sh; do git show "$GAMEPLAY_SHA:competition/agents/juraj_v35_cpp/$f" > "submission/$f"; done
+          chmod +x submission/build.sh submission/run.sh
+          (cd submission && ./build.sh && rm -f agent && zip -9 ../juraj_v35_iterative_submission.zip main.cpp core.hpp build.sh run.sh)
+          unzip -q juraj_v35_iterative_submission.zip -d verify
+          (cd verify && ./build.sh && test -x agent)
+          sha256sum juraj_v35_iterative_submission.zip | tee SUBMISSION_SHA256.txt
+          unzip -l juraj_v35_iterative_submission.zip
+      - uses: actions/upload-artifact@v4
+        if: steps.gate.outputs.ok == 'true'
+        with:
+          name: juraj-v35-iterative-submission
+          path: |
+            juraj_v35_iterative_submission.zip
+            SUBMISSION_SHA256.txt
+            ITERATIVE_FINAL_REPORT.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v35-iterative-final-report
+          path: ITERATIVE_FINAL_REPORT.json
+          if-no-files-found: error
