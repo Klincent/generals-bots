@@ -59,13 +59,13 @@ def lands(stderr):
  m=re.search(r'^\[v35_land\](.*)$',stderr,re.M)
  return {int(k):int(v) for k,v in re.findall(r'(\d+):(\d+)',m.group(1) if m else '')}
 telemetry={}
-for tag in ('v35_actions','v35_threat','v35_escape','v35_castle_live'):
+for tag in ('v35_actions','v35_threat','v35_escape','v35_castle_live','v35_castle_economy'):
  rows=[tagged(g['stderr'],tag) for g in valid]
  for key in set().union(*(x.keys() for x in rows)): telemetry[key]=sum(x.get(key,0) for x in rows)
 telemetry['castles_completed']=sum(g.get('candidate_castles_built',0) for g in valid)
 telemetry['turns_total']=sum(g['turns'] for g in valid); telemetry['pass_rate']=telemetry.get('pass',0)/max(1,telemetry['turns_total'])
 land_summary={}
-for turn in (50,100,150,200):
+for turn in (50,100,150,200,250,300):
  vals=[lands(g['stderr']).get(turn) for g in valid]; vals=[x for x in vals if x is not None]
  land_summary[str(turn)]={'mean':statistics.mean(vals) if vals else None,'games':len(vals)}
 timing={k:(float(np.quantile([g['candidate_timing'][k] for g in valid],.5)) if valid else 0) for k in ('p50','p95','p99','max')}
