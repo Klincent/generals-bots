@@ -1,0 +1,35 @@
+name: Fix V3.5 fresh benchmark invocation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [v35-defense-fresh]
+    paths:
+      - '.github/workflows/fix-v35-defense-fresh.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: v35-defense-fresh
+      - name: Remove unsupported diagnostics flag and relaunch
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE=.github/workflows/v35-defense-fresh.yml
+          test "$(grep -o -- '--diagnostics' "$FILE" | wc -l)" -eq 2
+          sed -i 's/ --diagnostics//g' "$FILE"
+          test "$(grep -o -- '--diagnostics' "$FILE" | wc -l)" -eq 0
+          git diff --check
+          git diff -- "$FILE"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$FILE"
+          git commit -m 'ci: use benchmark flags supported by champion harness'
+          git push origin HEAD:v35-defense-fresh
