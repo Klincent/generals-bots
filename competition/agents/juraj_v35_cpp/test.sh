@@ -15,3 +15,6 @@ g++ -O2 -std=c++17 -Wall -Wextra -Wpedantic test_picker_economics.cpp -o test_pi
 
 g++ -O2 -std=c++17 -Wall -Wextra -Wpedantic test_search_refactor.cpp -o test_search_refactor
 ./test_search_refactor
+
+g++ -O2 -std=c++17 -Wall -Wextra -Wpedantic test_stall_hardening.cpp -o test_stall_hardening
+./test_stall_hardening
