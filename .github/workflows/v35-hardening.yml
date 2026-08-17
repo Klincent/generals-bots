@@ -1,0 +1,68 @@
+name: v35-hardening
+
+on:
+  push:
+    branches: [juraj-v3.5-hardening]
+
+permissions:
+  contents: write
+
+env:
+  SDL_VIDEODRIVER: dummy
+
+jobs:
+  harden-test-package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: juraj-v3.5-hardening
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply V3.5 hardening
+        run: python tools/apply_v35_hardening.py
+      - name: Commit patched source if needed
+        run: |
+          if ! git diff --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add competition/agents/juraj_cpp/v34_part05.inc competition/agents/juraj_cpp/v34_part06.inc
+            git commit -m "V3.5: castle deadline and two-chunk edge consolidation"
+          fi
+      - name: Install engine and tests
+        run: |
+          pip install -e .
+          pip install pytest
+      - name: Compile Juraj bot
+        run: bash competition/agents/juraj_cpp/build.sh
+      - name: Unit tests
+        run: pytest -q
+      - name: Smoke benchmark vs expander
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/v35-smoke
+          for seed in $(seq 1 20); do
+            python3 competition/matchup.py \
+              competition/agents/juraj_cpp/run.sh \
+              competition/agents/expander_cpp/run.sh \
+              --mode competition --seed "$seed" \
+              >"/tmp/v35-smoke/seed-${seed}.out" 2>"/tmp/v35-smoke/seed-${seed}.err"
+          done
+      - name: Push tested source
+        run: |
+          if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/juraj-v3.5-hardening)" ]; then
+            git push origin HEAD:juraj-v3.5-hardening
+          fi
+      - name: Build submission zip
+        run: |
+          rm -f submission-juraj-v3.5-hardening.zip
+          cd competition/agents/juraj_cpp
+          zip -r ../../../submission-juraj-v3.5-hardening.zip . \
+            -x 'juraj_cpp' '*.o' '*.log' '__pycache__/*'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: submission-juraj-v3.5-hardening
+          path: submission-juraj-v3.5-hardening.zip
+          if-no-files-found: error
