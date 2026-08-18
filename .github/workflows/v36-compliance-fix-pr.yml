@@ -18,7 +18,9 @@ jobs:
           ref: juraj-v3.6-compliance-fix
           fetch-depth: 0
       - name: Apply compliance fixes
-        run: python tools/apply_v36_compliance_fix.py
+        run: |
+          python tools/apply_v36_compliance_fix.py
+          python tools/tune_v36_compliance_fix.py
       - name: Unit and build smoke
         run: |
           set -euo pipefail
@@ -59,7 +61,12 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add competition/agents/juraj_v35_cpp/core.hpp competition/agents/juraj_v35_cpp/main.cpp competition/agents/juraj_v35_cpp/test_core.cpp competition/agents/juraj_v35_cpp/test_agent.cpp
+          git add competition/agents/juraj_v35_cpp/core.hpp \
+                  competition/agents/juraj_v35_cpp/main.cpp \
+                  competition/agents/juraj_v35_cpp/test_core.cpp \
+                  competition/agents/juraj_v35_cpp/test_agent.cpp \
+                  competition/agents/juraj_v35_cpp/test_picker.cpp \
+                  competition/agents/juraj_v35_cpp/test_picker_economics.cpp
           git commit -m 'V3.6: enforce castle exploration picker and attack invariants'
           git push origin HEAD:juraj-v3.6-compliance-fix
       - uses: actions/upload-artifact@v4
