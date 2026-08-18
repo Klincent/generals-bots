@@ -12,7 +12,7 @@ jobs:
     env:
       SDL_VIDEODRIVER: dummy
       E501: e50123cee7d924f0d643acd372a5300971f93917
-      CHAMPION: 4f0fac768a8fc447a3ecbdbfedd6aef05
+      CHAMPION: v35-champion-70fresh
     steps:
       - uses: actions/checkout@v4
         with: {ref: juraj-v35-e50123-selective, fetch-depth: 0}
