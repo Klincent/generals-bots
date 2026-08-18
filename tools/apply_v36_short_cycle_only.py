@@ -1,5 +1,7 @@
 from pathlib import Path
 
+# This patch deliberately removes permanent revisit tabu and keeps only a short
+# 3-4 move memory for zig-zag / small-loop prevention.
 root = Path(__file__).resolve().parents[1]
 core = root / "competition/agents/juraj_v35_cpp/core.hpp"
 main = root / "competition/agents/juraj_v35_cpp/main.cpp"
