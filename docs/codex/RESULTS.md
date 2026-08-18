@@ -210,3 +210,45 @@ Best Tune 1 candidate versus the champion on the same games:
 Representative identical-seed losses include 31000 seat 0, 31001 both seats, 31002 seat 1 and 31003 seat 1. Runtime and lifecycle are healthy: almost every picker completes, abort/thrash counters are essentially zero, and delivered units per move are strongly positive. The competitive weakness is opportunity cost, not failed logistics. The picker consumes about 33 actions/game while candidate expansion falls by roughly 29 actions/game and T250 land trails by 15.8. Raising the threshold to 16 reduced this cost and improved score, but threshold 20 and efficiency 2.5 each worsened results. No unrelated champion strategy was changed.
 
 Decision: **RUNTIME FIXED; COMPETITIVELY REJECTED**. Keep exact e50123 as champion. The final picker-fix branch is non-crashing and inspectable, but it does not satisfy the replacement gate and should not receive a leaderboard submission.
+
+## 2026-08-18 picker opportunity-cost redesign v2
+
+Baseline remains exact `e50123cee7d924f0d643acd372a5300971f93917`. All screens use seeds `31000..31029`, both seats, identical `JURAJ_RNG_SEED`, and the real `competition/matchup.py` protocol. The candidate remains picker-only and retains the repaired map-sized castle-history initialization and real-process protocol regression test from `705fb94`.
+
+### Experiment 0 — threshold-16 / efficiency-2.0 reproduction
+
+Branch/commit: `codex/e50123-picker-fix` / `705fb94`. The completed 60-game reproduction recorded immediately before this redesign is 25/6/29, score 0.4667, paired bootstrap 95% CI [0.3833, 0.5500], 0 errors and 0 illegal actions. Candidate land was 18.3/38.4/56.6/80.1 at T50/T100/T150/T250 versus champion 19.6/43.9/62.3/95.9; expansion was 111.53 versus 140.08 actions/game. Picker economics were 5.92 starts, 5.87 completions, 33.25 moves, 429.92 units delivered, and 12.93 delivered units/move. This confirms that the modal branch's healthy mechanics nevertheless displaced growth.
+
+### Experiment 1 — champion scheduler competition
+
+Branch/commit: `codex/e50123-picker-opportunity-v2` / `b1edc4015f5e0a9f8c4f306e458e0d64d849d734`.
+
+Change: removed the direct `picker_.active && picker_available` selection path and aggressive source reservation. HARD candidates and the unmodified champion `strategic_pick` now decide every turn; an active picker can pause without aborting. Added opportunity telemetry for expansion/offense availability, the final eight pre-production turns, urgent castle funding, idle slots, and pauses.
+
+Screen: 28/6/26, score 0.5167, paired bootstrap 95% CI [0.4083, 0.6250], 0 errors, 0 illegal actions. Six disjoint benchmark chunks were run concurrently after prebuilding immutable agent snapshots; aggregate game-level round-trip p50 was about 3.7 ms and chunk p95 ranged 4.1–5.8 ms (concurrency inflates these relative to candidate-internal p50/p95/p99 0.50/0.83/3.51 ms).
+
+Telemetry: land 18.30/38.45/57.20/80.98; expansion 113.15, war 270.35, enemy 236.82, search 39.10 actions/game. C1 built 20/60 (mean turn 295.1), C2 2/60 (mean turn 245). Picker: 6.28 starts, 5.63 completions, 31.75 moves and 407.32 delivered units/game (12.83 units/move). Of those moves, only 0.33/game had an expansion candidate and none had an offense candidate; 2.25 were within eight turns of production, none coincided with an urgent castle candidate, and 31.42 were classified as idle slots with neither expansion nor offense available. The picker was logically paused 20.98 candidate turns/game.
+
+Diagnosis: direct modal monopolization was real in Experiment 0, but removing it did not restore land: the picker still changed the board on roughly 32 nominally idle logistics/search slots, which changes later candidate availability. The exact champion's counterfactual action cannot be recovered from the existing audit format after states diverge (the audit stores results, latency and legality, not per-turn candidate classifications); the in-state classifier establishes that almost all selected picker actions displaced lower-priority search/logistics/pass rather than a simultaneously legal expansion or offense candidate.
+
+### Experiment 2 — low-opportunity duty cycle
+
+Branch/commit: `codex/e50123-picker-opportunity-v2` / `7c1d1fad370eac29c45ec2528bc07854538caa3e`.
+
+Change: one coherent duty-cycle gate: when productive champion work exists, picker yields to offense, expansion starvation, urgent castle funding, the final eight turns before production, and a minimum three-turn spacing. Logical picker state is retained while paused. No geometry or threshold changed.
+
+Screen: 28/6/26, score 0.5167, paired bootstrap 95% CI [0.4083, 0.6250], 0 errors, 0 illegal actions. Candidate-internal p50/p95/p99 was 0.49/0.91/3.41 ms. Land 18.30/38.45/57.20/80.98; expansion 113.27, war 274.88, enemy 242.47, search 39.10. C1/C2 results were unchanged at 20/60 (295.1) and 2/60 (245). Picker: 6.38 starts, 5.73 completions, 33.30 moves, 417.83 delivered (12.55 units/move), 14.00 duty yields and 22.42 paused turns/game. Selected picker moves with expansion/offense/near-tick/urgent-castle candidates were 0.27/0/2.33/0; 33.03 were idle-slot moves.
+
+Diagnosis: the duty gate fired, but the explicit idle-slot bypass meant it did not reduce the dominant cost. This experiment is attribution evidence against keeping that bypass, not a successful reduction in dedicated volume.
+
+### Experiment 3 — safe interior handoff
+
+Branch/commit: `codex/e50123-picker-opportunity-v2` / `96063b069b6c642f6ebf4ba637eedaf3ee8845b2`.
+
+Change: retain Experiment 2 and complete a picker at a safe owned cell three tiles inside the edge rather than requiring every collected stack to traverse all the way to the general. The handoff remains available to unchanged champion logistics/war logic.
+
+Screen: 29/6/25, score 0.5333, paired bootstrap 95% CI [0.4333, 0.6333], 0 errors, 0 illegal actions. Candidate-internal p50/p95/p99 was 0.50/0.79/3.84 ms. Land 18.30/38.45/57.20/80.98; expansion 113.27, war 277.32, enemy 247.65, search 39.10. C1 built 21/60 (mean 321.3), C2 2/60 (mean 245). Picker: 6.43 starts, 5.80 completions, 32.17 moves, 415.28 delivered (12.91 units/move), 13.68 duty yields and 22.03 paused turns/game. Selected picker moves with expansion/offense/near-tick/urgent-castle candidates were 0.22/0/2.27/0; 31.95 were idle-slot moves.
+
+Representative losses include seed/seat 31010/0, 31012/0, 31013/0, 31014/0, 31015/1, 31016/1, 31017/0 and 31018/0. Across these and the aggregate, early and late land remain the principal failure: T100 trails the champion reference by about 5.5 and T250 by about 14.9, expansion remains about 27 actions/game below the champion, and dedicated picker volume remains far above the requested 15 despite healthy completion/economics. War activity is not materially below the earlier picker, castles do not collapse, and no runtime/lifecycle failure is present.
+
+Decision: **DO NOT CONFIRM; KEEP e50123 CHAMPION.** Experiment 3 has the best point score, but it fails the explicit land, expansion, and dedicated-move health gates, and its wide interval includes substantial regression. Therefore the independent 120-game confirmation and leaderboard submission are not justified. Recommended picker design direction is the non-modal scheduler integration from Experiment 1, but with the idle-slot bypass removed or true piggyback recognition added so a picker progresses only when the champion-selected move itself advances the collector. A shorter handoff alone is insufficient.
