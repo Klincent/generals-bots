@@ -1,0 +1,132 @@
+name: v36-e50123-final-pr
+on:
+  pull_request:
+    branches: [master]
+permissions:
+  contents: write
+jobs:
+  validate:
+    if: ${{ github.head_ref == 'juraj-v3.6-e50123-rebuild' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      BASE_SHA: e50123cee7d924f0d643acd372a5300971f93917
+      FEATURE_SHA: 61bf6184dda66355170156d6d8b08be5511e4d36
+      SDL_VIDEODRIVER: dummy
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: juraj-v3.6-e50123-rebuild
+          fetch-depth: 0
+      - name: Apply picker and 3x3 selectively onto e50123
+        run: |
+          set -euo pipefail
+          for f in apply_v36_edge_picker.py apply_v36_picker_lifecycle_fix.py apply_v36_picker_economics.py apply_v36_search_refactor.py; do git show "$FEATURE_SHA:tools/$f" > "/tmp/$f"; done
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('/tmp/apply_v36_edge_picker.py');s=p.read_text()
+          s=s.replace('packet_at_.assign(n_,0);std::fprintf','packet_at_.assign(n_,0);owned_castle_history_.assign(n_,0);for(int x=0;x<n_;++x)if(o.owner[x]==1&&o.type[x]==3)owned_castle_history_[x]=1;std::fprintf')
+          old="""    if old not in text:\n        raise SystemExit(f'{label}: anchor not found')"""
+          new="""    if old not in text:\n        if label == 'replace two-rally edge shift with persistent wall picker':\n            start=text.index('  const Front*front=fronts_.primary();int sink=')\n            loop=text.index('for(int x=0;x<n_;++x)if(source(o,x)){',start)\n            end=text.index('\\n  int window_pass=',loop)\n            prefix=text[start:loop]\n            print(f'{label}: e50123 adapted')\n            return text[:start]+prefix+new+text[end:]\n        if label == 'picker persistence scheduling':\n            start=text.index('  std::vector<Candidate>filtered;')\n            end=text.index('\\n  if(q.from<0)',start)\n            print(f'{label}: e50123 adapted')\n            return text[:start]+new+text[end:]\n        raise SystemExit(f'{label}: anchor not found')"""
+          if old not in s: raise SystemExit('could not adapt patcher')
+          p.write_text(s.replace(old,new,1))
+          PY
+          python /tmp/apply_v36_edge_picker.py
+          python /tmp/apply_v36_picker_lifecycle_fix.py
+          python /tmp/apply_v36_picker_economics.py
+          python /tmp/apply_v36_search_refactor.py
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('competition/agents/juraj_v35_cpp/main.cpp');s=p.read_text()
+          old='packet_at_.assign(n_,0);init_sector_exploration();if(const char*e=std::getenv("V35_EDGE_PICKER_THRESHOLD"))'
+          new='packet_at_.assign(n_,0);owned_castle_history_.assign(n_,0);for(int x=0;x<n_;++x)if(o.owner[x]==1&&o.type[x]==3)owned_castle_history_[x]=1;init_sector_exploration();if(const char*e=std::getenv("V35_EDGE_PICKER_THRESHOLD"))'
+          if old not in s: raise SystemExit('final recapture init anchor not found')
+          p.write_text(s.replace(old,new,1))
+          PY
+      - name: Apply exact per-packet four-edge anti-cycle
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          core=Path('competition/agents/juraj_v35_cpp/core.hpp');s=core.read_text();a=s.index('inline bool route_allowed(');b=s.index('\nstruct Budget',a)
+          fn='inline bool route_allowed(const Packet&p,int dest,int new_distance,int old_distance,int event_version,Reason reason){bool emergency=reason==Reason::GENERAL_EMERGENCY||reason==Reason::TERMINAL_CAPTURE;if(emergency)return true;int seen_edges=0;for(int i=(int)p.path.size()-1;i>=1&&seen_edges<4;--i,++seen_edges)if(p.path[i-1]==p.cell&&p.path[i]==dest)return false;bool recent_return=false;int seen_cells=0;for(auto it=p.path.rbegin();it!=p.path.rend()&&seen_cells<5;++it,++seen_cells)if(*it==dest){recent_return=true;break;}bool changed=event_version!=p.event_version&&reason!=Reason::NONE;if(!changed&&new_distance>old_distance&&!recent_return)return false;return true;}'
+          core.write_text(s[:a]+fn+s[b:])
+          main=Path('competition/agents/juraj_v35_cpp/main.cpp');s=main.read_text();s,n=re.subn(r'while\(p\.path\.size\(\)>\d+\)p\.path\.pop_front\(\);','while(p.path.size()>5)p.path.pop_front();',s,count=1)
+          if n!=1: raise SystemExit('path trim not found')
+          a=s.index(' bool history_cycle(');b=s.index('\n bool packet_route_ok',a)
+          fn=' bool history_cycle(const Candidate&q)const{if(q.from<0||q.to<0)return false;if(q.reason==Reason::GENERAL_EMERGENCY||q.reason==Reason::TERMINAL_CAPTURE)return false;const Packet*p=packet_for(q.from);if(!p)return false;int seen_edges=0;for(int i=(int)p->path.size()-1;i>=1&&seen_edges<4;--i,++seen_edges)if(p->path[i-1]==q.from&&p->path[i]==q.to)return true;return false;}'
+          main.write_text(s[:a]+fn+s[b:])
+          PY
+      - name: Restore focused feature tests
+        run: |
+          set -euo pipefail
+          for f in test_picker.cpp test_picker_economics.cpp test_search_refactor.cpp; do git show "$FEATURE_SHA:competition/agents/juraj_v35_cpp/$f" > "competition/agents/juraj_v35_cpp/$f"; done
+          git show "$FEATURE_SHA:competition/agents/juraj_v35_cpp/test.sh" > competition/agents/juraj_v35_cpp/test.sh
+          chmod +x competition/agents/juraj_v35_cpp/test.sh
+          grep -q 'owned_castle_history_.assign' competition/agents/juraj_v35_cpp/main.cpp
+          grep -q 'castles_=plan_castles(g_,general_)' competition/agents/juraj_v35_cpp/main.cpp
+          grep -q 'init_sector_exploration()' competition/agents/juraj_v35_cpp/main.cpp
+      - name: Unit regression suite and build
+        run: |
+          set -euo pipefail
+          bash competition/agents/juraj_v35_cpp/test.sh
+          bash competition/agents/juraj_v35_cpp/build.sh
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install benchmark dependencies
+        run: pip install -e .
+      - name: Build exact e50123 champion
+        run: |
+          git worktree add --detach /tmp/champion "$BASE_SHA"
+          bash /tmp/champion/competition/agents/juraj_v35_cpp/build.sh
+      - name: Run 120 paired games vs exact e50123
+        run: |
+          set -euo pipefail
+          cat >/tmp/candidate.sh <<'EOF'
+          #!/usr/bin/env bash
+          export V35_EDGE_PICKER_THRESHOLD=16
+          export V36_EDGE_PICKER_MIN_EFFICIENCY=2.0
+          "$GITHUB_WORKSPACE/competition/agents/juraj_v35_cpp/run.sh" "$@" 2> >(sed -u 's/^/[CAND] /' >&2)
+          EOF
+          cat >/tmp/champion.sh <<'EOF'
+          #!/usr/bin/env bash
+          "/tmp/champion/competition/agents/juraj_v35_cpp/run.sh" "$@" 2> >(sed -u 's/^/[CHAMP] /' >&2)
+          EOF
+          chmod +x /tmp/candidate.sh /tmp/champion.sh
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/candidate.sh --baseline /tmp/champion.sh --start 31000 --seeds 60 --output /tmp/bench
+          cat /tmp/bench/summary.json
+      - name: Summarize requested feature telemetry
+        run: |
+          python - <<'PY' | tee /tmp/bench/features.txt
+          import json,re
+          from pathlib import Path
+          games=[json.loads(x) for x in Path('/tmp/bench/games.jsonl').read_text().splitlines() if x.strip()]
+          def last(e,p):
+            xs=[x[7:] for x in e.splitlines() if x.startswith('[CAND] '+p)];return xs[-1] if xs else ''
+          def ints(s):return {k:int(v) for k,v in re.findall(r'(\w+)=(-?\d+)',s)}
+          for res in ('win','draw','loss'):
+            xs=[g for g in games if g['result']==res]
+            if not xs:continue
+            P=[ints(last(g.get('stderr',''),'[v36_picker]')) for g in xs];S=[ints(last(g.get('stderr',''),'[v36_search]')) for g in xs];C=[ints(last(g.get('stderr',''),'[v35_castle_deadline]')) for g in xs]
+            av=lambda arr,k:sum(z.get(k,0) for z in arr)/len(arr)
+            print(res,len(xs),'picker_delivered',round(av(P,'delivered'),1),'touched',round(av(S,'touched'),2),'swept',round(av(S,'swept'),2),'c1_missing',sum(z.get('c1_build_turn',-1)<0 for z in C),'c2_missing',sum(z.get('c2_build_turn',-1)<0 for z in C))
+          PY
+      - name: Commit validated source and package submission
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]';git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add competition/agents/juraj_v35_cpp/core.hpp competition/agents/juraj_v35_cpp/main.cpp competition/agents/juraj_v35_cpp/test.sh competition/agents/juraj_v35_cpp/test_core.cpp competition/agents/juraj_v35_cpp/test_picker.cpp competition/agents/juraj_v35_cpp/test_picker_economics.cpp competition/agents/juraj_v35_cpp/test_search_refactor.cpp
+          git commit -m 'V3.6: e50123 plus picker 3x3 expansion and exact anti-cycle'
+          git push origin HEAD:juraj-v3.6-e50123-rebuild
+          mkdir -p /tmp/sub/juraj_v36
+          cp competition/agents/juraj_v35_cpp/{main.cpp,core.hpp,build.sh,run.sh} /tmp/sub/juraj_v36/
+          cd /tmp/sub && zip -qr /tmp/juraj_v36_e50123_selective.zip juraj_v36
+          sha256sum /tmp/juraj_v36_e50123_selective.zip > /tmp/bench/submission.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v36-e50123-final-results
+          path: |
+            /tmp/bench
+            /tmp/juraj_v36_e50123_selective.zip
+          retention-days: 5
