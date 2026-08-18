@@ -3,7 +3,7 @@ on:
   pull_request:
     branches: [master]
 permissions:
-  contents: write
+  contents: read
 jobs:
   test-benchmark:
     if: ${{ github.head_ref == 'juraj-v3.6-compliance-fix' }}
@@ -17,10 +17,12 @@ jobs:
         with:
           ref: juraj-v3.6-compliance-fix
           fetch-depth: 0
-      - name: Apply compliance fixes
+      - name: Verify committed compliance source
         run: |
-          python tools/apply_v36_compliance_fix.py
-          python tools/tune_v36_compliance_fix.py
+          set -euo pipefail
+          grep -q 'castle_funding_active' competition/agents/juraj_v35_cpp/core.hpp
+          grep -q 'picker_start_allowed' competition/agents/juraj_v35_cpp/core.hpp
+          grep -q 'picker_cooldown_until_' competition/agents/juraj_v35_cpp/main.cpp
       - name: Unit and build smoke
         run: |
           set -euo pipefail
@@ -56,19 +58,6 @@ jobs:
             --start 24200 --seeds 20 --output /tmp/v36-compliance
           cat /tmp/v36-compliance/summary.json
           python tools/analyze_v36_compliance.py /tmp/v36-compliance/games.jsonl | tee /tmp/v36-compliance/compliance.txt
-      - name: Commit tested source
-        run: |
-          set -euo pipefail
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add competition/agents/juraj_v35_cpp/core.hpp \
-                  competition/agents/juraj_v35_cpp/main.cpp \
-                  competition/agents/juraj_v35_cpp/test_core.cpp \
-                  competition/agents/juraj_v35_cpp/test_agent.cpp \
-                  competition/agents/juraj_v35_cpp/test_picker.cpp \
-                  competition/agents/juraj_v35_cpp/test_picker_economics.cpp
-          git commit -m 'V3.6: enforce castle exploration picker and attack invariants'
-          git push origin HEAD:juraj-v3.6-compliance-fix
       - uses: actions/upload-artifact@v4
         with:
           name: v36-compliance-benchmark
