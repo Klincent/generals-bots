@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Runtime tuning layered after the compliance patch; also aligns lifecycle tests.
 from pathlib import Path
 root=Path(__file__).resolve().parents[1]
 core=root/'competition/agents/juraj_v35_cpp/core.hpp'
