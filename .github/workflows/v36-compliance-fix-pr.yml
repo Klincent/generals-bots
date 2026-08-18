@@ -1,0 +1,69 @@
+name: v36-compliance-fix-pr
+on:
+  pull_request:
+    branches: [master]
+permissions:
+  contents: write
+jobs:
+  test-benchmark:
+    if: ${{ github.head_ref == 'juraj-v3.6-compliance-fix' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      CURRENT_SHA: 89568b0912eb3a482a3994349e2724642b893b3a
+      SDL_VIDEODRIVER: dummy
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: juraj-v3.6-compliance-fix
+          fetch-depth: 0
+      - name: Apply compliance fixes
+        run: python tools/apply_v36_compliance_fix.py
+      - name: Unit and build smoke
+        run: |
+          set -euo pipefail
+          bash competition/agents/juraj_v35_cpp/test.sh
+          bash competition/agents/juraj_v35_cpp/build.sh
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install benchmark dependencies
+        run: pip install -e .
+      - name: Build current per-packet baseline
+        run: |
+          git worktree add --detach /tmp/v36-current "$CURRENT_SHA"
+          bash /tmp/v36-current/competition/agents/juraj_v35_cpp/build.sh
+      - name: Run 40-game paired benchmark against current per-packet
+        run: |
+          set -euo pipefail
+          cat > /tmp/run-candidate.sh <<'EOF'
+          #!/usr/bin/env bash
+          export V35_EDGE_PICKER_THRESHOLD=16
+          export V36_EDGE_PICKER_MIN_EFFICIENCY=2.0
+          "$GITHUB_WORKSPACE/competition/agents/juraj_v35_cpp/run.sh" "$@" 2> >(sed -u 's/^/[CAND] /' >&2)
+          EOF
+          cat > /tmp/run-current.sh <<'EOF'
+          #!/usr/bin/env bash
+          export V35_EDGE_PICKER_THRESHOLD=16
+          export V36_EDGE_PICKER_MIN_EFFICIENCY=2.0
+          "/tmp/v36-current/competition/agents/juraj_v35_cpp/run.sh" "$@" 2> >(sed -u 's/^/[BASE] /' >&2)
+          EOF
+          chmod +x /tmp/run-candidate.sh /tmp/run-current.sh
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py \
+            --candidate /tmp/run-candidate.sh --baseline /tmp/run-current.sh \
+            --start 24200 --seeds 20 --output /tmp/v36-compliance
+          cat /tmp/v36-compliance/summary.json
+          python tools/analyze_v36_compliance.py /tmp/v36-compliance/games.jsonl | tee /tmp/v36-compliance/compliance.txt
+      - name: Commit tested source
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add competition/agents/juraj_v35_cpp/core.hpp competition/agents/juraj_v35_cpp/main.cpp competition/agents/juraj_v35_cpp/test_core.cpp competition/agents/juraj_v35_cpp/test_agent.cpp
+          git commit -m 'V3.6: enforce castle exploration picker and attack invariants'
+          git push origin HEAD:juraj-v3.6-compliance-fix
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v36-compliance-benchmark
+          path: /tmp/v36-compliance
+          retention-days: 3
