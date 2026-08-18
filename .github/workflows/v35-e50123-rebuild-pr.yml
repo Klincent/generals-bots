@@ -19,46 +19,38 @@ jobs:
         with:
           ref: juraj-v35-e50123-rebuild
           fetch-depth: 0
-      - name: Merge picker and 3x3 search layers onto e50123
+      - name: Merge selected V3.6 layers onto e50123
         run: |
           set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git merge --no-commit --no-ff "$V36_SEARCH" || {
-            echo 'MERGE_CONFLICTS:'
-            git status --short
-            git diff --name-only --diff-filter=U
-            exit 2
+            echo 'MERGE_CONFLICTS:'; git status --short; git diff --name-only --diff-filter=U; exit 2;
           }
-          # Keep the original e50123 castle timing rule: C1 planned for 150, C2 for 250.
           python - <<'PY'
           from pathlib import Path
-          p=Path('competition/agents/juraj_v35_cpp/core.hpp')
-          s=p.read_text()
-          s=s.replace('eligible(a,160)', 'eligible(a,150)')
-          p.write_text(s)
+          p=Path('competition/agents/juraj_v35_cpp/core.hpp'); s=p.read_text(); s=s.replace('eligible(a,160)','eligible(a,150)'); p.write_text(s)
           PY
-      - name: Apply exact per-packet four-edge anti-cycle guard
+      - name: Exact per-packet anti-cycle
         run: |
           set -euo pipefail
           python - <<'PY'
           from pathlib import Path
-          main=Path('competition/agents/juraj_v35_cpp/main.cpp')
-          core=Path('competition/agents/juraj_v35_cpp/core.hpp')
-          m=main.read_text(); c=core.read_text()
-          # 4 transitions = 5 positions retained per moving packet.
+          import re
+          mp=Path('competition/agents/juraj_v35_cpp/main.cpp'); cp=Path('competition/agents/juraj_v35_cpp/core.hpp')
+          m=mp.read_text(); c=cp.read_text()
           m=m.replace('while(p.path.size()>12)p.path.pop_front();','while(p.path.size()>5)p.path.pop_front();')
           old='bool history_cycle(const Candidate&q)const{if(q.from<0||q.to<0)return false;for(auto it=actions_.rbegin();it!=actions_.rend();++it){if(it->event!=event_)break;if(it->from==q.to&&it->to==q.from)return true;}return false;}'
           new='bool history_cycle(const Candidate&q)const{if(q.from<0||q.to<0)return false;if(q.reason==Reason::GENERAL_EMERGENCY||q.reason==Reason::TERMINAL_CAPTURE)return false;const Packet*p=packet_for(q.from);if(!p)return false;int seen_edges=0;for(int i=(int)p->path.size()-1;i>=1&&seen_edges<4;--i,++seen_edges)if(p->path[i-1]==q.from&&p->path[i]==q.to)return true;return false;}'
-          if old not in m and new not in m:
-              raise SystemExit('history_cycle anchor missing')
-          m=m.replace(old,new,1)
-          import re
+          if old in m: m=m.replace(old,new,1)
+          elif new not in m: raise SystemExit('history_cycle anchor missing')
           pat=r'inline bool route_allowed\(const Packet&p,int dest,int new_distance,int old_distance,int event_version,Reason reason\)\{.*?return true;\}'
           repl='inline bool route_allowed(const Packet&p,int dest,int new_distance,int old_distance,int event_version,Reason reason){bool emergency=reason==Reason::GENERAL_EMERGENCY||reason==Reason::TERMINAL_CAPTURE;if(emergency)return true;int seen_edges=0;for(int i=(int)p.path.size()-1;i>=1&&seen_edges<4;--i,++seen_edges)if(p.path[i-1]==p.cell&&p.path[i]==dest)return false;bool recent_return=false;int seen_cells=0;for(auto it=p.path.rbegin();it!=p.path.rend()&&seen_cells<5;++it,++seen_cells)if(*it==dest){recent_return=true;break;}bool changed=event_version!=p.event_version&&reason!=Reason::NONE;if(!changed&&new_distance>old_distance&&!recent_return)return false;return true;}'
-          c2,n=re.subn(pat,repl,c,count=1)
-          if n!=1: raise SystemExit(f'route_allowed replace count={n}')
-          main.write_text(m); core.write_text(c2)
+          c,n=re.subn(pat,repl,c,count=1)
+          if n!=1: raise SystemExit(f'route_allowed count={n}')
+          mp.write_text(m); cp.write_text(c)
           PY
-      - name: Verify required invariants survived merge
+      - name: Verify requested features
         run: |
           set -euo pipefail
           grep -q 'owned_castle_history_' competition/agents/juraj_v35_cpp/main.cpp
@@ -70,7 +62,7 @@ jobs:
           grep -q 'edge_picker_threshold_=16' competition/agents/juraj_v35_cpp/main.cpp
           grep -q 'eligible(a,150)' competition/agents/juraj_v35_cpp/core.hpp
           grep -q 'eligible(b,250)' competition/agents/juraj_v35_cpp/core.hpp
-      - name: Add focused invariant tests
+      - name: Focused invariants, unit tests, build
         run: |
           cat > competition/agents/juraj_v35_cpp/test_rebuild_invariants.cpp <<'EOF'
           #define V35_AGENT_TEST
@@ -78,85 +70,48 @@ jobs:
           #include <cassert>
           #include <iostream>
           static Observation b(){Observation o;o.turn=0;o.type.assign(441,1);o.owner.assign(441,0);o.army.assign(441,0);o.type[220]=4;o.owner[220]=1;o.army[220]=90;o.my_land=1;o.my_army=90;return o;}
-          int main(){
-            Agent a(0,21,21);auto o=b();a.decide(o);
-            int c1=a.planned_castle(0),c2=a.planned_castle(1);assert(c1>=0&&c2>=0&&c1!=c2);
-            assert(a.search_sector_backbone_count()==8);assert(a.search_reachable_sectors()==9);
-            // Castle sites are fixed from turn zero, not re-planned from later ownership changes.
-            o.turn=120;for(int x=0;x<441;++x)if(x!=220){o.owner[x]=(x%3==0)?1:0;o.army[x]=(o.owner[x]==1)?2:0;}o.owner[220]=1;o.army[220]=30;a.decide(o);assert(a.planned_castle(0)==c1&&a.planned_castle(1)==c2);
-            // Exact directed-edge rule: A-B-A is legal; repeated A-B inside last four transitions is blocked.
-            Packet p;p.cell=10;p.target=20;p.event_version=0;p.path={10,11,10};
-            assert(route_allowed(p,11,1,1,0,Reason::SEARCH_PROGRESS));
-            p.path={10,11,12,13,10};p.cell=10;assert(!route_allowed(p,11,1,1,0,Reason::SEARCH_PROGRESS));
-            assert(route_allowed(p,11,1,1,0,Reason::GENERAL_EMERGENCY));
-            std::cout<<"e50123 rebuild invariants passed\n";
-          }
+          int main(){Agent a(0,21,21);auto o=b();a.decide(o);int c1=a.planned_castle(0),c2=a.planned_castle(1);assert(c1>=0&&c2>=0&&c1!=c2);assert(a.search_sector_backbone_count()==8);assert(a.search_reachable_sectors()==9);o.turn=120;for(int x=0;x<441;++x)if(x!=220){o.owner[x]=(x%3==0)?1:0;o.army[x]=o.owner[x]?2:0;}o.owner[220]=1;o.army[220]=30;a.decide(o);assert(a.planned_castle(0)==c1&&a.planned_castle(1)==c2);Packet p;p.cell=10;p.target=20;p.event_version=0;p.path={10,11,10};assert(route_allowed(p,11,1,1,0,Reason::SEARCH_PROGRESS));p.path={10,11,12,13,10};p.cell=10;assert(!route_allowed(p,11,1,1,0,Reason::SEARCH_PROGRESS));assert(route_allowed(p,11,1,1,0,Reason::GENERAL_EMERGENCY));std::cout<<"e50123 rebuild invariants passed\n";}
           EOF
-          cat >> competition/agents/juraj_v35_cpp/test.sh <<'EOF'
-          g++ -O2 -std=c++17 -Wall -Wextra -Wpedantic test_rebuild_invariants.cpp -o test_rebuild_invariants
-          ./test_rebuild_invariants
-          EOF
-      - name: Unit tests and build
-        run: |
-          set -euo pipefail
+          printf '\ng++ -O2 -std=c++17 -Wall -Wextra -Wpedantic test_rebuild_invariants.cpp -o test_rebuild_invariants\n./test_rebuild_invariants\n' >> competition/agents/juraj_v35_cpp/test.sh
           bash competition/agents/juraj_v35_cpp/test.sh
           bash competition/agents/juraj_v35_cpp/build.sh
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install benchmark dependencies
-        run: pip install -e .
-      - name: Build champion and original e50123
+      - name: Install benchmark dependencies and baselines
         run: |
-          set -euo pipefail
+          pip install -e .
           git worktree add --detach /tmp/champion "$CHAMPION"
           git worktree add --detach /tmp/e501 "$BASE_E501"
           bash /tmp/champion/competition/agents/juraj_v35_cpp/build.sh
           bash /tmp/e501/competition/agents/juraj_v35_cpp/build.sh
-      - name: 80-game paired benchmark vs champion
-        run: |
-          set -euo pipefail
-          mkdir -p /tmp/rebuild-bench
           cat > /tmp/run-candidate.sh <<'EOF'
           #!/usr/bin/env bash
           export V35_EDGE_PICKER_THRESHOLD=16
           export V36_EDGE_PICKER_MIN_EFFICIENCY=2.0
           "$GITHUB_WORKSPACE/competition/agents/juraj_v35_cpp/run.sh" "$@"
           EOF
-          cat > /tmp/run-champion.sh <<'EOF'
-          #!/usr/bin/env bash
-          "/tmp/champion/competition/agents/juraj_v35_cpp/run.sh" "$@"
-          EOF
-          chmod +x /tmp/run-candidate.sh /tmp/run-champion.sh
+          printf '#!/usr/bin/env bash\n"/tmp/champion/competition/agents/juraj_v35_cpp/run.sh" "$@"\n' > /tmp/run-champion.sh
+          printf '#!/usr/bin/env bash\n"/tmp/e501/competition/agents/juraj_v35_cpp/run.sh" "$@"\n' > /tmp/run-e501.sh
+          chmod +x /tmp/run-candidate.sh /tmp/run-champion.sh /tmp/run-e501.sh
+      - name: Benchmark 80 games vs champion
+        run: |
+          mkdir -p /tmp/rebuild-bench
           python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/run-candidate.sh --baseline /tmp/run-champion.sh --start 31000 --seeds 40 --output /tmp/rebuild-bench/champion
           cat /tmp/rebuild-bench/champion/summary.json
-      - name: 40-game paired regression vs original e50123
+      - name: Regression 40 games vs exact e50123
         run: |
-          set -euo pipefail
-          cat > /tmp/run-e501.sh <<'EOF'
-          #!/usr/bin/env bash
-          "/tmp/e501/competition/agents/juraj_v35_cpp/run.sh" "$@"
-          EOF
-          chmod +x /tmp/run-e501.sh
           python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/run-candidate.sh --baseline /tmp/run-e501.sh --start 32000 --seeds 20 --output /tmp/rebuild-bench/e501
           cat /tmp/rebuild-bench/e501/summary.json
-      - name: Commit tested source
+      - name: Commit and package tested source
         run: |
           set -euo pipefail
           git reset
           git add competition/agents/juraj_v35_cpp/core.hpp competition/agents/juraj_v35_cpp/main.cpp competition/agents/juraj_v35_cpp/test.sh competition/agents/juraj_v35_cpp/test_picker.cpp competition/agents/juraj_v35_cpp/test_picker_economics.cpp competition/agents/juraj_v35_cpp/test_search_refactor.cpp competition/agents/juraj_v35_cpp/test_rebuild_invariants.cpp
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'V3.5 e50123: add picker 3x3 exploration and exact anti-cycle'
+          git commit -m 'V3.5 e50123: picker 3x3 exploration and exact anti-cycle'
           git push origin HEAD:juraj-v35-e50123-rebuild
-      - name: Build submission zip
-        run: |
-          set -euo pipefail
           rm -rf /tmp/submission && mkdir -p /tmp/submission/juraj_v35
-          cp competition/agents/juraj_v35_cpp/main.cpp /tmp/submission/juraj_v35/
-          cp competition/agents/juraj_v35_cpp/core.hpp /tmp/submission/juraj_v35/
-          cp competition/agents/juraj_v35_cpp/build.sh /tmp/submission/juraj_v35/
-          cp competition/agents/juraj_v35_cpp/run.sh /tmp/submission/juraj_v35/
+          cp competition/agents/juraj_v35_cpp/{main.cpp,core.hpp,build.sh,run.sh} /tmp/submission/juraj_v35/
           (cd /tmp/submission && zip -qr /tmp/juraj_v35_e50123_rebuild.zip juraj_v35)
           sha256sum /tmp/juraj_v35_e50123_rebuild.zip | tee /tmp/rebuild-bench/submission.sha256
       - uses: actions/upload-artifact@v4
