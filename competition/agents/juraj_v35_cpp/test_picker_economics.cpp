@@ -6,7 +6,11 @@
 
 static Observation board(){
  Observation o;o.turn=120;o.type.assign(441,1);o.owner.assign(441,1);o.army.assign(441,1);
- o.type[220]=4;o.army[220]=8;o.my_land=441;o.my_army=448;o.opp_land=0;o.opp_army=0;return o;
+ o.type[220]=4;o.army[220]=8;
+ // On this deterministic 21x21 test map the planner selects 73/153. Mark
+ // both as already-built so this test isolates picker economics/lifecycle.
+ o.type[73]=3;o.type[153]=3;
+ o.my_land=441;o.my_army=448;o.opp_land=0;o.opp_army=0;return o;
 }
 static void recalc(Observation&o){o.my_army=0;o.my_land=0;for(int z=0;z<441;++z)if(o.owner[z]==1){++o.my_land;o.my_army+=o.army[z];}}
 int main(){
