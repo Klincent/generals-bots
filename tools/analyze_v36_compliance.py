@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Analyzer for the committed compliance-fix benchmark; runtime patching is no longer needed.
 import json,re,sys
 from pathlib import Path
 games=[json.loads(x) for x in Path(sys.argv[1]).read_text().splitlines() if x.strip() and 'result' in json.loads(x)]
