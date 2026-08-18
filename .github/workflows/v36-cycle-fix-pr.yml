@@ -1,0 +1,33 @@
+name: v36-cycle-fix-pr
+on:
+  pull_request:
+    branches: [master]
+permissions:
+  contents: write
+jobs:
+  apply-test-push:
+    if: ${{ github.head_ref == 'juraj-v3.6-short-cycle-only' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: juraj-v3.6-short-cycle-only
+          fetch-depth: 0
+      - name: Apply exact four-move directed-edge cycle semantics
+        run: python tools/apply_v36_directed_edge_cycle_guard.py
+      - name: Unit and build smoke
+        run: |
+          set -euo pipefail
+          bash competition/agents/juraj_v35_cpp/test.sh
+          bash competition/agents/juraj_v35_cpp/build.sh
+      - name: Commit tested source to feature branch
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add competition/agents/juraj_v35_cpp/core.hpp \
+                  competition/agents/juraj_v35_cpp/main.cpp \
+                  competition/agents/juraj_v35_cpp/test_core.cpp \
+                  competition/agents/juraj_v35_cpp/test_stall_hardening.cpp
+          git commit -m 'V3.6: directed-edge cycle guard'
+          git push origin HEAD:juraj-v3.6-short-cycle-only
