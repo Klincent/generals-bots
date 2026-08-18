@@ -5,7 +5,7 @@
 #include <iostream>
 
 static Observation board(){
- Observation o;o.turn=120;o.type.assign(441,1);o.owner.assign(441,1);o.army.assign(441,1);
+ Observation o;o.turn=100;o.type.assign(441,1);o.owner.assign(441,1);o.army.assign(441,1);
  o.type[220]=4;o.army[220]=8;
  // On this deterministic 21x21 test map the planner selects 73/153. Mark
  // both as already-built so this test isolates picker economics/lifecycle.

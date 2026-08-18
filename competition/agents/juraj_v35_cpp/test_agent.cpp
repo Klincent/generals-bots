@@ -40,5 +40,7 @@ int main(){
  {Agent a(0,21,21);auto o=board();o.owner[0]=1;o.army[0]=25;o.my_land=2;o.my_army=37;auto q=a.decide(o);size_t before=a.packet_count();apply(o,q);a.decide(o);assert(before<=1&&a.packet_count()>=1&&a.objective_changes()<=2);}
  // Confirmed general remains exact despite later fog.
  {Agent a(0,21,21);auto o=board();o.type[230]=4;o.owner[230]=2;o.army[230]=3;o.owner[229]=1;o.army[229]=1;a.decide(o);assert(a.enemy_general_confirmed()&&a.enemy_general_cell()==230);o.turn++;o.type[230]=-1;o.owner[230]=-1;a.decide(o);assert(a.enemy_general_cell()==230);}
+ // Once the enemy general is confirmed, a quiet front still produces forward attack progress.
+ {Agent a(0,21,21);auto o=board();for(int x=0;x<441;++x)if(x!=220){o.owner[x]=1;o.army[x]=1;}o.type[230]=4;o.owner[230]=2;o.army[230]=3;o.army[220]=20;o.my_land=440;o.my_army=459;o.opp_land=1;o.opp_army=3;auto q=a.decide(o);assert(q.kind==0);int s=src(q),d=dst(q);auto md=[](int x){return std::abs(x/21-230/21)+std::abs(x%21-230%21);};assert(md(d)<md(s));}
  std::cout<<"v35 agent recovery scenarios passed\n";
 }

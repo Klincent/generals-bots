@@ -5,7 +5,7 @@
 #include <iostream>
 
 static Observation picker_board(){
- Observation o;o.turn=120;o.type.assign(441,1);o.owner.assign(441,1);o.army.assign(441,1);o.type[220]=4;o.army[220]=5;
+ Observation o;o.turn=100;o.type.assign(441,1);o.owner.assign(441,1);o.army.assign(441,1);o.type[220]=4;o.army[220]=5;
  for(int r:{2,5,8})o.army[r*21+20]=3;
  o.my_land=441;o.my_army=452;o.opp_land=0;o.opp_army=0;return o;
 }
