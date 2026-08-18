@@ -14,12 +14,18 @@ int main(){
  assert(schedule({{4,1,2,0,99,Reason::SEARCH_PROGRESS},{3,2,3,0,1,Reason::PRODUCTION_TICK}}).reason==Reason::PRODUCTION_TICK);
  // 5 corner and 6 dead-end evacuation select the highest tier, FULL by default.
  Candidate rear{2,0,1,0,100,Reason::REAR_EVACUATION,false};assert(schedule({rear,{4,4,5,0,999,Reason::SEARCH_PROGRESS}}).reason==Reason::REAR_EVACUATION&&!rear.split);
- // 7 A-B-A and 8 A-B-C-B loops are hard rejected.
- Packet p;p.cell=2;p.target=8;p.event_version=1;p.path={0,1,2};assert(!route_allowed(p,1,2,2,1,Reason::NONE));p.path={0,1,2,3};assert(!route_allowed(p,1,2,2,1,Reason::NONE));
- // 9 noncritical event changes do NOT reopen visited cells.
- p.role=PacketRole::SEARCH;assert(!route_allowed(p,1,2,2,2,Reason::SEARCH_PROGRESS));
- // 10 a real general emergency may still override the tabu.
- assert(route_allowed(p,2,3,2,2,Reason::GENERAL_EMERGENCY));
+ // 7 A-B-A is allowed: one backtrack may be necessary to leave a dead end.
+ Packet p;p.target=8;p.event_version=1;p.cell=1;p.path={0,1};assert(route_allowed(p,0,3,2,1,Reason::NONE));
+ // 8 A-B-A-B is blocked: after returning to A, the same directed A->B edge may not repeat.
+ p.cell=0;p.path={0,1,0};assert(!route_allowed(p,1,2,2,1,Reason::NONE));
+ // 9 A-B-C-B is allowed, but 10 the next B->C is blocked (B-C-B-C).
+ p.cell=2;p.path={0,1,2};assert(route_allowed(p,1,3,2,1,Reason::NONE));p.cell=1;p.path={0,1,2,1};assert(!route_allowed(p,2,2,2,1,Reason::NONE));
+ // 11 A-B-C-D-A is allowed, but 12 then A->B must change direction.
+ p.cell=3;p.path={0,1,2,3};assert(route_allowed(p,0,4,3,1,Reason::NONE));p.cell=0;p.path={0,1,2,3,0};assert(!route_allowed(p,1,2,2,1,Reason::NONE));
+ // 13 once an edge falls outside the four-move history it can be used again.
+ p.cell=0;p.path={1,2,3,4,0};assert(route_allowed(p,1,1,2,1,Reason::NONE));
+ // 14 a real general emergency may override the short cycle guard.
+ p.cell=0;p.path={0,1,0};assert(route_allowed(p,1,3,2,1,Reason::GENERAL_EMERGENCY));
  // 10 contact creates war surplus and 11 FULL remains default.
  auto b=budget(200,20,15,20,true,.6);assert(b.war>0&&b.front==b.war);assert(!rear.split);
  // 12 swarm response and 13 doomstack response avoid chase/head-on policy.
@@ -38,5 +44,5 @@ int main(){
  auto large=open_graph(21,21);Belief belief;belief.initialise(large,220);double before=belief.entropy();belief.back_project(large,220,221);assert(belief.entropy()!=before&&belief.top()>=0);
  // 20 scheduler output is deterministic and graph moves are legal-adjacent.
  auto q=schedule({{3,1,2,0,1,Reason::SEARCH_PROGRESS},{3,1,3,0,1,Reason::SEARCH_PROGRESS}});assert(q.to==2&&g.neighbor(0,1)==9);
- std::cout<<"v35 core: 21 behavioral checks passed\n";
+ std::cout<<"v35 core: 27 behavioral checks passed\n";
 }
