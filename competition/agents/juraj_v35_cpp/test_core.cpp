@@ -14,10 +14,16 @@ int main(){
  assert(schedule({{4,1,2,0,99,Reason::SEARCH_PROGRESS},{3,2,3,0,1,Reason::PRODUCTION_TICK}}).reason==Reason::PRODUCTION_TICK);
  // 5 corner and 6 dead-end evacuation select the highest tier, FULL by default.
  Candidate rear{2,0,1,0,100,Reason::REAR_EVACUATION,false};assert(schedule({rear,{4,4,5,0,999,Reason::SEARCH_PROGRESS}}).reason==Reason::REAR_EVACUATION&&!rear.split);
- // 7 A-B-A and 8 A-B-C-B loops are hard rejected.
- Packet p;p.cell=2;p.target=8;p.event_version=1;p.path={0,1,2};assert(!route_allowed(p,1,2,2,1,Reason::NONE));p.path={0,1,2,3};assert(!route_allowed(p,1,2,2,1,Reason::NONE));
- // 9 a real strategic event permits reversal.
- assert(route_allowed(p,2,3,2,2,Reason::GENERAL_EMERGENCY));
+ // 7 A-B-A is allowed: a one-step backtrack can be necessary in a dead end.
+ Packet p;p.target=8;p.event_version=1;p.cell=1;p.path={0,1};assert(route_allowed(p,0,3,2,1,Reason::NONE));
+ // 8 A-B-A-B is blocked because directed edge A->B repeats inside four-move history.
+ p.cell=0;p.path={0,1,0};assert(!route_allowed(p,1,2,3,1,Reason::NONE));
+ // 9 A-B-C-B is allowed, but 10 the following B->C is blocked as a repeated directed edge.
+ p.cell=2;p.path={0,1,2};assert(route_allowed(p,1,3,2,1,Reason::NONE));p.cell=1;p.path={0,1,2,1};assert(!route_allowed(p,2,2,3,1,Reason::NONE));
+ // 11 A-B-C-D-A is allowed, but 12 the following A->B repeats a still-recent directed edge.
+ p.cell=3;p.path={0,1,2,3};assert(route_allowed(p,0,3,2,1,Reason::NONE));p.cell=0;p.path={0,1,2,3,0};assert(!route_allowed(p,1,2,3,1,Reason::NONE));
+ // 13 unrelated movement away from target is still rejected; 14 a strategic event still permits it.
+ p.cell=3;p.path={0,1,2,3};assert(!route_allowed(p,4,3,2,1,Reason::NONE));assert(route_allowed(p,4,3,2,2,Reason::GENERAL_EMERGENCY));
  // 10 contact creates war surplus and 11 FULL remains default.
  auto b=budget(200,20,15,20,true,.6);assert(b.war>0&&b.front==b.war);assert(!rear.split);
  // 12 swarm response and 13 doomstack response avoid chase/head-on policy.
@@ -36,5 +42,5 @@ int main(){
  auto large=open_graph(21,21);Belief belief;belief.initialise(large,220);double before=belief.entropy();belief.back_project(large,220,221);assert(belief.entropy()!=before&&belief.top()>=0);
  // 20 scheduler output is deterministic and graph moves are legal-adjacent.
  auto q=schedule({{3,1,2,0,1,Reason::SEARCH_PROGRESS},{3,1,3,0,1,Reason::SEARCH_PROGRESS}});assert(q.to==2&&g.neighbor(0,1)==9);
- std::cout<<"v35 core: 20 behavioral checks passed\n";
+ std::cout<<"v35 core: 25 behavioral checks passed\n";
 }
