@@ -1,0 +1,60 @@
+name: v35-e50123-tune-search
+on:
+  pull_request:
+    branches: [master]
+permissions:
+  contents: read
+jobs:
+  quick-ab:
+    if: ${{ github.head_ref == 'juraj-v35-e50123-selective' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      SDL_VIDEODRIVER: dummy
+      E501: e50123cee7d924f0d643acd372a5300971f93917
+      CHAMPION: v35-champion-70fresh
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: juraj-v35-e50123-selective, fetch-depth: 0}
+      - name: Apply conservative 3x3/search scheduler tuning
+        run: python tools/tune_e50123_conservative_3x3.py
+      - name: Unit tests and build
+        run: |
+          set -euo pipefail
+          cd competition/agents/juraj_v35_cpp
+          bash test.sh
+          g++ -O2 -std=c++17 -Wall -Wextra -Wpedantic test_selective_invariants.cpp -o test_selective_invariants
+          ./test_selective_invariants
+          bash build.sh
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Prepare runners
+        run: |
+          set -euo pipefail
+          pip install -e .
+          git worktree add --detach /tmp/e501 "$E501"
+          git worktree add --detach /tmp/champion "$CHAMPION"
+          bash /tmp/e501/competition/agents/juraj_v35_cpp/build.sh
+          bash /tmp/champion/competition/agents/juraj_v35_cpp/build.sh
+          cat > /tmp/candidate.sh <<'EOF'
+          #!/usr/bin/env bash
+          export V35_EDGE_PICKER_THRESHOLD=16 V36_EDGE_PICKER_MIN_EFFICIENCY=2.0
+          "$GITHUB_WORKSPACE/competition/agents/juraj_v35_cpp/run.sh" "$@"
+          EOF
+          printf '#!/usr/bin/env bash\n"/tmp/e501/competition/agents/juraj_v35_cpp/run.sh" "$@"\n' > /tmp/e501.sh
+          printf '#!/usr/bin/env bash\n"/tmp/champion/competition/agents/juraj_v35_cpp/run.sh" "$@"\n' > /tmp/champion.sh
+          chmod +x /tmp/candidate.sh /tmp/e501.sh /tmp/champion.sh
+      - name: 60 games vs exact e50123
+        run: |
+          mkdir -p /tmp/tune
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/candidate.sh --baseline /tmp/e501.sh --start 39000 --seeds 30 --output /tmp/tune/e501
+          cat /tmp/tune/e501/summary.json
+      - name: 60 games vs champion
+        run: |
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/candidate.sh --baseline /tmp/champion.sh --start 40000 --seeds 30 --output /tmp/tune/champion
+          cat /tmp/tune/champion/summary.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: e50123-conservative-3x3-ab
+          path: /tmp/tune
+          retention-days: 2
