@@ -1,0 +1,49 @@
+name: package-e50123-champion
+on:
+  pull_request:
+    branches: [master]
+permissions:
+  contents: read
+jobs:
+  package:
+    if: ${{ github.head_ref == 'tmp/e50123-package' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      CHAMP_SHA: e50123cee7d924f0d643acd372a5300971f93917
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Checkout exact champion
+        run: |
+          set -euo pipefail
+          git worktree add --detach /tmp/e50123 "$CHAMP_SHA"
+          test "$(git -C /tmp/e50123 rev-parse HEAD)" = "$CHAMP_SHA"
+      - name: Test and build exact champion
+        run: |
+          set -euo pipefail
+          bash /tmp/e50123/competition/agents/juraj_v35_cpp/test.sh
+          bash /tmp/e50123/competition/agents/juraj_v35_cpp/build.sh
+      - name: Package exact champion submission
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/sub && mkdir -p /tmp/sub/juraj_v35
+          cp /tmp/e50123/competition/agents/juraj_v35_cpp/main.cpp /tmp/sub/juraj_v35/
+          cp /tmp/e50123/competition/agents/juraj_v35_cpp/core.hpp /tmp/sub/juraj_v35/
+          cp /tmp/e50123/competition/agents/juraj_v35_cpp/build.sh /tmp/sub/juraj_v35/
+          cp /tmp/e50123/competition/agents/juraj_v35_cpp/run.sh /tmp/sub/juraj_v35/
+          chmod +x /tmp/sub/juraj_v35/build.sh /tmp/sub/juraj_v35/run.sh
+          cd /tmp/sub
+          zip -qr /tmp/juraj_e50123_champion_submission.zip juraj_v35
+          sha256sum /tmp/juraj_e50123_champion_submission.zip > /tmp/juraj_e50123_champion_submission.sha256
+          git -C /tmp/e50123 rev-parse HEAD > /tmp/e50123_commit.txt
+          cat /tmp/juraj_e50123_champion_submission.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: e50123-champion-submission
+          path: |
+            /tmp/juraj_e50123_champion_submission.zip
+            /tmp/juraj_e50123_champion_submission.sha256
+            /tmp/e50123_commit.txt
+          retention-days: 5
