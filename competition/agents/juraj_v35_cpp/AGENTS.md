@@ -57,6 +57,18 @@ The picker is logistics: recover stranded/rear/edge army and deliver useful mass
 - A temporarily pre-empted picker should be resumable; do not repeatedly restart/abort it without cause.
 - Picker should justify its move cost economically. Report starts, completions, moves, delivered units and aborts.
 
+## Runtime failures are bugs, not strategic verdicts
+
+If a feature branch crashes, closes stdout, violates the agent protocol, or produces invalid/illegal actions, do not classify the feature as competitively rejected yet.
+
+- Reproduce the exact failure with the real competition protocol.
+- Use ASan/UBSan or an equivalent debug build to identify the concrete invalid access / undefined behavior.
+- Compare initialization and persistent state against the exact champion so feature work does not accidentally delete unrelated state.
+- Add an integration regression test that fails before the fix and passes after it.
+- Only make a competitive keep/reject decision after the candidate completes a valid non-crashing benchmark.
+
+A unit test pass does not override a real protocol crash.
+
 ## Attack and global strategy
 
 A requested local feature must not weaken the champion's attack pipeline. Check that the bot still transitions from land growth / search into gathering and decisive war activity.
