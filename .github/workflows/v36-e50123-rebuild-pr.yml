@@ -24,6 +24,15 @@ jobs:
           for f in apply_v36_edge_picker.py apply_v36_picker_lifecycle_fix.py apply_v36_picker_economics.py apply_v36_search_refactor.py; do
             git show "$FEATURE_SHA:tools/$f" > "/tmp/$f"
           done
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('/tmp/apply_v36_edge_picker.py')
+          s=p.read_text()
+          old='packet_at_.assign(n_,0);std::fprintf'
+          new='packet_at_.assign(n_,0);owned_castle_history_.assign(n_,0);for(int x=0;x<n_;++x)if(o.owner[x]==1&&o.type[x]==3)owned_castle_history_[x]=1;std::fprintf'
+          if old not in s: raise SystemExit('picker patcher init anchor not found')
+          p.write_text(s.replace(old,new))
+          PY
       - name: Apply picker and 3x3 exploration only
         run: |
           set -euo pipefail
@@ -36,18 +45,13 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           core=Path('competition/agents/juraj_v35_cpp/core.hpp')
-          s=core.read_text()
-          a=s.index('inline bool route_allowed(')
-          b=s.index('\nstruct Budget',a)
+          s=core.read_text();a=s.index('inline bool route_allowed(');b=s.index('\nstruct Budget',a)
           fn='inline bool route_allowed(const Packet&p,int dest,int new_distance,int old_distance,int event_version,Reason reason){bool emergency=reason==Reason::GENERAL_EMERGENCY||reason==Reason::TERMINAL_CAPTURE;if(emergency)return true;int seen_edges=0;for(int i=(int)p.path.size()-1;i>=1&&seen_edges<4;--i,++seen_edges)if(p.path[i-1]==p.cell&&p.path[i]==dest)return false;bool recent_return=false;int seen_cells=0;for(auto it=p.path.rbegin();it!=p.path.rend()&&seen_cells<5;++it,++seen_cells)if(*it==dest){recent_return=true;break;}bool changed=event_version!=p.event_version&&reason!=Reason::NONE;if(!changed&&new_distance>old_distance&&!recent_return)return false;return true;}'
           core.write_text(s[:a]+fn+s[b:])
-          main=Path('competition/agents/juraj_v35_cpp/main.cpp')
-          s=main.read_text()
-          import re
+          main=Path('competition/agents/juraj_v35_cpp/main.cpp');s=main.read_text();import re
           s,n=re.subn(r'while\(p\.path\.size\(\)>\d+\)p\.path\.pop_front\(\);','while(p.path.size()>5)p.path.pop_front();',s,count=1)
           if n!=1: raise SystemExit('could not trim packet path to 5 cells')
-          a=s.index(' bool history_cycle(')
-          b=s.index('\n bool packet_route_ok',a)
+          a=s.index(' bool history_cycle(');b=s.index('\n bool packet_route_ok',a)
           fn=' bool history_cycle(const Candidate&q)const{if(q.from<0||q.to<0)return false;if(q.reason==Reason::GENERAL_EMERGENCY||q.reason==Reason::TERMINAL_CAPTURE)return false;const Packet*p=packet_for(q.from);if(!p)return false;int seen_edges=0;for(int i=(int)p->path.size()-1;i>=1&&seen_edges<4;--i,++seen_edges)if(p->path[i-1]==q.from&&p->path[i]==q.to)return true;return false;}'
           main.write_text(s[:a]+fn+s[b:])
           PY
@@ -104,9 +108,7 @@ jobs:
           "/tmp/champion/competition/agents/juraj_v35_cpp/run.sh" "$@" 2> >(sed -u 's/^/[CHAMP] /' >&2)
           EOF
           chmod +x /tmp/run-candidate.sh /tmp/run-champion.sh
-          python competition/agents/juraj_v35_cpp/paired_benchmark.py \
-            --candidate /tmp/run-candidate.sh --baseline /tmp/run-champion.sh \
-            --start 30000 --seeds 60 --output /tmp/e50123-rebuild-bench
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/run-candidate.sh --baseline /tmp/run-champion.sh --start 30000 --seeds 60 --output /tmp/e50123-rebuild-bench
           cat /tmp/e50123-rebuild-bench/summary.json
       - name: Feature telemetry summary
         run: |
@@ -115,25 +117,21 @@ jobs:
           from pathlib import Path
           rows=[json.loads(x) for x in Path('/tmp/e50123-rebuild-bench/games.jsonl').read_text().splitlines() if x.strip()]
           def tag(stderr,prefix):
-            xs=[x[7:] for x in stderr.splitlines() if x.startswith('[CAND] '+prefix)]
-            return xs[-1] if xs else ''
+            xs=[x[7:] for x in stderr.splitlines() if x.startswith('[CAND] '+prefix)];return xs[-1] if xs else ''
           def ints(s): return {k:int(v) for k,v in re.findall(r'(\w+)=(-?\d+)',s)}
           d=[]
           for g in rows:
-            e=g.get('stderr','')
-            p=ints(tag(e,'[v36_picker]')); q=ints(tag(e,'[v36_search]')); c=ints(tag(e,'[v35_castle_deadline]')); a=ints(tag(e,'[v35_actions]'))
-            d.append((g['result'],p,q,c,a))
+            e=g.get('stderr','');d.append((g['result'],ints(tag(e,'[v36_picker]')),ints(tag(e,'[v36_search]')),ints(tag(e,'[v35_castle_deadline]')),ints(tag(e,'[v35_actions]'))))
           for result in ('win','draw','loss'):
             xs=[x for x in d if x[0]==result]
             if not xs: continue
             avg=lambda idx,key: sum(x[idx].get(key,0) for x in xs)/len(xs)
-            print(result, 'n=',len(xs), 'picker_starts=',round(avg(1,'starts'),2),'delivered=',round(avg(1,'delivered'),2),'touched=',round(avg(2,'touched'),2),'swept=',round(avg(2,'swept'),2),'c1_missing=',sum(x[3].get('c1_build_turn',-1)<0 for x in xs),'c2_missing=',sum(x[3].get('c2_build_turn',-1)<0 for x in xs),'war=',round(avg(4,'war'),2))
+            print(result,'n=',len(xs),'picker_starts=',round(avg(1,'starts'),2),'delivered=',round(avg(1,'delivered'),2),'touched=',round(avg(2,'touched'),2),'swept=',round(avg(2,'swept'),2),'c1_missing=',sum(x[3].get('c1_build_turn',-1)<0 for x in xs),'c2_missing=',sum(x[3].get('c2_build_turn',-1)<0 for x in xs),'war=',round(avg(4,'war'),2))
           PY
       - name: Commit rebuilt source
         run: |
           set -euo pipefail
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git config user.name 'github-actions[bot]';git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add competition/agents/juraj_v35_cpp/core.hpp competition/agents/juraj_v35_cpp/main.cpp competition/agents/juraj_v35_cpp/test.sh competition/agents/juraj_v35_cpp/test_picker.cpp competition/agents/juraj_v35_cpp/test_picker_economics.cpp competition/agents/juraj_v35_cpp/test_search_refactor.cpp
           git commit -m 'V3.6: e50123 champion plus picker 3x3 search and exact anti-cycle'
           git push origin HEAD:juraj-v3.6-e50123-rebuild
