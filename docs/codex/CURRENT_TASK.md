@@ -1,121 +1,155 @@
-# Current Codex task: isolate regressions from e50123 champion
+# Current Codex task: repair and validate e50123 picker
 
 ## Goal
 
-Start from the exact reference champion:
+Fix the picker implementation properly. A runtime failure is not an acceptable final outcome for this task.
+
+Reference champion:
 
 `e50123cee7d924f0d643acd372a5300971f93917`
 
-The recent combined port of picker + 3x3 exploration + anti-cycle regressed badly versus this champion. Do not attempt another combined rewrite. First isolate each feature independently and determine which feature(s) can be added without destroying champion strength.
+Broken isolated picker commit:
 
-This task is forensic and experimental before it is integrative.
+`c919246db8d6140638f1000a02bd9bbae8686f1b`
 
-## Required experimental variants
+The picker-only screen attempted 60 games and all 60 failed because the candidate process closed stdout on the first request. Unit tests passed, so the existing tests are insufficient. Your task is to reproduce the real protocol failure, identify the exact root cause, fix it, add an integration regression test that would have caught it, and then evaluate/tune the picker competitively against exact e50123.
 
-Create three independent variants, each directly from the exact champion commit. Do not stack these variants on top of each other.
+Do not work on anti-cycle or 3x3 exploration in this task.
 
-### Variant A — anti-cycle only
+## Strong debugging lead — verify, do not blindly assume
 
-Add only the exact per-packet four-directed-edge anti-cycle semantics defined in `competition/agents/juraj_v35_cpp/AGENTS.md`.
+Compare the picker commit's `Agent::init()` line-by-line against exact e50123.
 
-Do not change picker, exploration, castle logic, scheduler shares, attack priorities or other strategy.
+The picker diff removed the champion initialization of `owned_castle_history_`:
 
-### Variant B — picker only
+```cpp
+owned_castle_history_.assign(n_,0);
+for(int x=0;x<n_;++x)
+  if(o.owner[x]==1&&o.type[x]==3)
+    owned_castle_history_[x]=1;
+```
 
-Add only a minimal, coherent picker implementation.
+but `act()` still indexes `owned_castle_history_[x]` and castle-recapture logic still reads it. This is a strong candidate for the first-observation crash. Prove the failure with sanitizer/debug instrumentation and verify whether this is the complete root cause. Also audit all other state initialization changed by the picker diff so no champion state was accidentally dropped.
 
-Requirements:
+## Required debugging procedure
 
-- gather stranded/rear/edge surplus army;
-- preserve general, castle funding/defence and active attack stacks;
-- start only when there is a realistic route and positive economic value;
-- be resumable after higher-priority tactical work;
-- expose telemetry: starts, completions, moves, units delivered, aborts.
+1. Reproduce the failure from the broken picker commit with the real competition protocol, not only a unit test. Start with seed `31000`, both seats, using the same `competition/matchup.py` / `paired_benchmark.py` path used by the screen.
+2. Build a debug binary with at least AddressSanitizer + UndefinedBehaviorSanitizer (`-fsanitize=address,undefined -fno-omit-frame-pointer -g`) and capture the first concrete failing stack trace / invalid access.
+3. Compare the entire picker diff against exact e50123, especially `init()`, packet state, castle recapture state, observation/reconcile state, and any vector indexed by map cell.
+4. Fix the root cause in coherent C++ source. Do not paper over the crash with bounds checks that silently disable champion behavior.
+5. Add a regression/integration test that launches the real agent process or exercises the exact stdin/stdout protocol through at least the first complete observation and verifies that it returns a valid action. The test must fail on `c919246...` and pass on the fixed candidate.
+6. Run the full existing unit/recovery/picker tests and release build.
+7. Run a protocol smoke test on at least 10 seeds x both seats. Requirement: 0 crashes, 0 protocol errors, 0 illegal actions.
 
-Do not add 3x3 exploration or anti-cycle changes in this variant.
+Do not proceed to competitive conclusions until runtime correctness is proven.
 
-### Variant C — 3x3 exploration only
+## Preserve champion behavior
 
-Add only 3x3 sector exploration/coverage.
+The corrected candidate must remain a picker-only variant directly comparable to exact e50123.
 
-Requirements:
+Non-negotiable:
 
-- compute the 3x3 sector layout deterministically from the initial map;
-- preserve the champion's initial expansion economics;
-- make meaningful progress toward the other eight reachable sectors;
-- use bounded/persistent probes rather than globally forcing search every turn;
-- do not drain the general, castle funding stack or primary attack stack merely for coverage;
-- expose telemetry for reachable/touched/swept sectors and probe moves.
+- preserve C1/C2 planning exactly as champion: sites computed once during initialization / turn 0;
+- preserve `owned_castle_history_` initialization and castle recapture behavior;
+- preserve champion castle funding/production logic;
+- preserve champion threat/defense behavior;
+- preserve champion anti-cycle semantics exactly as-is for this task;
+- preserve champion exploration/search behavior exactly as-is for this task;
+- do not steal the general stack, castle-funding/defense stacks, or live attack packets for picker work;
+- do not introduce a parallel global scheduler.
 
-Do not add picker or anti-cycle changes in this variant.
+The final branch should ideally have a small, reviewable diff against exact e50123: picker implementation + picker tests + protocol regression test, and nothing unrelated.
 
-## Castle invariants for all variants
+## Picker behavior to retain / improve
 
-These are not experimental variables and must remain unchanged unless required to fix a direct integration bug:
+The picker exists to recover economically worthwhile stranded/rear/edge surplus army and deliver that mass toward a useful sink (strategic center, active front, confirmed enemy general / attack backbone).
 
-- C1/C2 future castle sites are selected once during initialisation / turn 0.
-- Preserve the champion's castle production/funding policy.
-- Preserve recapture of our previously owned castles.
-- No new sticky funding or global HARD-priority mechanism that starves the rest of the strategy.
+Required properties:
 
-## Benchmark protocol
+- route must be owned/passable/safe enough before start;
+- source must have genuine surplus after reserve/protection rules;
+- picker must not use the general solely as a picker source;
+- picker must not drain planned/current castle resources or a castle that needs defense;
+- active attack packets are protected;
+- picker can be pre-empted by true tactical emergencies and then resume when still valid;
+- avoid repeated start/abort thrashing;
+- require positive economic value: delivered useful mass must justify move cost;
+- telemetry must include starts, completions, moves, delivered units, abort reasons, blocked ticks, source-guard rejects, planned mass/moves, and effective delivered-units-per-picker-move.
 
-Use exact `e50123cee7d924f0d643acd372a5300971f93917` as baseline.
+## Competitive benchmark and tuning loop
 
-For each of A/B/C:
+Once runtime correctness is established, benchmark against exact `e50123cee7d924f0d643acd372a5300971f93917` with identical RNG seeds and both seats.
 
-1. run the complete unit/regression suite and build;
-2. run a first paired screen of **30 seeds x both seats = 60 games** on seeds `31000..31029`;
-3. if score is at least 0.48, there are no errors/illegal actions, and telemetry shows no severe strategic collapse, run an independent confirmation of **60 seeds x both seats = 120 games** on seeds `32000..32059`;
-4. if score is clearly below 0.48 or land/war behaviour collapses, stop that variant and diagnose representative losses rather than tuning it blindly.
+### Screen
 
-A variant is not considered safe merely because its point estimate is above 0.50. Report uncertainty / confidence interval when the benchmark tooling supports it.
+Run 30 seeds x both seats = 60 games on:
 
-## Required metrics
+`31000..31029`
 
-For every tested variant report:
+Report W/D/L, score, bootstrap/paired 95% CI if tooling supports it, errors, illegal actions, latency, and picker telemetry.
 
-- W / D / L and score;
-- errors and illegal actions;
-- runtime latency summary;
-- land at T50, T100, T150 and T250;
-- C1/C2 built/missing and build timing;
-- war/enemy/attack activity;
-- variant-specific telemetry (anti-cycle blocks, picker economics, or sector coverage).
+Also compare candidate vs champion on identical seeds for:
 
-Compare loss telemetry against the champion on identical seeds where possible.
+- land T50/T100/T150/T250;
+- C1/C2 build status and timing;
+- war/enemy/attack actions;
+- passes;
+- picker starts/completions/moves/delivered/aborts;
+- representative losses.
 
-## Integration gate
+### Do not stop at the first non-crashing mediocre result
 
-Do **not** combine features until the independent results are understood.
+This task is specifically to make the picker work, not merely to classify the broken version.
 
-After A/B/C:
+If runtime is correct but the first screen score is below 0.48, inspect losses and picker economics and make up to **three small, evidence-based tuning iterations**. Typical knobs may include start threshold, minimum efficiency, protected-source rules, sink selection, cooldown/resume logic, and pre-emption policy. Change one coherent cause at a time and rerun the same 60-game screen so the effect is attributable.
 
-- identify which features are non-regressing or improving;
-- explain why any regressing feature loses;
-- only then test combinations of individually safe features;
-- every combination must again be benchmarked against exact e50123 on identical seeds and both seats.
+Do not compensate for a weak picker by modifying castle strategy, exploration, anti-cycle, or general attack architecture.
 
-If none of A/B/C is safe, keep e50123 as champion and report that result instead of manufacturing a new submission.
+### Confirmation
 
-## Implementation quality
+When a fixed/tuned picker reaches all of the following:
 
-- Read the current champion code before editing.
-- Implement source changes coherently in C++, not as permanent brittle string-replacement patch scripts.
-- Preserve unrelated champion behaviour.
-- Add focused tests for the exact semantics of each variant.
-- Do not merge to master.
-- Work on feature branches/commits that make the three experiments easy to inspect independently.
+- score >= 0.48 on the 60-game screen;
+- 0 runtime/protocol errors;
+- 0 illegal actions;
+- no material collapse in land/castle/war telemetry;
+- picker telemetry demonstrates useful delivered mass rather than move churn;
+
+run an independent 60 seeds x both seats = 120-game confirmation on:
+
+`32000..32059`
+
+A point estimate above 0.50 is encouraging but not sufficient by itself; report uncertainty and loss diagnosis.
+
+## Branching / commits
+
+Use a new branch such as:
+
+`codex/e50123-picker-fix`
+
+You may debug starting from the broken picker commit, but the final candidate must be easy to compare to exact e50123 and must not carry unrelated later V3.6 changes.
+
+Prefer a clean final commit series such as:
+
+1. reproduce + protocol regression test,
+2. root-cause runtime fix,
+3. minimal picker tuning if justified.
+
+Do not merge to master.
 
 ## Deliverables
 
-Update `docs/codex/RESULTS.md` with:
+At completion:
 
-- branch and commit SHA for each variant;
-- exact diff intent;
-- test/build status;
-- benchmark seed ranges and W/D/L/score;
-- key telemetry and representative loss diagnosis;
-- recommendation: reject / keep for combination / confirmed improvement.
+1. append a new section to `docs/codex/RESULTS.md` (do not erase the previous ablation results);
+2. state the exact crash root cause and sanitizer evidence;
+3. identify any additional initialization/state regressions found in the broken picker diff;
+4. provide branch + final commit SHA;
+5. list exact files changed;
+6. provide full unit/build/protocol-smoke results;
+7. provide every picker screen iteration W/D/L/score and what changed between iterations;
+8. provide confirmation benchmark if the gate is met;
+9. provide key land/castle/war/picker telemetry and representative-loss diagnosis;
+10. recommend either `READY TO COMBINE/SUBMIT`, `FIXED BUT NEEDS MORE TUNING`, or `PICKER IDEA COMPETITIVELY REJECTED`.
 
-At the end, provide a concise recommendation for the next competitive branch. Do not create or upload a leaderboard submission unless a tested candidate clearly justifies replacing e50123.
+Important: `PICKER IDEA COMPETITIVELY REJECTED` is only valid after the runtime bug has been fixed and a valid non-crashing competitive benchmark has actually been run. A crash is a bug to debug, not a competitive conclusion.
