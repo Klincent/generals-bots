@@ -5,53 +5,23 @@ on:
 permissions:
   contents: write
 jobs:
-  harden-test:
-    runs-on: ubuntu-latest
-    env:
-      BASE_SHA: 61bf6184dda66355170156d6d8b08be5511e4d36
-      SDL_VIDEODRIVER: dummy
+  apply-directed-edge-fix:
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: juraj-v3.6-expansion-cycle-hardening
+          ref: juraj-v3.6-short-cycle-only
           fetch-depth: 0
-      - name: Apply expansion/cycle hardening
+      - name: Apply exact directed-edge cycle semantics
         run: |
           set -euo pipefail
-          python tools/apply_v36_stall_cycle_hardening.py
-      - name: Unit and regression smoke
+          python tools/apply_v36_directed_edge_cycle_guard.py
+      - name: Unit and build smoke
         run: |
           set -euo pipefail
           bash competition/agents/juraj_v35_cpp/test.sh
           bash competition/agents/juraj_v35_cpp/build.sh
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: Install match engine
-        run: pip install -e .
-      - name: Tiny paired match smoke
-        run: |
-          set -euo pipefail
-          git worktree add --detach /tmp/v36-base "$BASE_SHA"
-          bash /tmp/v36-base/competition/agents/juraj_v35_cpp/build.sh
-          cat > /tmp/run-candidate.sh <<EOF
-          #!/usr/bin/env bash
-          export V35_EDGE_PICKER_THRESHOLD=16
-          export V36_EDGE_PICKER_MIN_EFFICIENCY=2.0
-          exec "$GITHUB_WORKSPACE/competition/agents/juraj_v35_cpp/run.sh" "\$@"
-          EOF
-          cat > /tmp/run-baseline.sh <<EOF
-          #!/usr/bin/env bash
-          export V35_EDGE_PICKER_THRESHOLD=16
-          export V36_EDGE_PICKER_MIN_EFFICIENCY=2.0
-          exec "/tmp/v36-base/competition/agents/juraj_v35_cpp/run.sh" "\$@"
-          EOF
-          chmod +x /tmp/run-candidate.sh /tmp/run-baseline.sh
-          python competition/agents/juraj_v35_cpp/paired_benchmark.py \
-            --candidate /tmp/run-candidate.sh --baseline /tmp/run-baseline.sh \
-            --start 24100 --seeds 1 --output /tmp/v36-stall-smoke
-          cat /tmp/v36-stall-smoke/summary.json
-      - name: Commit tested implementation
+      - name: Commit tested implementation to short-cycle branch
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
@@ -59,9 +29,8 @@ jobs:
           git add competition/agents/juraj_v35_cpp/main.cpp \
                   competition/agents/juraj_v35_cpp/core.hpp \
                   competition/agents/juraj_v35_cpp/test_core.cpp \
-                  competition/agents/juraj_v35_cpp/test_stall_hardening.cpp \
-                  competition/agents/juraj_v35_cpp/test.sh
+                  competition/agents/juraj_v35_cpp/test_stall_hardening.cpp
           if ! git diff --cached --quiet; then
-            git commit -m 'V3.6: force low-land breakout and harden anti-cycles'
-            git push origin HEAD:juraj-v3.6-expansion-cycle-hardening
+            git commit -m 'V3.6: directed-edge cycle guard'
+            git push origin HEAD:juraj-v3.6-short-cycle-only
           fi
