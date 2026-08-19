@@ -3,6 +3,7 @@ on:
   push:
     branches: [master]
     paths: ['.github/workflows/picker-v4-gate-search.yml']
+  workflow_call:
 permissions:
   contents: read
 jobs:
@@ -78,10 +79,8 @@ jobs:
           mkdir -p /tmp/results
           for v in A B C; do
             mkdir -p "/tmp/results/$v/chunk1" "/tmp/results/$v/chunk2"
-            python /tmp/picker-$v/competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/picker-$v/competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/e501/competition/agents/juraj_v35_cpp/run.sh --start 31000 --seeds 15 --output "/tmp/results/$v/chunk1" &
-            p1=$!
-            python /tmp/picker-$v/competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/picker-$v/competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/e501/competition/agents/juraj_v35_cpp/run.sh --start 31015 --seeds 15 --output "/tmp/results/$v/chunk2" &
-            p2=$!
+            python /tmp/picker-$v/competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/picker-$v/competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/e501/competition/agents/juraj_v35_cpp/run.sh --start 31000 --seeds 15 --output "/tmp/results/$v/chunk1" & p1=$!
+            python /tmp/picker-$v/competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/picker-$v/competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/e501/competition/agents/juraj_v35_cpp/run.sh --start 31015 --seeds 15 --output "/tmp/results/$v/chunk2" & p2=$!
             wait $p1; wait $p2
             python /tmp/aggregate.py "/tmp/results/$v" | tee "/tmp/results/$v.txt"
           done
@@ -103,14 +102,12 @@ jobs:
         run: |
           set -euo pipefail
           best=$(cat /tmp/results/BEST)
-          score=$(python -c "import json;print(json.load(open('/tmp/results/$best/aggregate.json'))['score'])")
-          starts=$(python -c "import json;print(json.load(open('/tmp/results/$best/aggregate.json'))['starts_per_game'])")
-          python - <<PY
-          import sys
-          sys.exit(0 if float('$score')>=0.50 and float('$starts')>0 else 42)
+          if ! python - <<PY
+          import json,sys
+          s=json.load(open('/tmp/results/$best/aggregate.json'))
+          sys.exit(0 if s['score']>=0.50 and s['starts_per_game']>0 else 1)
           PY
-          rc=$?
-          if [ "$rc" = 42 ]; then echo 'Skipping confirmation: screen gate not met'; exit 0; fi
+          then echo 'Skipping confirmation: screen gate not met'; exit 0; fi
           mkdir -p /tmp/results/confirm/chunk1 /tmp/results/confirm/chunk2
           python /tmp/picker-$best/competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/picker-$best/competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/e501/competition/agents/juraj_v35_cpp/run.sh --start 32000 --seeds 30 --output /tmp/results/confirm/chunk1 & p1=$!
           python /tmp/picker-$best/competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/picker-$best/competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/e501/competition/agents/juraj_v35_cpp/run.sh --start 32030 --seeds 30 --output /tmp/results/confirm/chunk2 & p2=$!
@@ -121,14 +118,12 @@ jobs:
           set -euo pipefail
           if [ ! -f /tmp/results/confirm/aggregate.json ]; then echo 'No confirmation'; exit 0; fi
           best=$(cat /tmp/results/BEST)
-          score=$(python -c "import json;print(json.load(open('/tmp/results/confirm/aggregate.json'))['score'])")
-          starts=$(python -c "import json;print(json.load(open('/tmp/results/confirm/aggregate.json'))['starts_per_game'])")
-          python - <<PY
-          import sys
-          sys.exit(0 if float('$score')>=0.50 and float('$starts')>0 else 42)
+          if ! python - <<PY
+          import json,sys
+          s=json.load(open('/tmp/results/confirm/aggregate.json'))
+          sys.exit(0 if s['score']>=0.50 and s['starts_per_game']>0 else 1)
           PY
-          rc=$?
-          if [ "$rc" = 42 ]; then echo 'Skipping holdout: confirmation gate not met'; exit 0; fi
+          then echo 'Skipping holdout: confirmation gate not met'; exit 0; fi
           mkdir -p /tmp/results/holdout/chunk1 /tmp/results/holdout/chunk2
           python /tmp/picker-$best/competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/picker-$best/competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/e501/competition/agents/juraj_v35_cpp/run.sh --start 33000 --seeds 30 --output /tmp/results/holdout/chunk1 & p1=$!
           python /tmp/picker-$best/competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/picker-$best/competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/e501/competition/agents/juraj_v35_cpp/run.sh --start 33030 --seeds 30 --output /tmp/results/holdout/chunk2 & p2=$!
