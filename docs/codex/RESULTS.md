@@ -103,6 +103,18 @@ Zero-picker action equivalence:
   - seeds 31000..31019, both seats (40 games, jobs=2): PASS, every emitted
     action identical
 
+Independent harness revalidation at `a5933d50fce85829ac98a64350a20e0b69f7c5ec`
+on 2026-08-19 reproduced the formerly failing seed before starting either
+batch.  The exact seed-31001 candidate-seat-0 command completed in 14 seconds
+without diagnostics (exit 0), and the same command completed in 14 seconds
+with `--diagnostic-json` (exit 0, 1.2 MiB trace).  The action-only checker then
+passed seed 31001 in both seats serially in 61 seconds, seeds 31000..31004 in
+both seats with `--jobs 2` in 237 seconds, and seeds 31000..31019 in both seats
+with `--jobs 2` in 916 seconds.  This confirms on the current workspace that
+the game, candidate protocol, and diagnostic writer all terminate normally;
+the old 180-second failure depended on the old parallel execution load rather
+than a stuck match or agent.
+
 No win-rate benchmark was interpreted during this harness repair. Picker
 thresholds and the selective gate were not changed.
 
