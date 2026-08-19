@@ -23,7 +23,8 @@ jobs:
       - name: Apply picker v9
         run: |
           set -euxo pipefail
-          python competition/agents/juraj_v35_cpp/apply_picker_v9.py
+          if ! grep -q 'muster_threshold_' competition/agents/juraj_v35_cpp/main.cpp; then python competition/agents/juraj_v35_cpp/apply_picker_v9.py; fi
+          python competition/agents/juraj_v35_cpp/apply_picker_v9_priority.py
           git diff --check
       - name: Tests and build
         run: |
@@ -50,7 +51,7 @@ jobs:
           git config user.email 'actions@users.noreply.github.com'
           git add competition/agents/juraj_v35_cpp/main.cpp
           if ! git diff --cached --quiet; then
-            git commit -m 'picker-v9: implement late attack muster and castle catchup'
+            git commit -m 'picker-v9: prioritize late muster collection'
             git push origin HEAD:chatgpt/picker-v9-muster-castle
           fi
       - name: Small paired validation
