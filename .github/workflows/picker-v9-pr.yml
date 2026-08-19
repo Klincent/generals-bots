@@ -1,0 +1,63 @@
+name: picker-v9-pr
+on:
+  pull_request:
+    branches: [master]
+permissions:
+  contents: write
+jobs:
+  apply-test:
+    if: ${{ github.head_ref == 'chatgpt/picker-v9-muster-castle' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    env:
+      E501: e50123cee7d924f0d643acd372a5300971f93917
+      SDL_VIDEODRIVER: dummy
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: chatgpt/picker-v9-muster-castle
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -e .
+      - name: Apply picker v9
+        run: |
+          python competition/agents/juraj_v35_cpp/apply_picker_v9.py
+          git diff --check
+      - name: Tests and build
+        run: |
+          bash competition/agents/juraj_v35_cpp/test.sh
+          bash competition/agents/juraj_v35_cpp/build.sh
+      - name: Prepare exact baseline
+        run: |
+          git worktree add --detach /tmp/e501 "$E501"
+          bash /tmp/e501/competition/agents/juraj_v35_cpp/build.sh
+      - name: Protocol smoke
+        run: |
+          python competition/matchup.py competition/agents/juraj_v35_cpp/run.sh /tmp/e501/competition/agents/juraj_v35_cpp/run.sh --mode competition --seed 35000
+      - name: Commit implementation
+        run: |
+          git config user.name 'ChatGPT'
+          git config user.email 'actions@users.noreply.github.com'
+          git add competition/agents/juraj_v35_cpp/main.cpp
+          if ! git diff --cached --quiet; then
+            git commit -m 'picker-v9: implement late attack muster and castle catchup'
+            git push origin HEAD:chatgpt/picker-v9-muster-castle
+          fi
+      - name: Small paired validation
+        continue-on-error: true
+        run: |
+          rm -rf /tmp/picker-v9-smoke
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/e501/competition/agents/juraj_v35_cpp/run.sh --start 35000 --seeds 5 --output /tmp/picker-v9-smoke
+      - name: Package submission
+        run: |
+          mkdir -p /tmp/package/juraj_v35
+          cp competition/agents/juraj_v35_cpp/{main.cpp,core.hpp,build.sh,run.sh} /tmp/package/juraj_v35/
+          (cd /tmp/package && zip -qr juraj_picker_v9_submission.zip juraj_v35)
+          sha256sum /tmp/package/juraj_picker_v9_submission.zip > /tmp/package/juraj_picker_v9_submission.sha256
+          if [ -f /tmp/picker-v9-smoke/summary.json ]; then cp /tmp/picker-v9-smoke/summary.json /tmp/package/; fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: picker-v9-submission
+          path: /tmp/package
+          retention-days: 7
