@@ -5,6 +5,7 @@ import argparse
 import concurrent.futures
 import json
 import os
+import re
 import signal
 import subprocess
 import sys
@@ -44,11 +45,11 @@ def stop_all():
         stop_process(proc)
 
 
-def run_match(agents, seed, trace, timeout, label):
+def run_match(agents, seed, trace, timeout, label, picker_enabled):
     if STOPPING.is_set():
         raise RuntimeError("equivalence run cancelled")
     env = os.environ.copy()
-    env["V35_PICKER_ENABLED"] = "0"
+    env["V35_PICKER_ENABLED"] = str(picker_enabled)
     env["JURAJ_RNG_SEED"] = str((seed * 0x9E3779B1 + 0x35) & 0xFFFFFFFF)
     env["PYTHONPATH"] = str(ROOT)
     command = [
@@ -87,23 +88,32 @@ def run_match(agents, seed, trace, timeout, label):
             f"match failed: seed={seed} {label} returncode={proc.returncode}\n"
             f"stdout:\n{stdout[-4000:]}\nstderr:\n{stderr[-8000:]}"
         )
-    return json.loads(trace.read_text())
+    return json.loads(trace.read_text()), stderr
 
 
-def check_game(seed, seat, candidate, baseline, output, timeout):
+def check_game(seed, seat, candidate, baseline, output, timeout, picker_enabled):
     opponent = baseline
     baseline_trace = output / f"baseline-{seed}-{seat}.json"
     candidate_trace = output / f"candidate-{seed}-{seat}.json"
     baseline_agents = [baseline, opponent] if seat == 0 else [opponent, baseline]
     candidate_agents = [candidate, opponent] if seat == 0 else [opponent, candidate]
-    reference = run_match(baseline_agents, seed, baseline_trace, timeout,
-                          f"seat={seat} implementation=baseline")
-    observed = run_match(candidate_agents, seed, candidate_trace, timeout,
-                         f"seat={seat} implementation=candidate")
+    reference, _ = run_match(baseline_agents, seed, baseline_trace, timeout,
+                             f"seat={seat} implementation=baseline", picker_enabled)
+    observed, candidate_stderr = run_match(
+        candidate_agents, seed, candidate_trace, timeout,
+        f"seat={seat} implementation=candidate", picker_enabled)
+    accepted_starts = [
+        int(match.group(1))
+        for match in re.finditer(r"\[v36_picker_start\] turn=(\d+).* allowed=1$",
+                                 candidate_stderr, re.MULTILINE)
+    ]
+    first_start = min(accepted_starts, default=None)
     reference_actions = [frame["actions"][seat] for frame in reference["frames"]]
     observed_actions = [frame["actions"][seat] for frame in observed["frames"]]
     for turn, (expected, actual) in enumerate(zip(reference_actions, observed_actions)):
         if expected != actual:
+            if first_start is not None and turn >= first_start:
+                return seed, seat, len(reference_actions), first_start, turn
             raise AssertionError(
                 f"first divergence: seed={seed} seat={seat} turn={turn} "
                 f"baseline={expected} candidate={actual}"
@@ -112,11 +122,13 @@ def check_game(seed, seat, candidate, baseline, output, timeout):
         turn = min(len(reference_actions), len(observed_actions))
         expected = reference_actions[turn] if turn < len(reference_actions) else "<terminated>"
         actual = observed_actions[turn] if turn < len(observed_actions) else "<terminated>"
+        if first_start is not None and turn >= first_start:
+            return seed, seat, len(reference_actions), first_start, turn
         raise AssertionError(
             f"first divergence: seed={seed} seat={seat} turn={turn} "
             f"baseline={expected} candidate={actual}"
         )
-    return seed, seat, len(reference_actions)
+    return seed, seat, len(reference_actions), first_start, None
 
 
 def main():
@@ -129,6 +141,9 @@ def main():
     parser.add_argument("--jobs", type=int, default=1)
     parser.add_argument("--timeout", type=int, default=600,
                         help="timeout in seconds for each full match")
+    parser.add_argument("--picker-enabled", type=int, choices=(0, 1), default=0,
+                        help="enable picker and require any divergence to occur no earlier "
+                             "than an accepted picker start (default: 0)")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     if args.jobs < 1 or args.timeout < 1 or args.seeds < 1:
@@ -154,15 +169,16 @@ def main():
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=args.jobs)
     futures = {
         executor.submit(check_game, seed, seat, args.candidate, args.baseline,
-                        output, args.timeout): (seed, seat)
+                        output, args.timeout, args.picker_enabled): (seed, seat)
         for seed, seat in work
     }
     completed = 0
+    active = 0
     try:
         for future in concurrent.futures.as_completed(futures):
             seed, seat = futures[future]
             try:
-                _, _, turns = future.result()
+                _, _, turns, first_start, first_divergence = future.result()
             except Exception as error:
                 print(f"[equivalence] FAILED seed={seed} seat={seat}: {error}",
                       file=sys.stderr, flush=True)
@@ -173,12 +189,18 @@ def main():
                 executor.shutdown(wait=False, cancel_futures=True)
                 return 1
             completed += 1
-            print(f"[equivalence] PASS seed={seed} seat={seat} turns={turns} "
+            status = (f"PICKER_ACTIVE turns={turns} first_start={first_start} "
+                      f"first_divergence={first_divergence}"
+                      if first_start is not None else f"PASS turns={turns}")
+            active += first_start is not None
+            print(f"[equivalence] {status} seed={seed} seat={seat} "
                   f"progress={completed}/{len(work)}", flush=True)
     finally:
         stop_all()
     executor.shutdown(wait=True)
-    print(f"[equivalence] PASS all {len(work)} games; every action identical")
+    print(f"[equivalence] PASS all {len(work)} games; "
+          f"zero_picker={len(work) - active} picker_active={active}; "
+          "every zero-picker action identical")
     if temp is not None:
         temp.cleanup()
     return 0

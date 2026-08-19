@@ -125,6 +125,38 @@ registration.
 No win-rate benchmark was interpreted during this harness repair. Picker
 thresholds and the selective gate were not changed.
 
+### Final enabled-picker equivalence and 60-game screen
+
+The action-trace harness now also accepts `--picker-enabled 1`. In that mode it
+parses accepted picker starts, still rejects any divergence before the accepted
+start turn, and reports picker-active games separately instead of falsely
+claiming whole-game equivalence after an intentional activation.
+
+With the selective picker enabled, seeds 31000..31029 in both seats (60 games)
+were replayed against the same deterministic exact-e50123 opponent. All 60 were
+zero-picker games and all 60 candidate action traces were identical to exact
+e50123 through termination. Thus eligibility evaluation was observational in
+every game in the requested screen; there was no first divergence.
+
+Selective-picker screen:
+  - candidate commit: `bc3fd06` (bot source unchanged by the final harness/report commit)
+  - exact baseline: `e50123cee7d924f0d643acd372a5300971f93917`
+  - seeds: 31000..31029, both seats (60 games)
+  - W/D/L: 20/20/20
+  - score: 0.5000; paired bootstrap 95% CI [0.5000, 0.5000]
+  - seat scores: seat 0 = 0.5667; seat 1 = 0.4333
+  - errors / illegal actions: 0 / 0
+  - picker starts/completions/moves/delivered mass/aborts: 0/0/0/0/0
+  - picker-active games: none; active-game win rate: not applicable
+  - zero-picker games: all 60; W/D/L 20/20/20, score 0.5000
+  - candidate decision round-trip: per-game p50 distribution p50 1.463 ms,
+    p95 1.662 ms, p99 1.689 ms; maximum single decision 53.874 ms
+
+The unchanged selective gate still produced no accepted starts in this seed
+pool. Consequently this is a valid integration/equivalence result, but it
+provides no evidence for or against picker effectiveness after activation. No
+gate thresholds were tuned.
+
 ## 2026-08-19 — selective economy-safe picker v3 (incomplete validation)
 
 Date: 2026-08-19
