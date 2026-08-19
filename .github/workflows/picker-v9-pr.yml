@@ -6,7 +6,7 @@ permissions:
   contents: write
 jobs:
   apply-test:
-    if: ${{ github.head_ref == 'chatgpt/picker-v9-muster-castle' }}
+    if: ${{ github.head_ref == 'tmp/picker-v9-trigger' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 100
     env:
@@ -22,21 +22,29 @@ jobs:
       - run: pip install -e .
       - name: Apply picker v9
         run: |
+          set -euxo pipefail
           python competition/agents/juraj_v35_cpp/apply_picker_v9.py
           git diff --check
       - name: Tests and build
         run: |
+          set -euxo pipefail
           bash competition/agents/juraj_v35_cpp/test.sh
           bash competition/agents/juraj_v35_cpp/build.sh
       - name: Prepare exact baseline
         run: |
+          set -euxo pipefail
           git worktree add --detach /tmp/e501 "$E501"
           bash /tmp/e501/competition/agents/juraj_v35_cpp/build.sh
+      - name: Zero-picker equivalence
+        run: |
+          set -euxo pipefail
+          V35_PICKER_ENABLED=0 python competition/agents/juraj_v35_cpp/equivalence_check.py --candidate competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/e501/competition/agents/juraj_v35_cpp/run.sh --start 35000 --seeds 3 --jobs 1 --timeout 600 --picker-enabled 0
       - name: Protocol smoke
         run: |
           python competition/matchup.py competition/agents/juraj_v35_cpp/run.sh /tmp/e501/competition/agents/juraj_v35_cpp/run.sh --mode competition --seed 35000
       - name: Commit implementation
         run: |
+          set -euxo pipefail
           git config user.name 'ChatGPT'
           git config user.email 'actions@users.noreply.github.com'
           git add competition/agents/juraj_v35_cpp/main.cpp
