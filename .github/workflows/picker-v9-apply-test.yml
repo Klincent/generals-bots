@@ -1,12 +1,12 @@
 name: picker-v9-apply-test
 on:
-  push:
-    branches: [chatgpt/e50123-picker-v9-muster-castle]
+  pull_request:
+    branches: [master]
 permissions:
   contents: write
 jobs:
   apply-test:
-    if: github.event.head_commit.message == 'picker-v9: trigger apply'
+    if: ${{ github.head_ref == 'chatgpt/picker-v9-muster-castle' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 100
     env:
@@ -14,7 +14,9 @@ jobs:
       SDL_VIDEODRIVER: dummy
     steps:
       - uses: actions/checkout@v4
-        with: {fetch-depth: 0}
+        with:
+          fetch-depth: 0
+          ref: chatgpt/picker-v9-muster-castle
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - run: pip install -e .
@@ -50,8 +52,10 @@ jobs:
           git config user.name 'ChatGPT'
           git config user.email 'actions@users.noreply.github.com'
           git add competition/agents/juraj_v35_cpp/main.cpp
-          git commit -m 'picker-v9: implement late attack muster and castle catchup'
-          git push origin HEAD:chatgpt/e50123-picker-v9-muster-castle
+          if ! git diff --cached --quiet; then
+            git commit -m 'picker-v9: implement late attack muster and castle catchup'
+            git push origin HEAD:chatgpt/picker-v9-muster-castle
+          fi
       - name: Package submission
         run: |
           mkdir -p /tmp/package/juraj_v35
