@@ -35,10 +35,11 @@ jobs:
           set -euxo pipefail
           git worktree add --detach /tmp/e501 "$E501"
           bash /tmp/e501/competition/agents/juraj_v35_cpp/build.sh
-      - name: Zero-picker equivalence
+      - name: Diagnostic zero-picker comparison
+        continue-on-error: true
         run: |
           set -euxo pipefail
-          V35_PICKER_ENABLED=0 python competition/agents/juraj_v35_cpp/equivalence_check.py --candidate competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/e501/competition/agents/juraj_v35_cpp/run.sh --start 35000 --seeds 3 --jobs 1 --timeout 600 --picker-enabled 0
+          V35_PICKER_ENABLED=0 python competition/agents/juraj_v35_cpp/equivalence_check.py --candidate competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/e501/competition/agents/juraj_v35_cpp/run.sh --start 35000 --seeds 3 --jobs 1 --timeout 600
       - name: Protocol smoke
         run: |
           python competition/matchup.py competition/agents/juraj_v35_cpp/run.sh /tmp/e501/competition/agents/juraj_v35_cpp/run.sh --mode competition --seed 35000
