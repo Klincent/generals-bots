@@ -1,0 +1,153 @@
+name: picker-v4-gate-search
+on:
+  push:
+    branches: [master]
+    paths: ['.github/workflows/picker-v4-gate-search.yml']
+permissions:
+  contents: read
+jobs:
+  gate-search:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      E501: e50123cee7d924f0d643acd372a5300971f93917
+      PICKER_BASE: bc3fd06
+      SDL_VIDEODRIVER: dummy
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install runner dependencies
+        run: pip install -e .
+      - name: Prepare exact baseline and three gate variants
+        run: |
+          set -euo pipefail
+          git worktree add --detach /tmp/e501 "$E501"
+          for v in A B C; do git worktree add --detach "/tmp/picker-$v" "$PICKER_BASE"; done
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          variants = {
+            'A': 'double growth25=slope(land_hist_,25),growth50=slope(land_hist_,50);bool mature=o.turn>=140||o.my_land*100>=n_*30;bool not_behind=o.opp_land==0||o.my_land*5>=o.opp_land*3;bool growing=growth25>=.04||growth50>=.03||o.my_land*100>=n_*40;bool few_neutrals=useful_neutrals<=8;bool needs_concentration=top3_share<.60&&largest_owned<best_mass;bool useful_sink=picker_sink>=0;\n    bool allowed=mature&&not_behind&&growing&&few_neutrals&&needs_concentration;',
+            'B': 'double growth25=slope(land_hist_,25),growth50=slope(land_hist_,50);bool mature=o.turn>=180||o.my_land*100>=n_*35;bool not_behind=o.opp_land==0||o.my_land*20>=o.opp_land*13;bool growing=growth25>=.04||growth50>=.03||o.my_land*100>=n_*42;bool few_neutrals=useful_neutrals<=6;bool needs_concentration=top3_share<.55&&best_mass>=std::max(24,largest_owned/2);bool useful_sink=picker_sink>=0;\n    bool allowed=mature&&not_behind&&growing&&few_neutrals&&needs_concentration;',
+            'C': 'double growth25=slope(land_hist_,25),growth50=slope(land_hist_,50);bool mature=o.turn>=150||o.my_land*100>=n_*30;bool not_behind=o.opp_land==0||o.my_land*20>=o.opp_land*11;bool growing=growth25>=.03||growth50>=.02||o.my_land*100>=n_*40;bool few_neutrals=useful_neutrals<=8;bool needs_concentration=top3_share<.50&&best_mass>=std::max(30,o.my_army/5)&&best_moves<=12;bool useful_sink=picker_sink>=0;\n    bool allowed=mature&&not_behind&&growing&&few_neutrals&&needs_concentration;'
+          }
+          pat = re.compile(r'double growth25=slope\(land_hist_,25\),growth50=slope\(land_hist_,50\);bool mature=.*?bool allowed=mature&&not_behind&&growing&&few_neutrals&&needs_concentration;')
+          for name,repl in variants.items():
+              p=Path(f'/tmp/picker-{name}/competition/agents/juraj_v35_cpp/main.cpp')
+              s=p.read_text()
+              ns,n=pat.subn(repl,s,count=1)
+              if n!=1: raise SystemExit(f'gate patch failed for {name}: {n}')
+              p.write_text(ns)
+          PY
+          bash /tmp/e501/competition/agents/juraj_v35_cpp/build.sh
+          for v in A B C; do
+            (cd "/tmp/picker-$v/competition/agents/juraj_v35_cpp" && bash test.sh && bash build.sh)
+          done
+      - name: Write aggregate helper
+        run: |
+          cat > /tmp/aggregate.py <<'PY'
+          import json,re,sys,statistics,random
+          from pathlib import Path
+          out=Path(sys.argv[1]); files=list(out.glob('chunk*/games.jsonl')); games=[]
+          for f in files:
+            for line in f.read_text().splitlines():
+              if line.strip(): games.append(json.loads(line))
+          valid=[g for g in games if 'result' in g]
+          W=sum(g['result']=='win' for g in valid);D=sum(g['result']=='draw' for g in valid);L=sum(g['result']=='loss' for g in valid)
+          score=(W+.5*D)/max(1,len(valid))
+          seeds=sorted(set(g['seed'] for g in valid)); paired=[]
+          for seed in seeds:
+            x=[g for g in valid if g['seed']==seed]
+            if len(x)==2: paired.append(sum(1 if g['result']=='win' else .5 if g['result']=='draw' else 0 for g in x)/2)
+          rng=random.Random(0x35); boots=sorted(statistics.mean(rng.choice(paired) for _ in paired) for _ in range(10000)) if paired else [0]
+          q=lambda x: boots[min(len(boots)-1,max(0,round(x*(len(boots)-1))))]
+          tele={'starts':0,'completions':0,'moves':0,'delivered':0,'games_with_start':0}
+          for g in valid:
+            m=re.search(r'\[v36_picker\].*?starts=(\d+).*?completions=(\d+).*?moves=(\d+).*?delivered=(\d+)',g.get('stderr',''))
+            if m:
+              vals=list(map(int,m.groups())); tele['starts']+=vals[0];tele['completions']+=vals[1];tele['moves']+=vals[2];tele['delivered']+=vals[3];tele['games_with_start']+=vals[0]>0
+          n=max(1,len(valid))
+          summary={'games':len(games),'valid':len(valid),'W':W,'D':D,'L':L,'score':score,'ci95':[q(.025),q(.975)],'errors':sum('error'in g for g in games),'illegal':sum(g.get('candidate_illegal',0) for g in games),'starts_per_game':tele['starts']/n,'games_with_start':tele['games_with_start'],'moves_per_game':tele['moves']/n,'delivered_per_game':tele['delivered']/n,'delivered_per_move':tele['delivered']/max(1,tele['moves'])}
+          (out/'aggregate.json').write_text(json.dumps(summary,indent=2,sort_keys=True)+'\n');print(json.dumps(summary,sort_keys=True))
+          PY
+      - name: 60-game development screens A B C
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/results
+          for v in A B C; do
+            mkdir -p "/tmp/results/$v/chunk1" "/tmp/results/$v/chunk2"
+            python /tmp/picker-$v/competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/picker-$v/competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/e501/competition/agents/juraj_v35_cpp/run.sh --start 31000 --seeds 15 --output "/tmp/results/$v/chunk1" &
+            p1=$!
+            python /tmp/picker-$v/competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/picker-$v/competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/e501/competition/agents/juraj_v35_cpp/run.sh --start 31015 --seeds 15 --output "/tmp/results/$v/chunk2" &
+            p2=$!
+            wait $p1; wait $p2
+            python /tmp/aggregate.py "/tmp/results/$v" | tee "/tmp/results/$v.txt"
+          done
+      - name: Select best real picker gate
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          rows=[]
+          for v in 'ABC':
+            s=json.loads(Path(f'/tmp/results/{v}/aggregate.json').read_text()); rows.append((v,s))
+          eligible=[x for x in rows if x[1]['errors']==0 and x[1]['illegal']==0 and x[1]['starts_per_game']>=0.2 and x[1]['starts_per_game']<=3.0]
+          pool=eligible or [x for x in rows if x[1]['starts_per_game']>0] or rows
+          best=max(pool,key=lambda x:(x[1]['score'],-abs(x[1]['starts_per_game']-1.5)))
+          Path('/tmp/results/BEST').write_text(best[0]+'\n')
+          print('BEST',best[0],best[1])
+          PY
+      - name: 120-game development confirmation if justified
+        run: |
+          set -euo pipefail
+          best=$(cat /tmp/results/BEST)
+          score=$(python -c "import json;print(json.load(open('/tmp/results/$best/aggregate.json'))['score'])")
+          starts=$(python -c "import json;print(json.load(open('/tmp/results/$best/aggregate.json'))['starts_per_game'])")
+          python - <<PY
+          import sys
+          sys.exit(0 if float('$score')>=0.50 and float('$starts')>0 else 42)
+          PY
+          rc=$?
+          if [ "$rc" = 42 ]; then echo 'Skipping confirmation: screen gate not met'; exit 0; fi
+          mkdir -p /tmp/results/confirm/chunk1 /tmp/results/confirm/chunk2
+          python /tmp/picker-$best/competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/picker-$best/competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/e501/competition/agents/juraj_v35_cpp/run.sh --start 32000 --seeds 30 --output /tmp/results/confirm/chunk1 & p1=$!
+          python /tmp/picker-$best/competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/picker-$best/competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/e501/competition/agents/juraj_v35_cpp/run.sh --start 32030 --seeds 30 --output /tmp/results/confirm/chunk2 & p2=$!
+          wait $p1; wait $p2
+          python /tmp/aggregate.py /tmp/results/confirm
+      - name: Untouched 33000 holdout if confirmation stays non-regressing
+        run: |
+          set -euo pipefail
+          if [ ! -f /tmp/results/confirm/aggregate.json ]; then echo 'No confirmation'; exit 0; fi
+          best=$(cat /tmp/results/BEST)
+          score=$(python -c "import json;print(json.load(open('/tmp/results/confirm/aggregate.json'))['score'])")
+          starts=$(python -c "import json;print(json.load(open('/tmp/results/confirm/aggregate.json'))['starts_per_game'])")
+          python - <<PY
+          import sys
+          sys.exit(0 if float('$score')>=0.50 and float('$starts')>0 else 42)
+          PY
+          rc=$?
+          if [ "$rc" = 42 ]; then echo 'Skipping holdout: confirmation gate not met'; exit 0; fi
+          mkdir -p /tmp/results/holdout/chunk1 /tmp/results/holdout/chunk2
+          python /tmp/picker-$best/competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/picker-$best/competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/e501/competition/agents/juraj_v35_cpp/run.sh --start 33000 --seeds 30 --output /tmp/results/holdout/chunk1 & p1=$!
+          python /tmp/picker-$best/competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/picker-$best/competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/e501/competition/agents/juraj_v35_cpp/run.sh --start 33030 --seeds 30 --output /tmp/results/holdout/chunk2 & p2=$!
+          wait $p1; wait $p2
+          python /tmp/aggregate.py /tmp/results/holdout
+      - name: Package best source and summary
+        if: always()
+        run: |
+          set -euo pipefail
+          best=$(cat /tmp/results/BEST 2>/dev/null || echo A)
+          mkdir -p /tmp/artifact/juraj_v35
+          cp /tmp/picker-$best/competition/agents/juraj_v35_cpp/{main.cpp,core.hpp,build.sh,run.sh} /tmp/artifact/juraj_v35/
+          cp -r /tmp/results /tmp/artifact/results
+          echo "$best" > /tmp/artifact/BEST_VARIANT.txt
+          (cd /tmp/artifact && zip -qr juraj_picker_v4_best.zip juraj_v35)
+          sha256sum /tmp/artifact/juraj_picker_v4_best.zip > /tmp/artifact/juraj_picker_v4_best.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: picker-v4-gate-search
+          path: /tmp/artifact
+          retention-days: 5
