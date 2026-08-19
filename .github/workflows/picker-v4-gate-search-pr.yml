@@ -1,0 +1,10 @@
+name: picker-v4-gate-search-pr
+on:
+  pull_request:
+    branches: [master]
+permissions:
+  contents: read
+jobs:
+  run-picker-search:
+    if: ${{ github.head_ref == 'picker-v4-run' }}
+    uses: ./.github/workflows/picker-v4-gate-search.yml
