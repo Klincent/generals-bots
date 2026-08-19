@@ -1,4 +1,4 @@
-name: tmp-picker-v6-trigger-pr
+name: tmp-picker-v7-trigger-pr
 
 on:
   pull_request:
@@ -15,12 +15,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: chatgpt/e50123-picker-v6-pressure
+          ref: chatgpt/e50123-picker-v7-comeback
           fetch-depth: 0
       - name: Install Python deps
         run: python -m pip install -q numpy jax
-      - name: Apply v6 pressure picker
-        run: python competition/agents/juraj_v35_cpp/apply_picker_v6.py
+      - name: Apply v7 comeback picker
+        run: python competition/agents/juraj_v35_cpp/apply_picker_v7.py
       - name: Validate tests and zero-picker equivalence
         shell: bash
         run: |
@@ -37,8 +37,8 @@ jobs:
           git config user.email 'actions@users.noreply.github.com'
           if ! git diff --quiet -- competition/agents/juraj_v35_cpp/main.cpp; then
             git add competition/agents/juraj_v35_cpp/main.cpp
-            git commit -m 'picker-v6: pressure-fed selective picker'
-            git push origin HEAD:chatgpt/e50123-picker-v6-pressure
+            git commit -m 'picker-v7: late comeback selective picker'
+            git push origin HEAD:chatgpt/e50123-picker-v7-comeback
           fi
 
   bench:
@@ -53,7 +53,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: chatgpt/e50123-picker-v6-pressure
+          ref: chatgpt/e50123-picker-v7-comeback
           fetch-depth: 0
       - name: Install Python deps
         run: python -m pip install -q numpy jax
@@ -66,16 +66,16 @@ jobs:
           bash /tmp/e50123/competition/agents/juraj_v35_cpp/build.sh
       - name: Run paired chunk
         env:
-          V35_PICKER_GATE: 4
+          V35_PICKER_GATE: 5
         shell: bash
         run: |
           set -euxo pipefail
-          OUT="picker-v6-s${{ matrix.start }}"
+          OUT="picker-v7-s${{ matrix.start }}"
           python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/e50123/competition/agents/juraj_v35_cpp/run.sh --start ${{ matrix.start }} --seeds 10 --output "$OUT"
       - uses: actions/upload-artifact@v4
         with:
-          name: picker-v6-s${{ matrix.start }}
-          path: picker-v6-s${{ matrix.start }}
+          name: picker-v7-s${{ matrix.start }}
+          path: picker-v7-s${{ matrix.start }}
           retention-days: 7
 
   aggregate:
@@ -85,21 +85,21 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          pattern: picker-v6-s*
+          pattern: picker-v7-s*
           path: artifacts
-      - name: Aggregate v6
+      - name: Aggregate v7
         shell: bash
         run: |
           python - <<'PY'
           import json,pathlib,random,re,statistics
           games=[]
-          for p in sorted(pathlib.Path('artifacts').glob('picker-v6-s*/games.jsonl')):
+          for p in sorted(pathlib.Path('artifacts').glob('picker-v7-s*/games.jsonl')):
               games += [json.loads(x) for x in p.read_text().splitlines() if x.strip()]
           valid=[g for g in games if 'result' in g]
           W=sum(g['result']=='win' for g in valid);D=sum(g['result']=='draw' for g in valid);L=sum(g['result']=='loss' for g in valid);score=(W+.5*D)/len(valid)
           by={}
           for g in valid:by.setdefault(g['seed'],[]).append(1 if g['result']=='win' else .5 if g['result']=='draw' else 0)
-          paired=[sum(v)/2 for v in by.values() if len(v)==2];rng=random.Random(0x356);boots=sorted(statistics.mean(rng.choice(paired) for _ in paired) for _ in range(10000));q=lambda x:boots[min(len(boots)-1,max(0,round(x*(len(boots)-1))))]
+          paired=[sum(v)/2 for v in by.values() if len(v)==2];rng=random.Random(0x357);boots=sorted(statistics.mean(rng.choice(paired) for _ in paired) for _ in range(10000));q=lambda x:boots[min(len(boots)-1,max(0,round(x*(len(boots)-1))))]
           starts=[];moves=[];delivered=[];completions=[];active=0;active_rows=[]
           for g in valid:
               s=g.get('stderr','');m=re.search(r'\[v36_picker\].*?starts=(\d+).*?completions=(\d+).*?moves=(\d+).*?delivered=(\d+)',s)
@@ -108,10 +108,10 @@ jobs:
                   if st: active+=1;active_rows.append([g['seed'],g['candidate_seat'],g['result'],st,co,mv,de])
           mean=lambda x:statistics.mean(x) if x else 0
           out={'games':len(valid),'W':W,'D':D,'L':L,'score':score,'ci95':[q(.025),q(.975)],'errors':sum('error'in g for g in games),'illegal':sum(g.get('candidate_illegal',0) for g in games),'active_games':active,'starts_per_game':mean(starts),'completions_per_game':mean(completions),'moves_per_game':mean(moves),'delivered_per_game':mean(delivered),'active_rows':active_rows}
-          pathlib.Path('picker-v6-aggregate.json').write_text(json.dumps(out,indent=2,sort_keys=True)+'\n');print(json.dumps(out,indent=2,sort_keys=True))
+          pathlib.Path('picker-v7-aggregate.json').write_text(json.dumps(out,indent=2,sort_keys=True)+'\n');print(json.dumps(out,indent=2,sort_keys=True))
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: picker-v6-aggregate
-          path: picker-v6-aggregate.json
+          name: picker-v7-aggregate
+          path: picker-v7-aggregate.json
           retention-days: 14
