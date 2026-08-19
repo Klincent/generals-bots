@@ -115,6 +115,13 @@ the game, candidate protocol, and diagnostic writer all terminate normally;
 the old 180-second failure depended on the old parallel execution load rather
 than a stuck match or agent.
 
+The final harness also closes the process-start cancellation race: once any
+worker fails, a shared stop signal prevents queued workers from spawning new
+matches, and a worker that races with the stop signal immediately terminates
+its newly registered process group. This preserves prompt failure even when a
+timeout occurs while another worker is between scheduling and process
+registration.
+
 No win-rate benchmark was interpreted during this harness repair. Picker
 thresholds and the selective gate were not changed.
 

@@ -16,6 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 RUNNING = set()
 RUNNING_LOCK = threading.Lock()
+STOPPING = threading.Event()
 
 
 class MatchTimeout(RuntimeError):
@@ -44,6 +45,8 @@ def stop_all():
 
 
 def run_match(agents, seed, trace, timeout, label):
+    if STOPPING.is_set():
+        raise RuntimeError("equivalence run cancelled")
     env = os.environ.copy()
     env["V35_PICKER_ENABLED"] = "0"
     env["JURAJ_RNG_SEED"] = str((seed * 0x9E3779B1 + 0x35) & 0xFFFFFFFF)
@@ -60,6 +63,14 @@ def run_match(agents, seed, trace, timeout, label):
     )
     with RUNNING_LOCK:
         RUNNING.add(proc)
+    # A different worker may have failed between the pre-spawn check and
+    # registration. Do not leave this newly registered process running after
+    # the failing worker's cleanup snapshot.
+    if STOPPING.is_set():
+        stop_process(proc)
+        with RUNNING_LOCK:
+            RUNNING.discard(proc)
+        raise RuntimeError("equivalence run cancelled")
     try:
         try:
             stdout, stderr = proc.communicate(timeout=timeout)
@@ -109,6 +120,7 @@ def check_game(seed, seat, candidate, baseline, output, timeout):
 
 
 def main():
+    STOPPING.clear()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--candidate", type=Path, required=True)
     parser.add_argument("--baseline", type=Path, required=True)
@@ -154,6 +166,7 @@ def main():
             except Exception as error:
                 print(f"[equivalence] FAILED seed={seed} seat={seat}: {error}",
                       file=sys.stderr, flush=True)
+                STOPPING.set()
                 stop_all()
                 for pending in futures:
                     pending.cancel()
