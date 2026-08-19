@@ -1,0 +1,85 @@
+name: picker-v9-issue
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  validate:
+    if: github.event.issue.title == '[picker-v9-run]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    env:
+      E501: e50123cee7d924f0d643acd372a5300971f93917
+      SDL_VIDEODRIVER: dummy
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: chatgpt/picker-v9-muster-castle
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -e .
+      - name: Apply v9 implementation
+        run: |
+          set -euxo pipefail
+          python competition/agents/juraj_v35_cpp/apply_picker_v9.py
+          git diff --check
+      - name: Test and build
+        run: |
+          set -euxo pipefail
+          bash competition/agents/juraj_v35_cpp/test.sh
+          bash competition/agents/juraj_v35_cpp/build.sh
+          git worktree add --detach /tmp/e501 "$E501"
+          bash /tmp/e501/competition/agents/juraj_v35_cpp/build.sh
+      - name: Zero-picker equivalence
+        run: |
+          set -euxo pipefail
+          V35_PICKER_ENABLED=0 python competition/agents/juraj_v35_cpp/equivalence_check.py \
+            --candidate competition/agents/juraj_v35_cpp/run.sh \
+            --baseline /tmp/e501/competition/agents/juraj_v35_cpp/run.sh \
+            --start 35000 --seeds 3 --jobs 1 --timeout 600 --picker-enabled 0
+      - name: Commit implementation
+        run: |
+          set -euxo pipefail
+          git config user.name 'ChatGPT'
+          git config user.email 'actions@users.noreply.github.com'
+          git add competition/agents/juraj_v35_cpp/main.cpp
+          if ! git diff --cached --quiet; then
+            git commit -m 'picker-v9: implement late attack muster and castle catchup'
+            git push origin HEAD:chatgpt/picker-v9-muster-castle
+          fi
+          git rev-parse HEAD > /tmp/v9_sha.txt
+      - name: Paired smoke benchmark
+        continue-on-error: true
+        run: |
+          set -euxo pipefail
+          rm -rf /tmp/picker-v9-smoke
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py \
+            --candidate competition/agents/juraj_v35_cpp/run.sh \
+            --baseline /tmp/e501/competition/agents/juraj_v35_cpp/run.sh \
+            --start 35000 --seeds 10 --output /tmp/picker-v9-smoke
+      - name: Package and comment
+        if: always()
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/package/juraj_v35
+          cp competition/agents/juraj_v35_cpp/{main.cpp,core.hpp,build.sh,run.sh} /tmp/package/juraj_v35/
+          (cd /tmp/package && zip -qr juraj_picker_v9_submission.zip juraj_v35)
+          sha256sum /tmp/package/juraj_picker_v9_submission.zip > /tmp/package/juraj_picker_v9_submission.sha256
+          SHA=$(cat /tmp/v9_sha.txt 2>/dev/null || git rev-parse HEAD)
+          SUMMARY='(benchmark summary unavailable)'
+          if [ -f /tmp/picker-v9-smoke/summary.json ]; then SUMMARY=$(cat /tmp/picker-v9-smoke/summary.json); cp /tmp/picker-v9-smoke/summary.json /tmp/package/; fi
+          printf 'Picker v9 validation finished.\n\nCommit: `%s`\n\nBenchmark:\n```json\n%s\n```\n\nRun: %s/%s/actions/runs/%s\n' "$SHA" "$SUMMARY" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" > /tmp/comment.md
+          gh issue comment "${{ github.event.issue.number }}" --body-file /tmp/comment.md
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: picker-v9-submission
+          path: /tmp/package
+          retention-days: 7
