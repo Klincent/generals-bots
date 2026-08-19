@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 08ba205
+          ref: 08ba20582f06adcc6b50590820b16a94956f733a
           fetch-depth: 0
       - name: Install Python deps
         run: python -m pip install -q numpy jax
@@ -23,7 +23,7 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          test "$(git rev-parse HEAD)" = "08ba205bd90d14569fc25effbe1b56f63d6e383b" || { git rev-parse HEAD; exit 1; }
+          test "$(git rev-parse HEAD)" = "08ba20582f06adcc6b50590820b16a94956f733a"
           bash competition/agents/juraj_v35_cpp/test.sh
           bash competition/agents/juraj_v35_cpp/build.sh
           git worktree add --detach /tmp/e50123 e50123cee7d924f0d643acd372a5300971f93917
@@ -41,7 +41,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 08ba205
+          ref: 08ba20582f06adcc6b50590820b16a94956f733a
           fetch-depth: 0
       - name: Install Python deps
         run: python -m pip install -q numpy jax
@@ -49,7 +49,7 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          test "$(git rev-parse HEAD)" = "08ba205bd90d14569fc25effbe1b56f63d6e383b"
+          test "$(git rev-parse HEAD)" = "08ba20582f06adcc6b50590820b16a94956f733a"
           git worktree add --detach /tmp/e50123 e50123cee7d924f0d643acd372a5300971f93917
           bash competition/agents/juraj_v35_cpp/build.sh
           bash /tmp/e50123/competition/agents/juraj_v35_cpp/build.sh
@@ -96,7 +96,7 @@ jobs:
                   st,co,mv,de=map(int,m.groups());starts.append(st);completions.append(co);moves.append(mv);delivered.append(de)
                   if st: active+=1;active_rows.append([g['seed'],g['candidate_seat'],g['result'],st,co,mv,de])
           mean=lambda x:statistics.mean(x) if x else 0
-          out={'frozen_sha':'08ba205bd90d14569fc25effbe1b56f63d6e383b','games':len(valid),'W':W,'D':D,'L':L,'score':score,'ci95':[q(.025),q(.975)],'errors':sum('error'in g for g in games),'illegal':sum(g.get('candidate_illegal',0) for g in games),'active_games':active,'starts_per_game':mean(starts),'completions_per_game':mean(completions),'moves_per_game':mean(moves),'delivered_per_game':mean(delivered),'active_rows':active_rows}
+          out={'frozen_sha':'08ba20582f06adcc6b50590820b16a94956f733a','games':len(valid),'W':W,'D':D,'L':L,'score':score,'ci95':[q(.025),q(.975)],'errors':sum('error'in g for g in games),'illegal':sum(g.get('candidate_illegal',0) for g in games),'active_games':active,'starts_per_game':mean(starts),'completions_per_game':mean(completions),'moves_per_game':mean(moves),'delivered_per_game':mean(delivered),'active_rows':active_rows}
           pathlib.Path('picker-v7-holdout-aggregate.json').write_text(json.dumps(out,indent=2,sort_keys=True)+'\n');print(json.dumps(out,indent=2,sort_keys=True))
           PY
       - uses: actions/upload-artifact@v4
