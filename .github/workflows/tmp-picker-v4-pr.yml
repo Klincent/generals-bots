@@ -1,0 +1,174 @@
+name: tmp-picker-v4-pr
+
+on:
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    if: github.head_ref == 'chatgpt/e50123-picker-v4'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      already: ${{ steps.detect.outputs.already }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - id: detect
+        shell: bash
+        run: |
+          if grep -q 'picker_gate_mode_' competition/agents/juraj_v35_cpp/main.cpp; then
+            echo 'already=1' >> "$GITHUB_OUTPUT"
+          else
+            echo 'already=0' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Apply bounded selective picker v4
+        if: steps.detect.outputs.already == '0'
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('competition/agents/juraj_v35_cpp/main.cpp')
+          s=p.read_text()
+          def rep(old,new):
+              global s
+              if old not in s:
+                  raise SystemExit('missing patch anchor: '+old[:120])
+              s=s.replace(old,new,1)
+          rep('struct EdgePickerState {bool active=false;int wall=-1,cell=-1,dir=0,phase=0,start_turn=-1,start_army=0,blocked_turns=0;};','struct EdgePickerState {bool active=false;int wall=-1,cell=-1,dir=0,phase=0,wall_goal=-1,start_turn=-1,start_army=0,blocked_turns=0,moves_used=0;};')
+          rep('EdgePickerState picker_;bool picker_enabled_=true;int edge_picker_threshold_=16,picker_wait_=0;double edge_picker_min_efficiency_=2.0;','EdgePickerState picker_;bool picker_enabled_=true;int picker_gate_mode_=1,picker_cooldown_until_=0,edge_picker_threshold_=16,picker_wait_=0;double edge_picker_min_efficiency_=2.0;')
+          rep('if(const char*e=std::getenv("V35_PICKER_ENABLED"))picker_enabled_=std::strcmp(e,"0")!=0;if(const char*e=std::getenv("V35_EDGE_PICKER_THRESHOLD"))','if(const char*e=std::getenv("V35_PICKER_ENABLED"))picker_enabled_=std::strcmp(e,"0")!=0;if(const char*e=std::getenv("V35_PICKER_GATE")){int v=std::atoi(e);if(v>=0&&v<=2)picker_gate_mode_=v;}if(const char*e=std::getenv("V35_EDGE_PICKER_THRESHOLD"))')
+          rep('int wall_cell_at(int wall,int coord)const{if(wall==0)return coord>=0&&coord<w_?coord:-1;if(wall==2)return coord>=0&&coord<w_?(h_-1)*w_+coord:-1;if(wall==1)return coord>=0&&coord<h_?coord*w_+w_-1:-1;return coord>=0&&coord<h_?coord*w_:-1;}','int wall_cell_at(int wall,int coord)const{if(wall==0)return coord>=0&&coord<w_?coord:-1;if(wall==2)return coord>=0&&coord<w_?(h_-1)*w_+coord:-1;if(wall==1)return coord>=0&&coord<h_?coord*w_+w_-1:-1;return coord>=0&&coord<h_?coord*w_:-1;}\n int edge_depth(int x)const{return x<0?0:std::min({x/w_,h_-1-x/w_,x%w_,w_-1-x%w_});}')
+          rep('if(picker_.active&&(picker_.cell<0||picker_.cell>=n_||o.owner[picker_.cell]!=1)){picker_.active=false;picker_wait_=0;++picker_aborts_;++picker_lost_aborts_;}\n  else if(picker_.active&&o.army[picker_.cell]<=1){picker_.active=false;picker_wait_=0;++picker_aborts_;++picker_depleted_aborts_;}','if(picker_.active&&(picker_.cell<0||picker_.cell>=n_||o.owner[picker_.cell]!=1)){picker_.active=false;picker_wait_=0;picker_cooldown_until_=std::max(picker_cooldown_until_,o.turn+40);++picker_aborts_;++picker_lost_aborts_;}\n  else if(picker_.active&&o.army[picker_.cell]<=1){picker_.active=false;picker_wait_=0;picker_cooldown_until_=std::max(picker_cooldown_until_,o.turn+40);++picker_aborts_;++picker_depleted_aborts_;}')
+          start=s.index('  if(picker_enabled_&&!picker_.active&&!immediate&&general_>=0){')
+          end=s.index('  if(picker_.active){int x=picker_.cell', start)
+          new_start=r'''  if(picker_enabled_&&!picker_.active&&!immediate&&general_>=0&&o.turn>=picker_cooldown_until_){
+   int best_wall=-1,best_start=-1,best_dir=0,best_goal=-1,best_mass=-1,best_moves=INF;double best_margin=-1e100;
+   for(int wall=0;wall<4;++wall)if(wall_irrelevant(wall,picker_sink)){int proj=(wall==0||wall==2)?general_%w_:general_/w_,limit=(wall==0||wall==2)?w_:h_;for(int side:{-1,1}){int far=proj;for(int cc=proj+side;cc>=0&&cc<limit;cc+=side){int z=wall_cell_at(wall,cc);if(z<0||z==general_||!picker_transit_safe(o,z))break;if(o.army[z]>1)far=cc;}if(far==proj)continue;int inward=-side,sweep=std::min(3,std::abs(far-proj)),goal=far+inward*sweep,mass=0;bool protected_source=false;for(int cc=far;;cc+=inward){int z=wall_cell_at(wall,cc);if(z>=0&&z!=general_&&picker_transit_safe(o,z))mass+=std::max(0,o.army[z]-1);if(const Packet*p=packet_for(z))protected_source|=p->role==PacketRole::ATTACK||p->role==PacketRole::FRONT||p->role==PacketRole::COUNTERATTACK||p->role==PacketRole::GENERAL_DEFENSE||p->role==PacketRole::CASTLE_C1||p->role==PacketRole::CASTLE_C2;if(cc==goal)break;}if(protected_source){++picker_source_guard_rejects_;continue;}int start_cell=wall_cell_at(wall,far),goal_cell=wall_cell_at(wall,goal);if(start_cell<0||goal_cell<0||owned_next_to_general(o,goal_cell)<0)continue;int moves=std::max(1,sweep+3);if(mass<=edge_picker_threshold_){++picker_start_mass_rejects_;continue;}double eff=double(mass)/moves;if(eff<edge_picker_min_efficiency_){++picker_start_efficiency_rejects_;continue;}double margin=mass-edge_picker_min_efficiency_*moves;if(best_start<0||std::tuple(-margin,-mass,moves,wall,start_cell)<std::tuple(-best_margin,-best_mass,best_moves,best_wall,best_start)){best_wall=wall;best_start=start_cell;best_dir=inward;best_goal=goal;best_mass=mass;best_moves=moves;best_margin=margin;}}}
+   if(best_start>=0){
+    ++picker_eligible_;int useful_neutrals=0,largest_owned=0;std::vector<int>owned_stacks;
+    for(int x=0;x<n_;++x)if(o.owner[x]==1){largest_owned=std::max(largest_owned,o.army[x]);owned_stacks.push_back(o.army[x]);for(int d=0;d<4;++d){int y=g_.neighbor(x,d);if(y>=0&&o.owner[y]==0&&o.army[x]-1>o.army[y]){++useful_neutrals;break;}}}
+    std::sort(owned_stacks.rbegin(),owned_stacks.rend());int top3=0;for(int i=0;i<std::min(3,(int)owned_stacks.size());++i)top3+=owned_stacks[i];double top3_share=o.my_army?double(top3)/o.my_army:1.;
+    double growth25=slope(land_hist_,25),growth50=slope(land_hist_,50);int mode=picker_gate_mode_;bool mature=mode==0?(o.turn>=180||o.my_land*100>=n_*35):mode==1?(o.turn>=150||o.my_land*100>=n_*30):(o.turn>=120||o.my_land*100>=n_*25);bool not_behind=o.opp_land==0||(mode==0?o.my_land*5>=o.opp_land*4:mode==1?o.my_land*20>=o.opp_land*13:o.my_land*20>=o.opp_land*11);bool growing=mode==0?(growth25>=.08||growth50>=.06||o.my_land*100>=n_*45):(mode==1?(growth25>=.04||growth50>=.03||o.my_land*100>=n_*35||o.turn>=350):(growth25>=.02||growth50>=.015||o.my_land*100>=n_*30||o.turn>=300));int neutral_cap=mode==0?4:mode==1?8:12;int neutral_waive_turn=mode==0?450:mode==1?320:260;bool few_neutrals=useful_neutrals<=neutral_cap||o.turn>=neutral_waive_turn;double concentration_cap=mode==0?.40:mode==1?.50:.58;bool needs_concentration=top3_share<concentration_cap&&largest_owned<best_mass;int mass_floor=mode==0?std::max(22,o.my_army/8):mode==1?std::max(18,o.my_army/10):std::max(16,o.my_army/12);bool meaningful_mass=best_mass>=mass_floor;bool economy_ok=production_!=ProductionState::SEVERE_DEFICIT&&!f1.must_fund&&!f2.must_fund;bool useful_sink=picker_sink>=0;bool allowed=mature&&not_behind&&growing&&few_neutrals&&needs_concentration&&meaningful_mass&&economy_ok;
+    std::fprintf(stderr,"[v36_picker_start] turn=%d gate=%d my_land=%d opp_land=%d land_delta=%d growth25=%.3f growth50=%.3f my_army=%d opp_army=%d army_delta=%d largest=%d top3=%d top3_share=%.3f surplus=%d moves=%d delivered=%d useful_neutrals=%d enemy_seen=%d contact=%d fronts=%d enemy_general=%d production=%d tick_in=%d c1=%d c2=%d attack_sink=%d allowed=%d\n",o.turn,mode,o.my_land,o.opp_land,o.my_land-o.opp_land,growth25,growth50,o.my_army,o.opp_army,o.my_army-o.opp_army,largest_owned,top3,top3_share,best_mass,best_moves,best_mass,useful_neutrals,enemy_seen,meaningful,fronts_.active_count(),belief_.confirmed(),(int)production_,50-o.turn%50,(int)castle_state_[0],(int)castle_state_[1],useful_sink,allowed);
+    if(!mature||!economy_ok)++picker_reject_economy_;else if(!not_behind)++picker_reject_behind_;else if(!growing)++picker_reject_growth_;else if(!few_neutrals)++picker_reject_neutrals_;else if(!needs_concentration||!meaningful_mass)++picker_reject_concentration_;else{picker_={true,best_wall,best_start,best_dir,0,best_goal,o.turn,o.army[best_start],0,0};picker_wait_=0;++picker_starts_;picker_planned_mass_sum_+=best_mass;picker_planned_moves_sum_+=best_moves;}
+   }
+  }
+'''
+          s=s[:start]+new_start+s[end:]
+          start=s.index('  if(picker_.active){int x=picker_.cell')
+          end=s.index('  for(int x=0;x<n_;++x)if(source(o,x)){if(picker_.active&&x==picker_.cell)continue;', start)
+          new_active=r'''  if(picker_.active){int x=picker_.cell,y=-1;bool can_step=production_!=ProductionState::SEVERE_DEFICIT&&!f1.must_fund&&!f2.must_fund&&until>8&&expansion_wait_<3;if(!can_step){++picker_paused_;}else{if(picker_.phase==0){int cc=wall_coord(x,picker_.wall);if(cc!=picker_.wall_goal&&picker_.dir!=0){int z=wall_cell_at(picker_.wall,cc+picker_.dir);if(z>=0&&picker_transit_safe(o,z))y=z;else picker_.phase=1;}else picker_.phase=1;}if(picker_.phase==1)y=owned_next_to_general(o,x);if(y>=0&&source(o,x)&&o.owner[y]==1){picker_.blocked_turns=0;c.push_back({2,x,y,0,1000.+o.army[x]*2.,Reason::EDGE_PICKER,false,ActionClass::LOGISTICS,general_,-1,PacketRole::EDGE_PICKER});}else if(x!=general_){++picker_.blocked_turns;++picker_blocked_ticks_;if(picker_.blocked_turns>12){picker_.active=false;picker_wait_=0;picker_cooldown_until_=std::max(picker_cooldown_until_,o.turn+40);++picker_aborts_;}}}}
+'''
+          s=s[:start]+new_active+s[end:]
+          exec_start=s.index('if(q.role==PacketRole::EDGE_PICKER){++picker_moves_;')
+          exec_end=s.index('commit_packet(o,q);', exec_start)
+          old_exec=s[exec_start:exec_end]
+          preempt='else if(picker_.active&&q.from==picker_.cell&&(q.reason==Reason::GENERAL_EMERGENCY||q.reason==Reason::TERMINAL_CAPTURE)){picker_.cell=q.to;picker_.phase=1;picker_.blocked_turns=0;++picker_critical_preempt_moves_;}'
+          if preempt not in old_exec: raise SystemExit('missing picker execution preemption anchor')
+          new_exec='if(q.role==PacketRole::EDGE_PICKER){++picker_moves_;++picker_.moves_used;bool handoff=edge_depth(q.to)>=3||picker_.moves_used>=8;if(handoff){picker_units_delivered_+=std::max(0,o.army[q.from]-1);picker_.active=false;picker_wait_=0;picker_.blocked_turns=0;picker_cooldown_until_=std::max(picker_cooldown_until_,o.turn+(picker_gate_mode_==0?120:picker_gate_mode_==1?90:70));++picker_completions_;}else{picker_.cell=q.to;picker_.blocked_turns=0;}}'+preempt
+          s=s[:exec_start]+new_exec+s[exec_end:]
+          p.write_text(s)
+          PY
+      - name: Validate implementation
+        if: steps.detect.outputs.already == '0'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          bash competition/agents/juraj_v35_cpp/test.sh
+          bash competition/agents/juraj_v35_cpp/build.sh
+          git worktree add --detach /tmp/e50123 e50123cee7d924f0d643acd372a5300971f93917
+          V35_PICKER_ENABLED=0 python competition/agents/juraj_v35_cpp/equivalence_check.py --candidate competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/e50123/competition/agents/juraj_v35_cpp/run.sh --start 31000 --seeds 3 --jobs 2 --timeout 600 --picker-enabled 0
+      - name: Push implementation
+        if: steps.detect.outputs.already == '0'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git config user.name 'ChatGPT'
+          git config user.email 'actions@users.noreply.github.com'
+          git add competition/agents/juraj_v35_cpp/main.cpp
+          git commit -m 'picker-v4: apply implementation'
+          git push origin HEAD:${{ github.head_ref }}
+
+  bench:
+    if: github.head_ref == 'chatgpt/e50123-picker-v4' && needs.prepare.outputs.already == '0'
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        gate: [0, 1, 2]
+        start: [31000, 31010, 31020]
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Prepare exact baseline
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git worktree add --detach /tmp/e50123 e50123cee7d924f0d643acd372a5300971f93917
+          bash competition/agents/juraj_v35_cpp/build.sh
+          bash /tmp/e50123/competition/agents/juraj_v35_cpp/build.sh
+      - name: Run paired chunk
+        shell: bash
+        env:
+          V35_PICKER_GATE: ${{ matrix.gate }}
+        run: |
+          set -euxo pipefail
+          OUT="picker-v4-g${{ matrix.gate }}-s${{ matrix.start }}"
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/e50123/competition/agents/juraj_v35_cpp/run.sh --start ${{ matrix.start }} --seeds 10 --output "$OUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: picker-v4-g${{ matrix.gate }}-s${{ matrix.start }}
+          path: picker-v4-g${{ matrix.gate }}-s${{ matrix.start }}
+          retention-days: 7
+
+  aggregate:
+    if: github.head_ref == 'chatgpt/e50123-picker-v4' && needs.prepare.outputs.already == '0'
+    needs: [prepare, bench]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: picker-v4-g*
+          path: artifacts
+      - name: Aggregate
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,pathlib,random,re,statistics
+          root=pathlib.Path('artifacts'); out={}
+          for gate in (0,1,2):
+              games=[]
+              for p in sorted(root.glob(f'picker-v4-g{gate}-s*/games.jsonl')): games += [json.loads(x) for x in p.read_text().splitlines() if x.strip()]
+              valid=[g for g in games if 'result'in g]; W=sum(g['result']=='win' for g in valid);D=sum(g['result']=='draw' for g in valid);L=sum(g['result']=='loss' for g in valid);score=(W+.5*D)/len(valid) if valid else 0
+              by={}
+              for g in valid: by.setdefault(g['seed'],[]).append(1 if g['result']=='win' else .5 if g['result']=='draw' else 0)
+              paired=[sum(v)/2 for v in by.values() if len(v)==2];rng=random.Random(0x354);boots=sorted(statistics.mean(rng.choice(paired) for _ in paired) for _ in range(10000)) if paired else [0];q=lambda x:boots[min(len(boots)-1,max(0,round(x*(len(boots)-1))))]
+              starts=[];moves=[];delivered=[];completions=[];land100=[];land250=[];expansion=[];war=[];active=0
+              for g in valid:
+                  s=g.get('stderr','');m=re.search(r'\[v36_picker\].*?starts=(\d+).*?completions=(\d+).*?moves=(\d+).*?delivered=(\d+)',s)
+                  if m:
+                      st,co,mv,de=map(int,m.groups());starts.append(st);completions.append(co);moves.append(mv);delivered.append(de);active+=st>0
+                  m=re.search(r'\[v35_land\](.*)',s)
+                  if m:
+                      d={int(k):int(v) for k,v in re.findall(r'(\d+):(\d+)',m.group(1))};land100 += [d[100]] if 100 in d else [];land250 += [d[250]] if 250 in d else []
+                  m=re.search(r'\[v35_actions\] expansion=(\d+).*?war=(\d+)',s)
+                  if m: expansion.append(int(m.group(1)));war.append(int(m.group(2)))
+              mean=lambda x:statistics.mean(x) if x else 0
+              out[str(gate)]={'games':len(games),'W':W,'D':D,'L':L,'score':score,'ci95':[q(.025),q(.975)],'errors':sum('error'in g for g in games),'illegal':sum(g.get('candidate_illegal',0) for g in games),'active_games':active,'starts_per_game':mean(starts),'completions_per_game':mean(completions),'moves_per_game':mean(moves),'delivered_per_game':mean(delivered),'land100':mean(land100),'land250':mean(land250),'expansion':mean(expansion),'war':mean(war)}
+          pathlib.Path('picker-v4-aggregate.json').write_text(json.dumps(out,indent=2,sort_keys=True)+'\n');print(json.dumps(out,indent=2,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: picker-v4-aggregate
+          path: picker-v4-aggregate.json
+          retention-days: 14
