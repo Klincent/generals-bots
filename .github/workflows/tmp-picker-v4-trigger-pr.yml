@@ -19,6 +19,8 @@ jobs:
         with:
           ref: chatgpt/e50123-picker-v4
           fetch-depth: 0
+      - name: Install Python deps
+        run: python -m pip install -q numpy jax
       - name: Apply implementation
         run: python competition/agents/juraj_v35_cpp/apply_picker_v4.py
       - name: Validate tests and zero-picker equivalence
@@ -58,6 +60,8 @@ jobs:
         with:
           ref: chatgpt/e50123-picker-v4
           fetch-depth: 0
+      - name: Install Python deps
+        run: python -m pip install -q numpy jax
       - name: Prepare agents
         shell: bash
         run: |
