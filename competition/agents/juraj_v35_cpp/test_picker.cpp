@@ -6,7 +6,7 @@
 
 static Observation picker_board(){
  Observation o;o.turn=300;o.type.assign(441,1);o.owner.assign(441,1);o.army.assign(441,1);o.type[220]=4;o.army[220]=5;
- for(int r:{2,3,4,5})o.army[r*21+20]=6;
+ for(int r:{2,3,4,5})o.army[r*21+20]=8;
  o.my_land=441;o.my_army=0;o.opp_land=0;o.opp_army=0;for(int z=0;z<441;++z)o.my_army+=o.army[z];return o;
 }
 static int psrc(const Action&a){return a.row*21+a.col;}
@@ -17,10 +17,10 @@ static void apply_action(Observation&o,const Action&a){if(a.kind!=0){++o.turn;re
 int main(){
  setenv("V35_PICKER_GATE","1",1);setenv("V36_EDGE_PICKER_MIN_EFFICIENCY","0",1);
  // Threshold still controls whether a valuable bounded ray is eligible.
- {setenv("V35_EDGE_PICKER_THRESHOLD","30",1);Agent a(0,21,21);auto o=picker_board();a.decide(o);assert(a.edge_picker_starts()==0);}
+ {setenv("V35_EDGE_PICKER_THRESHOLD","40",1);Agent a(0,21,21);auto o=picker_board();a.decide(o);assert(a.edge_picker_starts()==0);}
  // A dense edge packet starts once, uses a bounded number of dedicated moves,
  // and hands off in the interior instead of walking all the way to the general.
- {setenv("V35_EDGE_PICKER_THRESHOLD","4",1);Agent a(0,21,21);auto o=picker_board();for(int i=0;i<80&&a.edge_picker_completions()==0;++i){auto q=a.decide(o);apply_action(o,q);}assert(a.edge_picker_starts()==1);assert(a.edge_picker_completions()==1);assert(a.edge_picker_moves()>=1&&a.edge_picker_moves()<=8);assert(a.edge_picker_delivered()>=15);assert(a.edge_picker_aborts()==0);}
+ {setenv("V35_EDGE_PICKER_THRESHOLD","4",1);Agent a(0,21,21);auto o=picker_board();for(int i=0;i<80&&a.edge_picker_completions()==0;++i){auto q=a.decide(o);apply_action(o,q);}assert(a.edge_picker_starts()==1);assert(a.edge_picker_completions()==1);assert(a.edge_picker_moves()>=1&&a.edge_picker_moves()<=8);assert(a.edge_picker_delivered()>=20);assert(a.edge_picker_aborts()==0);}
  // A hard general emergency pre-empts an active collector without destroying it.
  {setenv("V35_EDGE_PICKER_THRESHOLD","4",1);Agent a(0,21,21);auto o=picker_board();for(int i=0;i<20&&!a.edge_picker_active();++i){auto q=a.decide(o);apply_action(o,q);}assert(a.edge_picker_active());int pc=a.edge_picker_cell();int enemy=219;o.owner[enemy]=2;o.army[enemy]=8;o.army[218]=12;recount(o);auto emergency=a.decide(o);assert(emergency.kind==0);assert(psrc(emergency)!=pc);assert(a.edge_picker_active());apply_action(o,emergency);o.owner[enemy]=1;o.army[enemy]=1;recount(o);for(int i=0;i<80&&a.edge_picker_completions()==0;++i){auto z=a.decide(o);apply_action(o,z);}assert(a.edge_picker_completions()==1);assert(a.edge_picker_aborts()==0);assert(a.edge_picker_paused()>0);}
  std::cout<<"v36 bounded edge picker lifecycle scenarios passed\n";
