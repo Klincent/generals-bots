@@ -1,4 +1,4 @@
-# Current Codex task: redesign picker to preserve champion opportunity cost
+# Current Codex task: selective economy-safe picker v3
 
 ## Context
 
@@ -6,167 +6,227 @@ Reference champion:
 
 `e50123cee7d924f0d643acd372a5300971f93917`
 
-Runtime-correct picker branch:
+Useful implementation history:
 
-`codex/e50123-picker-fix`
+- runtime-correct picker base: `codex/e50123-picker-fix`
+- non-modal picker experiment: `b1edc4015f5e0a9f8c4f306e458e0d64d849d734`
+- short-handoff experiment: `96063b069b6c642f6ebf4ba637eedaf3ee8845b2`
 
-The picker crash is fixed and protocol smoke is clean. The best tested picker configuration so far uses threshold 16 and min efficiency 2.0.
+The 60-game screen for the short-handoff picker looked promising at 29/6/25 = 0.5333, but an untouched 120-game confirmation on seeds 32000..32059 failed badly:
 
-Its best 60-game screen versus exact e50123 on seeds 31000..31029, both seats, was:
-
-- 25 W / 6 D / 29 L
-- score 0.4667
+- 37 W / 18 D / 65 L
+- score 0.3833
+- paired 95% CI [0.3125, 0.4542]
 - 0 errors / 0 illegal actions
-- picker: about 5.92 starts, 5.87 completions, 33.25 picker moves, 429.92 units delivered per game
-- about 12.93 delivered units per picker move
-- candidate land T50/T100/T150/T250: 18.3 / 38.4 / 56.6 / 80.1
-- champion land T50/T100/T150/T250: 19.6 / 43.9 / 62.3 / 95.9
-- candidate expansion actions: 111.53/game
-- champion expansion actions: 140.08/game
-- war activity is roughly unchanged
 
-The important diagnosis is that picker logistics are mechanically healthy but strategically too expensive. It consumes about 33 turns/game, while expansion falls by about 29 actions/game and T250 land trails by about 15.8. The problem is not insufficient picker efficiency per move. The problem is **opportunity cost and scheduling priority**.
+The confirmation forensics are important:
 
-Do not solve this by only changing the source threshold again. Threshold 20 and min efficiency 2.5 already regressed.
+- some wins clearly showed a real picker benefit: smaller land/economy but much larger concentrated stacks that converted into decisive general pressure;
+- in aggregate the picker still damaged economy too often;
+- candidate had about 28 fewer expansion actions/game and a large T250 land deficit;
+- most picker moves occurred in nominally low-opportunity/idle slots, so simple scheduler competition alone is not enough;
+- the core failure is that picker activation is too unconditional across game states. It is useful in some states and harmful in others.
+
+Do not resurrect the old modal picker and do not simply retune mass threshold again.
 
 ## Primary objective
 
-Redesign the picker so it recovers useful stranded/edge army **without taking ~33 dedicated turns away from the champion's expansion/war pipeline**.
+Build a **selective picker that activates only when the current game state can afford consolidation and the expected concentration benefit is worth the economic risk**.
 
-The picker should become an opportunistic/background logistics mechanism rather than a modal state that monopolizes turns while active.
+The goal is not maximum delivered mass. The goal is a picker that improves paired win rate versus exact e50123 on independent seeds.
 
-The final candidate must remain picker-only relative to exact e50123. Do not change anti-cycle, 3x3 exploration, castle policy, threat defense or attack architecture.
+The final candidate must remain picker-only relative to exact e50123. Do not modify anti-cycle, 3x3 exploration, castle policy, threat defense or attack architecture.
 
-## Required code diagnosis
+## Development data and holdout discipline
 
-Inspect the current `codex/e50123-picker-fix` implementation carefully before changing it.
+The following seed pools are already spent and may be used for diagnosis/tuning:
 
-There is a known high-value lead in the current scheduler: while `picker_.active` and a picker candidate exists, the code effectively schedules the picker candidate directly instead of allowing normal champion priorities to compete. This likely explains why almost every started picker runs to completion and why expansion loses almost one action per picker move.
+- `31000..31029`
+- `32000..32059`
 
-Prove this with telemetry on representative identical-seed games before changing it.
+Do not call either pool an independent confirmation again.
 
-Specifically instrument / measure:
+Use a fresh holdout for final validation:
 
-- how many picker moves occur on turns where a legal expansion candidate existed;
-- how many occur on turns where a war/offense candidate existed;
-- how many occur within 8 turns before a production tick;
-- how many occur while castle funding is urgent;
-- how many picker moves replace what the exact champion chose on the same seed/seat/turn;
-- classify the champion's displaced action as expansion / war / search / logistics / pass / hard tactical.
+- `33000..33059`, both seats = 120 games
 
-Add aggregate telemetry such as:
+If the result is promising but uncertain, use another untouched holdout:
 
-- `picker_displaced_expansion`
-- `picker_displaced_war`
-- `picker_displaced_search`
-- `picker_used_idle_slot`
-- `picker_opportunity_cost_score`
+- `34000..34059`, both seats = 120 games
 
-If exact action-by-action baseline shadowing inside one process is too invasive, derive the comparison from paired replay/audit traces offline. Do not change champion behavior merely to collect telemetry.
+Do not tune on 33000/34000 after seeing their outcomes.
 
-## Redesign requirements
+## Phase 1 — data-driven picker-start forensics
 
-Implement a **non-monopolizing picker**. Explore the smallest coherent design that satisfies these constraints:
+Before changing runtime policy, deterministically replay the spent development pools and instrument every potential/actual picker start with a compact state snapshot.
 
-1. Starting a picker must NOT imply that every subsequent turn is automatically a picker move.
-2. True HARD actions always win.
-3. Expansion must retain the champion's starvation protection. If a useful expansion candidate exists and expansion has been deferred recently, picker must yield.
-4. During healthy early/mid expansion, picker should normally move only when the opportunity cost is low.
-5. Picker should yield to meaningful war/offense when contact/general information makes war productive.
-6. Picker should avoid stealing the last useful action window before production ticks.
-7. Picker may remain logically active while paused. Pause is not abort. Resume later if route/state remains valid.
-8. Do not reserve the picker source so aggressively that higher-value champion actions from that same source are suppressed. Protect picker continuity only when the alternative action is genuinely lower value.
-9. Prefer picker steps that piggyback on useful inward movement already aligned with champion logistics. If the same move would have been a valid rear evacuation / war mobilization / consolidation step, count it as picker progress without creating an additional dedicated action.
-10. Consider a bounded picker duty cycle / token budget rather than unconditional modal execution. Example concept: at most one dedicated picker step every N non-HARD turns unless no productive champion candidate exists. Do not hardcode this blindly; test N values with evidence.
-11. Completion target need not always be the general itself. A strategically useful handoff point on the attack/front/logistics backbone can terminate the picker earlier if the collected mass is then naturally consumed by champion logic.
-12. Preserve route safety, source protection, resumability and all runtime fixes.
+At minimum collect:
 
-The key metric is no longer only `units delivered / picker move`. Also measure `net useful mass delivered per displaced high-value action`.
+- turn
+- my_land / opp_land / land delta
+- recent land growth slope over roughly 25 and 50 turns
+- my_army / opp_army / army delta
+- largest owned stack and top-3 owned stack mass/share if practical
+- scattered owned mass in small stacks if practical
+- current edge/rear surplus mass proposed for picker
+- proposed picker moves and estimated delivered mass
+- reachable neutral expansion opportunities / count of immediately useful neutral candidates
+- distance to nearest useful neutral expansion if practical
+- enemy seen / meaningful contact / active fronts
+- enemy general confirmed
+- production state and turns to next production tick
+- C1/C2 urgency/build status
+- whether an attack/front packet already exists
+- whether the game eventually won/lost
+- local 50-turn change in land/army after picker start where available
 
-## Experimental sequence
+Use the spent 31000/32000 pools to identify simple interpretable conditions separating helpful picker starts from harmful ones. Do not train a large black-box model. Small offline scripts/grid searches are fine for analysis, but runtime policy must remain simple deterministic C++.
 
-Work on a new branch:
+Important hypotheses to test, not blindly assume:
 
-`codex/e50123-picker-opportunity-v2`
+1. Picker is safer after early expansion is largely established.
+2. Picker is safer when recent land growth is healthy rather than stalled.
+3. Picker is safer when we are not materially behind the opponent in land/economy.
+4. Picker is most useful when edge surplus is large but concentration is poor (no existing decisive stack).
+5. Picker should stay off when many cheap neutral expansion opportunities remain.
+6. Picker may be useful after meaningful contact when it can feed a real attack/front sink, but not when it merely carries mass toward the general.
 
-Start from the runtime-correct picker implementation, preserving its crash fix and protocol regression test.
+Report which of these are actually supported by the spent replay data.
 
-### Experiment 0 — baseline reproduction
+## Phase 2 — implement small selective variants
 
-Re-run the best current picker (threshold 16, efficiency 2.0) on the same 60-game screen and confirm results are materially consistent with 0.4667 before redesign.
+Work on branch:
 
-### Experiment 1 — scheduler de-monopolization
+`codex/e50123-picker-selective-v3`
 
-Remove the unconditional/modal picker scheduling behavior. Let picker compete in the existing champion scheduler with explicit safeguards for expansion starvation and war opportunity.
+Use the non-modal picker architecture as the implementation starting point, but exact e50123 remains the benchmark reference.
 
-Do not alter route geometry or source threshold in this first experiment.
+Create at most three small, attributable runtime policies. Suggested structure:
 
-Run 60 games, seeds 31000..31029 both seats.
+### Variant A — economy-health gate
 
-### Experiment 2 — low-opportunity duty cycle / piggyback
+Picker may start only when an evidence-derived economy/expansion health condition is satisfied.
 
-Based on Experiment 1 telemetry, add one coherent mechanism to reduce dedicated picker turns further. Prefer piggybacking or a duty-cycle gate over another mass threshold change.
+Examples of possible signals:
 
-Run the same 60-game screen.
+- minimum turn / expansion maturity
+- recent land slope not stalled
+- not materially behind opponent land
+- low count of useful neutral expansion candidates
 
-### Experiment 3 — shorter handoff / strategic sink
+Choose thresholds from replay evidence rather than arbitrary guessing.
 
-Only if still necessary, test terminating the picker at a useful interior/front handoff rather than always carrying the stack all the way to the general. The goal is to reduce picker move count while preserving delivered strategic value.
+### Variant B — concentration-need gate
 
-Run the same 60-game screen.
+Build on A only if justified. Require that consolidation is actually needed:
 
-Do not make more than these three conceptual changes in one task. Keep each as an inspectable commit so attribution is clear.
+- substantial edge/rear surplus exists
+- no already-dominant attack stack / top-3 concentration is below an evidence-derived threshold
+- projected delivered mass per dedicated move remains worthwhile
 
-## Acceptance gates
+Do not move army merely because it exists on an edge.
 
-A candidate is interesting if all are true:
+### Variant C — attack-fed / hybrid gate
 
-- 0 runtime/protocol errors
-- 0 illegal actions
-- 60-game score >= 0.48; >= 0.50 preferred
-- T100 land no worse than champion by ~3 on average
-- T250 land no worse than champion by ~8 on average
-- expansion actions materially recover toward champion levels
-- war activity does not materially regress
-- castle timing does not materially regress
-- picker still delivers meaningful mass
-- dedicated picker moves fall materially below the current ~33/game, preferably <= 15/game unless displaced-action telemetry proves the extra moves are nearly free
+Only if justified by forensics, allow picker preferentially when it can hand off into a meaningful front/attack backbone or when the economy-health + concentration-need conditions both hold.
 
-If a 60-game candidate reaches >=0.50 with healthy telemetry, run an independent 120-game confirmation on seeds 32000..32059 both seats.
+Prefer a useful front/interior handoff over the general when appropriate.
 
-If it lands in 0.48..0.50, inspect uncertainty and telemetry and decide whether one final small tuning pass is justified before confirmation.
+Do not make unrelated strategy changes between variants.
 
-## Required loss forensics
+## Piggyback and dedicated move policy
 
-For each tested version, inspect identical-seed losses and report at minimum:
+Keep the picker non-modal and resumable.
 
-- champion vs candidate land T50/T100/T150/T250
-- expansion action delta
-- war/offense delta
-- picker dedicated moves
-- picker moves that displaced expansion/war
-- picker idle-slot/piggyback moves
-- castles C1/C2 timing/status
-- at least 5 representative losses with a short causal label
+- HARD actions always win.
+- Expansion starvation protection remains champion-equivalent.
+- Meaningful war/offense yields priority.
+- Pause is not abort.
+- Prefer piggyback progress when an unchanged champion logistics/war move naturally advances the collector.
+- Dedicated picker moves are allowed only after the selective activation gate has passed.
+- Track dedicated vs piggyback moves separately.
 
-Do not call a picker variant bad merely because it delivers less total mass. A lower-volume picker that preserves expansion and improves win rate is preferable.
+A picker that starts 1-2 times/game and wins more is better than one that delivers 400 units/game and loses.
+
+## Development benchmark protocol
+
+For each A/B/C candidate:
+
+1. full unit/recovery/picker/protocol tests and release build;
+2. 60-game paired screen on `31000..31029`;
+3. 120-game paired development check on `32000..32059` if the 60-game result is not clearly bad;
+4. compare the candidate's behavior against exact e50123 and against the known failed short-handoff picker.
+
+Because 31000/32000 are development data now, use them for ranking/tuning only, not final claims.
+
+Required telemetry:
+
+- W/D/L and score
+- errors/illegal actions
+- land T50/T100/T150/T250
+- expansion actions
+- war/offense/search actions
+- C1/C2 frequency/timing
+- picker eligible opportunities
+- picker starts/completions
+- dedicated picker moves
+- piggyback picker moves
+- delivered mass
+- delivered mass per dedicated move
+- gate rejects by reason (economy, expansion opportunity, concentration already sufficient, behind/stalled, no useful sink, etc.)
+- per-start turn distribution
+
+## Final holdout gate
+
+Pick exactly one best selective candidate before looking at the final holdout.
+
+Freeze its source and commit SHA.
+
+Then run:
+
+- seeds `33000..33059`
+- both seats
+- 120 games
+- exact e50123 baseline
+- no tuning, no early stopping, no source edits
+
+Interpretation:
+
+- score >= 0.52 with 0 errors/illegal actions: strong candidate; run second holdout 34000..34059 for confirmation
+- score 0.50..0.52: promising; run 34000..34059 before any submission decision
+- score 0.48..0.50: inconclusive; do not submit yet
+- score < 0.48: reject that selective policy
+
+If a second holdout is run, require the combined evidence from 33000+34000 to be at least non-regressing and preferably >0.50 before recommending submission.
+
+## Loss and win forensics
+
+Do not inspect only losses. For the final candidate inspect at least five wins and five losses.
+
+Specifically answer:
+
+- when picker helped, what state made consolidation valuable?
+- when picker hurt, why did the gate permit it?
+- did winning picker games show larger decisive stacks / earlier general pressure / better war conversion?
+- did losing games still show economy damage, or are losses unrelated to picker activity?
+
+If a loss occurs with zero picker starts, do not attribute it to picker.
 
 ## Deliverables
 
-Append the new experiment results to `docs/codex/RESULTS.md`.
+Append results to `docs/codex/RESULTS.md`.
 
 At completion provide:
 
-- branch and final SHA
-- exact code-level cause of current opportunity cost
-- baseline reproduction W/D/L
-- W/D/L and score for each redesign experiment
-- confidence intervals
-- land/expansion/war/castle telemetry
-- picker displaced-action telemetry
-- picker moves and delivered mass
-- representative loss diagnosis
-- recommended picker design
-- whether 120-game confirmation was run
+- branch + SHA for each tested variant
+- exact selective gate rules and why the data supports them
+- 31000/32000 development W/D/L for each variant
+- telemetry and gate rejection counts
+- frozen final candidate SHA
+- untouched 33000 holdout result
+- untouched 34000 holdout result if triggered
+- 95% paired/bootstrap intervals
+- 5-win / 5-loss forensic summary
+- explicit recommendation: REJECT / PROMISING BUT UNCONFIRMED / CONFIRMED SUBMISSION CANDIDATE
 
-Do not create a leaderboard submission unless the confirmed candidate clearly justifies replacing exact e50123.
+Do not create a leaderboard submission until a frozen candidate survives fresh holdout testing.
