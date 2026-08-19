@@ -188,3 +188,11 @@ Decision: **REJECT**
 Reasoning: the task requires competitive evidence. A runtime prototype without
 the prescribed full development and holdout results cannot be recommended or
 submitted, irrespective of local correctness.
+
+### Final workspace verification
+
+The completed repair was checked again from branch head
+`a7c7cd90464642d6d68c00b0081377b8e62b48da`: the complete Juraj v3.5 test
+suite, including picker lifecycle/economics and real protocol coverage, passed,
+and the release agent rebuilt successfully. This verification did not change
+picker strategy, gate thresholds, or the previously recorded benchmark result.
