@@ -230,3 +230,22 @@ At completion provide:
 - explicit recommendation: REJECT / PROMISING BUT UNCONFIRMED / CONFIRMED SUBMISSION CANDIDATE
 
 Do not create a leaderboard submission until a frozen candidate survives fresh holdout testing.
+
+## Equivalence repair completion
+
+The follow-up zero-picker equivalence repair supersedes further tuning for this
+candidate.  The repaired action-only harness completed seeds `31000..31019` in
+both seats with `V35_PICKER_ENABLED=0`; all 40 action traces were identical to
+exact `e50123`.  The enabled selective-v3 screen also completed seeds
+`31000..31029` in both seats: all 60 games had zero picker starts and remained
+action-identical through termination.  The resulting paired record was
+20 W / 20 D / 20 L (score 0.5000), with zero errors and zero illegal actions.
+
+The old 180-second failure was a harness execution failure caused by parallel
+CPU/JAX oversubscription, not a stuck agent or competitive result.  The checker
+now defaults to one job, uses action-only traces, accepts explicit job and
+timeout limits, terminates matchup process groups on failure, cancels queued
+work, and reports progress and first divergence details.  Full methodology,
+timings, telemetry, and the first pre-fix divergence are recorded in
+`docs/codex/RESULTS.md`.  Do not retune picker thresholds or infer picker
+effectiveness from this pool: no picker activation occurred.
