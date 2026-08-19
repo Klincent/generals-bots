@@ -1,1 +1,1 @@
-Temporary trigger for frozen picker v7 fresh holdout validation on seeds 33000..33059.
+Temporary trigger for frozen picker v7 second fresh holdout validation on seeds 34000..34059.
