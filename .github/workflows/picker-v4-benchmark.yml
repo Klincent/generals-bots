@@ -1,0 +1,113 @@
+name: picker-v4-benchmark
+
+on:
+  push:
+    branches:
+      - chatgpt/e50123-picker-v4
+
+permissions:
+  contents: read
+
+jobs:
+  bench:
+    if: github.event.head_commit.message == 'picker-v4: apply implementation'
+    strategy:
+      fail-fast: false
+      matrix:
+        gate: [0, 1, 2]
+        start: [31000, 31010, 31020]
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Prepare exact champion baseline
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git worktree add --detach /tmp/e50123 e50123cee7d924f0d643acd372a5300971f93917
+          bash competition/agents/juraj_v35_cpp/build.sh
+          bash /tmp/e50123/competition/agents/juraj_v35_cpp/build.sh
+      - name: Run paired chunk
+        shell: bash
+        env:
+          V35_PICKER_GATE: ${{ matrix.gate }}
+        run: |
+          set -euxo pipefail
+          OUT="/tmp/picker-v4-g${{ matrix.gate }}-s${{ matrix.start }}"
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py \
+            --candidate competition/agents/juraj_v35_cpp/run.sh \
+            --baseline /tmp/e50123/competition/agents/juraj_v35_cpp/run.sh \
+            --start ${{ matrix.start }} --seeds 10 --output "$OUT"
+          cp -a "$OUT" "picker-v4-g${{ matrix.gate }}-s${{ matrix.start }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: picker-v4-g${{ matrix.gate }}-s${{ matrix.start }}
+          path: picker-v4-g${{ matrix.gate }}-s${{ matrix.start }}
+          retention-days: 7
+
+  aggregate:
+    if: github.event.head_commit.message == 'picker-v4: apply implementation'
+    needs: bench
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: picker-v4-*
+          path: artifacts
+      - name: Aggregate 60-game results per gate
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, pathlib, random, re, statistics
+          root=pathlib.Path('artifacts')
+          out={}
+          for gate in (0,1,2):
+              games=[]
+              for p in sorted(root.glob(f'picker-v4-g{gate}-s*/games.jsonl')):
+                  games += [json.loads(x) for x in p.read_text().splitlines() if x.strip()]
+              valid=[g for g in games if 'result' in g]
+              W=sum(g['result']=='win' for g in valid); D=sum(g['result']=='draw' for g in valid); L=sum(g['result']=='loss' for g in valid)
+              score=(W+.5*D)/len(valid) if valid else 0
+              byseed={}
+              for g in valid:
+                  byseed.setdefault(g['seed'],[]).append(1 if g['result']=='win' else .5 if g['result']=='draw' else 0)
+              paired=[sum(v)/len(v) for _,v in sorted(byseed.items()) if len(v)==2]
+              rng=random.Random(0x354)
+              boots=sorted(statistics.mean(rng.choice(paired) for _ in paired) for _ in range(10000)) if paired else [0]
+              q=lambda a,x:a[min(len(a)-1,max(0,round(x*(len(a)-1))))]
+              starts=[]; moves=[]; delivered=[]; completions=[]; land100=[]; land250=[]; expansion=[]; war=[]; active_games=0
+              for g in valid:
+                  s=g.get('stderr','')
+                  m=re.search(r'\[v36_picker\].*?starts=(\d+).*?completions=(\d+).*?moves=(\d+).*?delivered=(\d+)',s)
+                  if m:
+                      st,co,mv,de=map(int,m.groups()); starts.append(st); completions.append(co); moves.append(mv); delivered.append(de); active_games += st>0
+                  m=re.search(r'\[v35_land\](.*)',s)
+                  if m:
+                      vals={int(k):int(v) for k,v in re.findall(r'(\d+):(\d+)',m.group(1))}
+                      if 100 in vals: land100.append(vals[100])
+                      if 250 in vals: land250.append(vals[250])
+                  m=re.search(r'\[v35_actions\] expansion=(\d+).*?war=(\d+)',s)
+                  if m:
+                      expansion.append(int(m.group(1))); war.append(int(m.group(2))
+              mean=lambda xs: statistics.mean(xs) if xs else 0
+              out[str(gate)]={
+                  'games':len(games),'valid':len(valid),'W':W,'D':D,'L':L,'score':score,
+                  'ci95':[q(boots,.025),q(boots,.975)],
+                  'errors':sum('error' in g for g in games),
+                  'illegal':sum(g.get('candidate_illegal',0) for g in games),
+                  'picker_active_games':active_games,
+                  'picker_starts_per_game':mean(starts),'picker_completions_per_game':mean(completions),
+                  'picker_moves_per_game':mean(moves),'picker_delivered_per_game':mean(delivered),
+                  'land100':mean(land100),'land250':mean(land250),
+                  'expansion_actions':mean(expansion),'war_actions':mean(war),
+              }
+          pathlib.Path('picker-v4-aggregate.json').write_text(json.dumps(out,indent=2,sort_keys=True)+'\n')
+          print(json.dumps(out,indent=2,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: picker-v4-aggregate
+          path: picker-v4-aggregate.json
+          retention-days: 14
