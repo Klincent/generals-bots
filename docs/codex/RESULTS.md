@@ -252,3 +252,57 @@ Screen: 29/6/25, score 0.5333, paired bootstrap 95% CI [0.4333, 0.6333], 0 error
 Representative losses include seed/seat 31010/0, 31012/0, 31013/0, 31014/0, 31015/1, 31016/1, 31017/0 and 31018/0. Across these and the aggregate, early and late land remain the principal failure: T100 trails the champion reference by about 5.5 and T250 by about 14.9, expansion remains about 27 actions/game below the champion, and dedicated picker volume remains far above the requested 15 despite healthy completion/economics. War activity is not materially below the earlier picker, castles do not collapse, and no runtime/lifecycle failure is present.
 
 Decision: **DO NOT CONFIRM; KEEP e50123 CHAMPION.** Experiment 3 has the best point score, but it fails the explicit land, expansion, and dedicated-move health gates, and its wide interval includes substantial regression. Therefore the independent 120-game confirmation and leaderboard submission are not justified. Recommended picker design direction is the non-modal scheduler integration from Experiment 1, but with the idle-slot bypass removed or true piggyback recognition added so a picker progresses only when the champion-selected move itself advances the collector. A shorter handoff alone is insufficient.
+## 2026-08-19 picker Experiment 3 independent confirmation
+
+Date: 2026-08-19
+Variant: Experiment 3 opportunistic picker with safe interior handoff
+Branch: `codex/e50123-picker-opportunity-v2`
+Tested candidate commit: exact `96063b069b6c642f6ebf4ba637eedaf3ee8845b2`
+Baseline commit: exact `e50123cee7d924f0d643acd372a5300971f93917`
+Files changed for the confirmation: none before or during the run; this results section was appended only after all 120 games completed.
+Intent: independently determine whether the candidate's 29/6/25 (0.5333) screen on seeds 31000..31029 was a real improvement or screening noise. Lower land was treated as diagnostic rather than an automatic rejection.
+
+Unit tests: PASS (`bash competition/agents/juraj_v35_cpp/test.sh`: core, agent-recovery, picker-lifecycle, picker-economics, and real protocol tests passed)
+Build: PASS for both the candidate and an exact detached worktree of the champion.
+
+Confirmation benchmark:
+- Protocol: `competition/agents/juraj_v35_cpp/paired_benchmark.py`, competition mode, seeds `32000..32059`, both seats, identical per-map `JURAJ_RNG_SEED=(seed*0x9E3779B1+0x35)&0xffffffff`; no tuning, source edits, early stopping, or intermediate-result changes.
+- Games: 120 (60 paired maps)
+- W/D/L: **37/18/65**
+- Score: **0.3833** (`(37 + 0.5*18)/120 = 46/120`)
+- Paired bootstrap 95% CI: **[0.3125, 0.4542]** (10,000 seed-pair resamples)
+- Seat scores: candidate seat 0 = 0.4083; candidate seat 1 = 0.3583
+- Errors / illegal actions: **0 / 0**
+- Mean game length: 834.66 turns
+- Candidate decision round-trip latency: game-p50 distribution p50/p95/p99 = 1.162/1.376/1.414 ms; maximum individual game-level decision maximum = 130.551 ms. Candidate self-timing means were p50/p95/p99/max = 0.349/0.550/1.426/12.190 ms; champion self-timing means were 0.330/0.538/1.251/11.924 ms.
+
+Aggregate telemetry (candidate versus champion):
+- Land T50/T100/T150/T250: **17.18/35.67/51.87/74.31** versus **19.40/42.83/62.38/95.67**. T150 and T250 means include only games reaching those snapshots; early decisive games legitimately omit later snapshots.
+- Expansion actions: **117.53 versus 145.55/game**.
+- Enemy/offense actions: **284.10 versus 300.95/game**.
+- War-mobilization actions: **307.71 versus 307.54/game** (essentially unchanged).
+- Search actions: **31.77 versus 30.53/game**.
+- Rear/logistics actions: **46.38 versus 30.97/game**.
+- C1: candidate built 49/120, mean build turn 342.71; champion 41/120, mean 307.78.
+- C2: candidate built 15/120, mean build turn 722.33; champion 8/120, mean 509.50. The candidate built somewhat more castles but later; castle urgency never directly coincided with a selected picker move.
+- Meaningful enemy contact: 116.65 versus 116.64 mean turn; max active fronts 9.27 versus 8.95. There is no aggregate evidence of faster enemy-general pressure.
+- Picker starts/completions/moves: **6.03/5.34/29.77 per game**.
+- Picker delivered mass: **257.53 units/game**; **8.65 delivered units per picker move**.
+- Picker aborts: 0.58/game (0.57 depleted, 0.01 lost); active at termination 0.12/game; blocked ticks 0.10/game; critical pre-emption moves 0.50/game.
+- Picker scheduling: 29.67 idle-slot moves, 0.10 moves with expansion available, 0 with war available, 1.26 within eight turns of production, 0 with urgent castle funding, 29.88 pauses, and 20.06 duty yields per game. Thus most picker steps satisfy the low-opportunity scheduler definition, but their route/lifecycle still correlates with 28 fewer expansion actions and a 21.36-cell T250 deficit.
+
+Concentration and conversion forensics:
+- Army totals and packet concentration are not retained by the normal compact audit. After the complete confirmation (never during it), the exact binaries, seeds, seats, and RNG values were replayed with the runner's diagnostic-state output for three representative wins and three losses. “Top 3” is the sum of the three largest owned stacks; “scattered” counts owned units in stacks of at most three. These are diagnostic replays, not additional scored games.
+- **Win 32029, seat 1 (turn 143):** the candidate delivered 133 units in 15 picker moves. At T100 it held only 29 land and 98 total army versus the opposing champion's 50 land and 121 army, but its largest stack was **41 versus 10**, its top-three share was **46.9% versus 19.8%**, and it had only 57 units in small scattered stacks versus 97. The concentrated packet converted a severe territorial deficit into a very early general capture.
+- **Win 32054, seat 1 (turn 841):** seven completed pickers delivered 429 units in 32 moves. At T250 the candidate had 50 land/248 total army versus 89/323, yet fielded a **107-unit maximum stack and 117 top-three mass** versus 31 and 68. This is the clearest positive case: picker concentration produced a credible decisive packet even with much lower breadth. In the paired same-seed/seat counterfactual, the champion had T100/T150/T250 land 47/67/79 versus the winning candidate's 39/50/50, but did not obtain this candidate win.
+- **Win 32059, seat 1 (turn 1198):** seven pickers delivered 195 units in 40 moves. The candidate's same-seat trace had 466 enemy and 454 war actions, versus 249 and 282 for the champion on the paired same-seed/seat run, and meaningful contact at turn 75 versus 89. At T600 in the direct game it had 789 total army versus 590. This supports better war conversion in this individual win, although its T800 top-three share was only 4.7%, so not every win is explained by permanent concentration.
+- **Loss 32008, seat 0 (turn 1172):** 13 completions, 94 picker moves, and 521 delivered units produced a T800 maximum stack of 115 versus 72 and top-three share 24.0% versus 11.1%, but total army was only 826 versus 1283 and land 105 versus 184. Concentration did not compensate for the much smaller economy; this is an overactive-picker/economic-deficit loss.
+- **Loss 32022, seat 1 (turn 793):** only one two-move picker delivered 18 units. The candidate began in a severe growth stall (T50/T100 land 3/5 versus 19/44 directly) and accumulated very high concentration because it owned almost no territory; at T600 it had 422 total army versus 1358. This is not evidence that the picker displaced expansion, and concentration was strategically unusable.
+- **Loss 32027, seat 1 (turn 188):** no picker started. Land was tied at T50 and the candidate led directly at T100 (39 versus 36), but it lost shortly after contact; this is an early tactical/defensive conversion loss rather than a picker-volume loss.
+
+Interpretation:
+- The requested non-land hypothesis is real in some wins: Experiment 3 can turn a smaller territorial base into substantially larger attack packets, reduce low-value scattered mass, and win by decisive general pressure (especially seeds 32029 and 32054).
+- It is not reliable enough in aggregate. Candidate war activity was flat, enemy/offense activity was lower, meaningful contact was not earlier, and the economy/land deficit often reduced total army more than concentration improved usable packet size. The representative losses include both excessive logistics (32008) and failures where picker did essentially nothing (32022/32027), so there is no single automatic “lower land” rejection; the competitive result itself rejects the experiment.
+- The confirmation score is 15 percentage points below even 0.50, the entire paired 95% interval lies below 0.48, and the candidate lost 28 more games than it won. The earlier 0.5333 screen was screening noise rather than a reproducible edge.
+
+Decision: **REJECT EXPERIMENT 3** under the explicit `<0.48` rule. Keep exact `e50123cee7d924f0d643acd372a5300971f93917` as champion. Do not recommend larger final validation or submission consideration. Runtime is healthy, but Experiment 3 does **not** beat e50123 on independent seeds.
