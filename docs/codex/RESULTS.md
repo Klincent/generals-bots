@@ -156,3 +156,153 @@ Decision: **REJECT**
 Reasoning: the task requires competitive evidence. A runtime prototype without
 the prescribed full development and holdout results cannot be recommended or
 submitted, irrespective of local correctness.
+
+## 2026-08-19 — selective picker v4 gate
+
+Date: 2026-08-19
+Variant: A — relax only the dominant neutral-opportunity economy condition
+Branch: `codex/e50123-picker-selective-v4-gate`
+Behaviorally correct parent: `bc3fd06`
+Baseline commit: `e50123cee7d924f0d643acd372a5300971f93917`
+Frozen candidate source commit: `d3c8bd3c340c1f113e82ec4c16e7c8d91a9e4d9b`
+Files changed before freezing: `competition/agents/juraj_v35_cpp/main.cpp`
+
+### Gate diagnosis
+
+The original rejecting gate was replayed on seeds 31000..31029 and
+32000..32059, both seats. Across 92,134 mass/efficiency-eligible snapshots,
+the unconditional rejection counts were:
+
+- maturity: 103;
+- land parity: 19,606;
+- recent growth: 32,084;
+- immediately capturable neutral opportunities: 92,113;
+- concentration: 64,616.
+
+The exact overlap histogram was:
+
+```text
+32704 neutral+concentration
+18066 neutral only
+16110 growth+neutral+concentration
+ 8769 land-parity+growth+neutral+concentration
+ 6980 land-parity+neutral+concentration
+ 5560 growth+neutral
+ 2197 land-parity+neutral
+ 1645 land-parity+growth+neutral
+   38 maturity+neutral
+   37 maturity+neutral+concentration
+    8 maturity+concentration
+    6 maturity+land-parity+concentration
+    5 maturity+land-parity+neutral
+    5 maturity only
+    2 maturity+land-parity
+    2 maturity+land-parity+neutral+concentration
+```
+
+Only 21 snapshots satisfied the neutral limit, while 18,066 snapshots failed
+only that limit. In original evaluation order, first-failure counts were
+maturity 103, land parity 19,591, growth 21,670, neutral pressure 50,770, and
+concentration 0. This establishes the `<=3` neutral-opportunity limit as the
+dominant over-restrictive economy condition; it was measuring the number of
+owned cells with some capturable neutral, not three discrete urgent moves.
+
+### Exact selected gate
+
+Variant A keeps all route mass/efficiency/source safety checks and requires:
+
+- turn >=150 or ownership >=35% of all map cells;
+- opponent land is zero or our land is at least 80% of opponent land;
+- growth >=2 cells/25 turns or >=3 cells/50 turns, waived at 45% ownership;
+- top-three owned stack share <55%;
+- largest existing owned stack < proposed picker delivery.
+
+The useful-neutral count remains observational telemetry but is not an
+acceptance condition. Variant B and Variant C were not developed: Variant A
+landed inside the requested activation range, so additional relaxation or a
+different positive trigger was unnecessary and would have increased tuning.
+
+### Variant A screen — 31000..31029
+
+- commit: `d3c8bd3c340c1f113e82ec4c16e7c8d91a9e4d9b`;
+- games: 60, both seats, identical per-seed RNG derivation;
+- W/D/L: 26/14/20; score 0.5500; paired bootstrap 95% CI [0.4750, 0.6250];
+- errors / illegal actions: 0 / 0;
+- picker starts: 110 (1.833/game), with >=1 start in 47/60 games (78.3%);
+- completions / aborts: 102 / 3, with 5 still active at termination;
+- dedicated picker moves: 714 (6.49/start), delivered mass: 4,580
+  (41.64/start and 6.41/dedicated move);
+- land T100/T250: 42.68 / 89.64 (T250 available in 58 games);
+- expansion / war actions: 8,144 / 18,321;
+- unconditional gate rejection counts over 18,237 eligible snapshots:
+  maturity 36, land parity 4,357, growth 6,436, concentration 17,307, and
+  observational neutral pressure 18,229;
+- sequential first-failure counts in the selected gate order: maturity 36,
+  land parity 4,351, growth 4,151, concentration 9,589;
+- candidate decision latency: mean per-game p50 1.948 ms, mean per-game p95
+  16.756 ms, maximum decision 216.543 ms.
+
+Every one of the 13 zero-picker games was replayed with action traces against
+exact e50123. All actions were identical through termination. Active games
+were also identical before their first accepted picker start by construction
+of the enabled equivalence checker. Variant A was therefore selected on
+selectivity, economics, equivalence, and clean competitive behavior—not merely
+its 60-game score—and pushed after the successful benchmark.
+
+### Frozen development confirmation — 32000..32059
+
+- frozen source: `d3c8bd3c340c1f113e82ec4c16e7c8d91a9e4d9b` (no tuning);
+- games: 120, both seats;
+- W/D/L: 50/38/32; score 0.5750; paired bootstrap 95% CI
+  [0.5208, 0.6292];
+- errors / illegal actions: 0 / 0;
+- starts: 280 (2.333/game), >=1 start in 95/120 games (79.2%);
+- completions / aborts: 253 / 20, with 7 active at termination;
+- dedicated moves: 1,762 (6.29/start), delivered mass: 13,866
+  (49.52/start and 7.87/dedicated move);
+- land T100/T250: 42.45 / 88.24 (T250 available in 117 games);
+- expansion / war actions: 15,930 / 41,055;
+- unconditional rejections over 43,239 eligible snapshots: maturity 67, land
+  parity 14,705, growth 16,224, concentration 40,828, observational neutral
+  pressure 43,226;
+- sequential selected-gate first failures: maturity 67, land parity 14,696,
+  growth 8,095, concentration 20,101;
+- candidate latency: mean per-game p50 1.794 ms, mean per-game p95 12.689 ms,
+  maximum 190.477 ms.
+
+All 25 zero-picker games were independently replayed and remained exactly
+action-identical to e50123 through termination. The score and meaningful
+activation cleared the predeclared holdout threshold, so the untouched 33000
+pool was opened without changing source.
+
+### Untouched holdout — 33000..33059
+
+- frozen source: `d3c8bd3c340c1f113e82ec4c16e7c8d91a9e4d9b`;
+- games: 120, both seats;
+- W/D/L: 49/25/46; score 0.5125; paired bootstrap 95% CI
+  [0.4583, 0.5667];
+- errors / illegal actions: 0 / 0;
+- starts: 252 (2.100/game), >=1 start in 88/120 games (73.3%);
+- completions / aborts: 236 / 12, with 4 active at termination;
+- dedicated moves: 1,639 (6.50/start), delivered mass: 12,730
+  (50.52/start and 7.77/dedicated move);
+- land T100/T250: 41.23 / 84.00;
+- expansion / war actions: 15,722 / 39,167;
+- unconditional rejections over 30,927 eligible snapshots: maturity 40, land
+  parity 8,016, growth 11,336, concentration 29,504, observational neutral
+  pressure 30,915;
+- sequential selected-gate first failures: maturity 40, land parity 8,011,
+  growth 7,033, concentration 15,591;
+- candidate latency: mean per-game p50 1.786 ms, mean per-game p95 12.073 ms,
+  maximum 211.846 ms.
+
+All 32 zero-picker holdout games were independently replayed and remained
+action-identical to exact e50123 through termination. No source or threshold
+was changed after viewing the holdout. The holdout score is in the predeclared
+0.50..0.52 promising range; no submission archive was created.
+
+Decision: **PROMISING BUT UNCONFIRMED**
+
+Known uncertainty: the 33000 confidence interval is wide and crosses 0.50.
+The gate is economically selective and the invariant is intact, but the
+holdout does not establish a statistically certain improvement.
