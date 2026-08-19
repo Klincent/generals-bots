@@ -61,6 +61,51 @@ Reference champion for the current task:
 
 The combined selective picker + 3x3 + anti-cycle port is known to regress substantially versus this reference and must not be treated as the new baseline.
 
+## 2026-08-19 — selective picker v3 zero-picker equivalence repair
+
+Date: 2026-08-19
+Variant: selective picker v3 integration-equivalence repair
+Branch: `codex/e50123-picker-selective-v3-equivalence`
+Baseline commit: `e50123cee7d924f0d643acd372a5300971f93917`
+Candidate parent: `fb29962110ea4f3d451aefb426daf0321b0ff4b4`
+Files changed: `competition/agents/juraj_v35_cpp/main.cpp` (runtime disable
+switch and restoration of champion logistics),
+`competition/agents/juraj_v35_cpp/equivalence_check.py` (robust action-only
+checker), and `competition/matchup.py` (minimal action-trace and prebuilt-agent
+modes).
+Intent: prove exact champion behavior whenever picker starts are disabled,
+before interpreting any competitive result.
+
+Timeout diagnosis: the exact seed 31001 candidate-seat-0 matchup completed
+serially without `--diagnostic-json` in about 45 seconds and completed serially
+with full diagnostic JSON in about 57 seconds (864 turns, 3.4 MiB diagnostic
+file). Neither the match nor diagnostic serialization hangs. The old 180-second
+failure was parallel CPU/JAX oversubscription; full diagnostics added measurable
+overhead but were not independently responsible.
+
+The first action-only comparison of the uncorrected transplant diverged at
+seed 31001, seat 0, turn 17: baseline `[0,13,18,2,0]`, candidate
+`[0,13,18,0,0]`. The cause was broader than the previously identified edge
+exclusion: the transplant had also changed normal rear classification from
+`edge <= 1 || degree <= 1` to `degree <= 1` and replaced champion
+`tactical_next_logistics` routing with `tactical_next`. Normal logistics now
+uses the exact champion expressions; picker eligibility is gated by
+`V35_PICKER_ENABLED`, and the picker source is excluded only while an actual
+picker is active.
+
+Unit tests: PASS
+Build: PASS
+
+Zero-picker action equivalence:
+  - seed 31001, both seats: PASS, every emitted action identical
+  - seeds 31000..31004, both seats (10 games, jobs=2): PASS, every emitted
+    action identical
+  - seeds 31000..31019, both seats (40 games, jobs=2): PASS, every emitted
+    action identical
+
+No win-rate benchmark was interpreted during this harness repair. Picker
+thresholds and the selective gate were not changed.
+
 ## 2026-08-19 — selective economy-safe picker v3 (incomplete validation)
 
 Date: 2026-08-19

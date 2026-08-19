@@ -198,6 +198,10 @@ def main():
                         help="write protocol, legality, outcome, and round-trip timing audit")
     parser.add_argument("--diagnostic-json", type=Path,
                         help="write full-state/action turns for deterministic used-seed forensics")
+    parser.add_argument("--action-trace-json", type=Path,
+                        help="write only emitted actions (cheap deterministic equivalence audit)")
+    parser.add_argument("--skip-build", action="store_true",
+                        help="skip agent build scripts (for harnesses that built once)")
     args = parser.parse_args()
 
     a0_path = Path(args.agent0).resolve()
@@ -206,9 +210,10 @@ def main():
         if not p.exists():
             sys.exit(f"agent script not found: {p}")
 
-    build_agent(a0_path)
-    if a1_path != a0_path:
-        build_agent(a1_path)
+    if not args.skip_build:
+        build_agent(a0_path)
+        if a1_path != a0_path:
+            build_agent(a1_path)
 
     # A named mode pins the whole ruleset for a competition round; otherwise the
     # individual flags build the env.
@@ -251,6 +256,7 @@ def main():
     winner = -1
     turn = 0
     diagnostic_turns = []
+    action_turns = []
     try:
         while turn < env.truncation:
             obs_0 = get_obs(state, 0)
@@ -270,6 +276,12 @@ def main():
                     "ownership": np.asarray(state.ownership).astype(np.int8).tolist(),
                     "generals": np.asarray(state.generals).astype(np.int8).tolist(),
                     "castles": np.asarray(state.castles).astype(np.int8).tolist(),
+                    "actions": [np.asarray(a_0, dtype=np.int64).tolist(),
+                                np.asarray(a_1, dtype=np.int64).tolist()],
+                })
+            if args.action_trace_json:
+                action_turns.append({
+                    "turn": turn,
                     "actions": [np.asarray(a_0, dtype=np.int64).tolist(),
                                 np.asarray(a_1, dtype=np.int64).tolist()],
                 })
@@ -356,6 +368,13 @@ def main():
         args.diagnostic_json.write_text(json.dumps({
             "schema": 1, "seed": args.seed, "winner": winner, "turns": turn,
             "labels": labels, "frames": diagnostic_turns,
+        }, separators=(",", ":")) + "\n")
+
+    if args.action_trace_json:
+        args.action_trace_json.parent.mkdir(parents=True, exist_ok=True)
+        args.action_trace_json.write_text(json.dumps({
+            "schema": 1, "seed": args.seed, "winner": winner, "turns": turn,
+            "labels": labels, "frames": action_turns,
         }, separators=(",", ":")) + "\n")
 
     if record:
