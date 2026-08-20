@@ -1,0 +1,88 @@
+name: doomguard-validation-pr
+on:
+  pull_request:
+    branches: [master]
+permissions:
+  contents: write
+jobs:
+  validate:
+    if: ${{ github.head_ref == 'chatgpt/e50123-doomguard' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    env:
+      BASE_SHA: e50123cee7d924f0d643acd372a5300971f93917
+      PICKER9_SHA: 734355a44adf76f274892bf13804d638c52869b0
+      SDL_VIDEODRIVER: dummy
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: chatgpt/e50123-doomguard
+          fetch-depth: 0
+      - name: Apply DoomGuard to exact e50123
+        run: |
+          set -euo pipefail
+          if ! grep -q '\[v35_doomguard\]' competition/agents/juraj_v35_cpp/main.cpp; then python tools/apply_e50123_doomguard.py; fi
+          grep -q 'doomguard_active_' competition/agents/juraj_v35_cpp/main.cpp
+      - name: Unit regression suite and build
+        run: |
+          set -euo pipefail
+          bash competition/agents/juraj_v35_cpp/test.sh
+          bash competition/agents/juraj_v35_cpp/build.sh
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install benchmark dependencies
+        run: pip install -e .
+      - name: Build champion and picker9
+        run: |
+          set -euo pipefail
+          git worktree add --detach /tmp/champion "$BASE_SHA"
+          git worktree add --detach /tmp/picker9 "$PICKER9_SHA"
+          bash /tmp/champion/competition/agents/juraj_v35_cpp/build.sh
+          bash /tmp/picker9/competition/agents/juraj_v35_cpp/build.sh
+          printf '#!/usr/bin/env bash\nexport V35_DOOMGUARD_ENABLED=1\n"%s/competition/agents/juraj_v35_cpp/run.sh" "$@" 2> >(sed -u '\''s/^/[DOOM] /'\'' >&2)\n' "$GITHUB_WORKSPACE" >/tmp/doom.sh
+          printf '#!/usr/bin/env bash\n/tmp/champion/competition/agents/juraj_v35_cpp/run.sh "$@" 2> >(sed -u '\''s/^/[CHAMP] /'\'' >&2)\n' >/tmp/champ.sh
+          printf '#!/usr/bin/env bash\nexport V35_PICKER_ENABLED=1\n/tmp/picker9/competition/agents/juraj_v35_cpp/run.sh "$@" 2> >(sed -u '\''s/^/[P9] /'\'' >&2)\n' >/tmp/picker9.sh
+          chmod +x /tmp/doom.sh /tmp/champ.sh /tmp/picker9.sh
+      - name: Preservation screen
+        run: python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/doom.sh --baseline /tmp/champ.sh --start 36000 --seeds 30 --output /tmp/doom/champion
+      - name: DoomGuard pressure screen
+        run: python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/doom.sh --baseline /tmp/picker9.sh --start 36100 --seeds 20 --output /tmp/doom/doom-vs-p9
+      - name: Champion pressure control
+        run: |
+          cd /tmp/champion
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/champ.sh --baseline /tmp/picker9.sh --start 36100 --seeds 20 --output /tmp/doom/champ-vs-p9
+      - name: Summarize gates
+        run: |
+          python - <<'PY' | tee /tmp/doom/gate.txt
+          import json,re
+          from pathlib import Path
+          b=Path('/tmp/doom');p=json.loads((b/'champion/summary.json').read_text());d=json.loads((b/'doom-vs-p9/summary.json').read_text());c=json.loads((b/'champ-vs-p9/summary.json').read_text())
+          games=[json.loads(x) for x in (b/'champion/games.jsonl').read_text().splitlines() if x.strip()]; starts=moves=windows=active=0
+          for g in games:
+            ls=[x for x in g.get('stderr','').splitlines() if '[DOOM] [v35_doomguard]' in x]
+            if not ls: continue
+            v={k:int(x) for k,x in re.findall(r'(\w+)=(-?\d+)',ls[-1])};starts+=v.get('starts',0);moves+=v.get('moves',0);windows+=v.get('windows',0);active+=v.get('starts',0)>0
+          delta=d['score']-c['score'];pres=p['score']>=0.475 and not p['errors'] and not p['illegal_actions'];pressure=delta>=0
+          print('preserve',p['W'],p['D'],p['L'],'score',p['score'],'ci',p['paired_ci95'])
+          print('doom_vs_p9',d['W'],d['D'],d['L'],'score',d['score'])
+          print('champ_vs_p9',c['W'],c['D'],c['L'],'score',c['score'],'delta',round(delta,4))
+          print('active_games',active,'starts',starts,'windows',windows,'moves',moves)
+          print('PRESERVATION_GATE', 'PASS' if pres else 'FAIL')
+          print('PRESSURE_GATE', 'PASS' if pressure else 'FAIL')
+          print('COMBINE_RECOMMENDATION', 'YES' if pres and pressure else 'NO')
+          PY
+      - name: Commit tested source
+        run: |
+          set -euo pipefail
+          if ! git diff --quiet -- competition/agents/juraj_v35_cpp/main.cpp; then
+            git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add competition/agents/juraj_v35_cpp/main.cpp
+            git commit -m 'V3.5: add gated DoomGuard defensive muster'
+            git push origin HEAD:chatgpt/e50123-doomguard
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: doomguard-validation
+          path: /tmp/doom
+          retention-days: 5
