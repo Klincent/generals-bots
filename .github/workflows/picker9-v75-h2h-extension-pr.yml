@@ -1,0 +1,83 @@
+name: picker9-v75-h2h-extension-pr
+
+on:
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  shard:
+    if: ${{ github.head_ref == 'tmp/picker9-v75-h2h-extension-trigger' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        start: [52025, 52030, 52035, 52040, 52045]
+    env:
+      FINAL_SHA: 2260b6f19d51a14d7c68770677f22d04dfd88022
+      V75_SHA: 9cc3b78a0003dd17079cd2aa8d6439321fedccc0
+      SDL_VIDEODRIVER: dummy
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.FINAL_SHA }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -e .
+      - name: Build exact versions
+        run: |
+          set -euo pipefail
+          bash competition/agents/juraj_v35_cpp/build.sh
+          git worktree add --detach /tmp/v75 "$V75_SHA"
+          bash /tmp/v75/competition/agents/juraj_v35_cpp/build.sh
+          cat >/tmp/final.sh <<'EOF'
+          #!/usr/bin/env bash
+          export V35_PICKER_ENABLED=1 V35_DOOMGUARD_ENABLED=1
+          exec "$GITHUB_WORKSPACE/competition/agents/juraj_v35_cpp/run.sh" "$@"
+          EOF
+          cat >/tmp/v75.sh <<'EOF'
+          #!/usr/bin/env bash
+          export V35_PICKER_ENABLED=1 V35_DOOMGUARD_ENABLED=1
+          exec "/tmp/v75/competition/agents/juraj_v35_cpp/run.sh" "$@"
+          EOF
+          chmod +x /tmp/final.sh /tmp/v75.sh
+      - name: Run 10 games on 5 maps
+        run: |
+          OUT=/tmp/h2h-${{ matrix.start }}
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/final.sh --baseline /tmp/v75.sh --start ${{ matrix.start }} --seeds 5 --output "$OUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: h2hext-${{ matrix.start }}
+          path: /tmp/h2h-${{ matrix.start }}
+          retention-days: 14
+
+  aggregate:
+    if: ${{ github.head_ref == 'tmp/picker9-v75-h2h-extension-trigger' }}
+    needs: shard
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: h2hext-*
+          path: /tmp/results
+      - name: Aggregate extension
+        run: |
+          python - <<'PY' | tee /tmp/extension-summary.txt
+          import json,glob
+          W=D=L=e=i=0
+          for p in glob.glob('/tmp/results/**/summary.json',recursive=True):
+            s=json.load(open(p));W+=s['W'];D+=s['D'];L+=s['L'];e+=s['errors'];i+=s['illegal_actions']
+          n=W+D+L
+          print(f'FINAL_vs_V75_SECOND_25_MAPS W/D/L={W}/{D}/{L} games={n} raw_wr={W/n:.4f} score={(W+.5*D)/n:.4f} errors={e} illegal={i}')
+          assert e==0 and i==0
+          PY
+          mkdir -p /tmp/summary && cp /tmp/extension-summary.txt /tmp/summary/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: picker9-final-v75-extension-summary
+          path: /tmp/summary
+          retention-days: 14
