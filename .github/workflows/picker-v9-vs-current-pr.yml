@@ -1,0 +1,42 @@
+name: picker-v9-vs-current
+on:
+  pull_request:
+    branches: [master]
+permissions:
+  contents: read
+jobs:
+  bench:
+    if: ${{ github.head_ref == 'tmp/picker-v9-trigger' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      CURRENT_PICKER: d3c8bd3c340c1f113e82ec4c16e7c8d91a9e4d9b
+      SDL_VIDEODRIVER: dummy
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: chatgpt/picker-v9-muster-castle
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -e .
+      - name: Build candidate and current picker
+        run: |
+          set -euxo pipefail
+          bash competition/agents/juraj_v35_cpp/build.sh
+          git worktree add --detach /tmp/current "$CURRENT_PICKER"
+          bash /tmp/current/competition/agents/juraj_v35_cpp/build.sh
+      - name: Paired benchmark 20 games
+        run: |
+          set -euxo pipefail
+          rm -rf /tmp/v9-vs-current
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py \
+            --candidate competition/agents/juraj_v35_cpp/run.sh \
+            --baseline /tmp/current/competition/agents/juraj_v35_cpp/run.sh \
+            --start 36000 --seeds 10 --output /tmp/v9-vs-current
+          cat /tmp/v9-vs-current/summary.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: picker-v9-vs-current-results
+          path: /tmp/v9-vs-current
+          retention-days: 7
