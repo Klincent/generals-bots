@@ -7,10 +7,10 @@ new="int doom_floor=std::max(18,std::max(1,o.opp_army)*(doom_eta_now<=6?15:25)/1
 if old not in s:
     raise SystemExit('expected DoomGuard condition not found')
 s=s.replace(old,new,1)
-old2="bool late_muster=picker_enabled_&&enemy_general>=0&&!immediate&&!late_castle_pending&&o.turn>=300&&production_!=ProductionState::SEVERE_DEFICIT&&(o.opp_army<=0||o.my_army>=o.opp_army+80||o.my_army*5>=o.opp_army*6);"
-new2="bool late_muster=picker_enabled_&&enemy_general>=0&&!immediate&&!late_castle_pending&&o.turn>=300&&production_!=ProductionState::SEVERE_DEFICIT&&(o.turn>=1000||o.opp_army<=0||o.my_army>=o.opp_army+80||o.my_army*5>=o.opp_army*6);"
+old2="int launch_need=std::max({90,eg_army*3+20,std::max(0,o.opp_army/2)});bool ready=o.army[anchor]>=launch_need||donor_count<=2||donor_mass<20;"
+new2="int launch_need=std::max({90,eg_army*3+20,std::max(0,o.opp_army/2)});bool late_finish=o.turn>=900&&o.army[anchor]>=std::max(70,eg_army*2+15);bool ready=o.army[anchor]>=launch_need||late_finish||donor_count<=2||donor_mass<20;"
 if old2 not in s:
-    raise SystemExit('expected late muster condition not found')
+    raise SystemExit('expected late muster launch condition not found')
 s=s.replace(old2,new2,1)
 p.write_text(s)
-print('applied DoomGuard concentration gate plus late draw-breaker muster at turn >=1000')
+print('applied DoomGuard concentration gate plus turn>=900 late-finisher launch threshold')
