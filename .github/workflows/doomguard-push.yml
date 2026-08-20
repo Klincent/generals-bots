@@ -1,0 +1,21 @@
+name: doomguard-push
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/doomguard-trigger.txt'
+permissions:
+  contents: write
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: chatgpt/e50123-doomguard
+          fetch-depth: 0
+      - name: Run DoomGuard validation
+        env:
+          SDL_VIDEODRIVER: dummy
+        run: bash tools/run_doomguard_ci.sh
