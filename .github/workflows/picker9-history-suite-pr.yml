@@ -35,6 +35,12 @@ jobs:
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - run: pip install -e .
+      - name: Apply single gated candidate experiment
+        if: matrix.variant == 'candidate'
+        run: |
+          set -euo pipefail
+          python tools/apply_doomguard_concentration_gate.py
+          git diff --check
       - name: Build target and historical opponent
         run: |
           set -euo pipefail
