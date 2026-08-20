@@ -17,7 +17,6 @@ jobs:
       matrix:
         opponent:
           - v35-champion-70fresh
-          - juraj-v3.4
           - v35-defense-fresh
           - v35-heuristic-rebuild
           - v35-logistics-recenter
@@ -94,12 +93,11 @@ jobs:
       - name: Aggregate historical opponent screen
         run: |
           python - <<'PY' | tee /tmp/history-suite-summary.txt
-          import json,glob,os
-          refs=['v35-champion-70fresh','juraj-v3.4','v35-defense-fresh','v35-heuristic-rebuild','v35-logistics-recenter','juraj-v3.6-iter1-attack-pass','juraj-v3.6-search-refactor']
+          import json,glob
+          refs=['v35-champion-70fresh','v35-defense-fresh','v35-heuristic-rebuild','v35-logistics-recenter','juraj-v3.6-iter1-attack-pass','juraj-v3.6-search-refactor']
           cw=cd=cl=bw=bd=bl=0
           print('opponent candidate_W/D/L candidate_wr picker9_W/D/L picker9_wr delta')
           for ref in refs:
-              safe=ref.replace('/','_')
               c=glob.glob(f'/tmp/results/history-{ref}-candidate/**/summary.json',recursive=True)
               b=glob.glob(f'/tmp/results/history-{ref}-picker9/**/summary.json',recursive=True)
               if not c: c=glob.glob(f'/tmp/results/history-{ref}-candidate/summary.json')
