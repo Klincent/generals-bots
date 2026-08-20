@@ -1,0 +1,110 @@
+name: picker9-doomguard-rusher-pr
+on:
+  pull_request:
+    branches: [master]
+permissions:
+  contents: read
+jobs:
+  validate:
+    if: ${{ github.head_ref == 'tmp/doomstack-rusher-trigger' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    env:
+      COMBO_REF: chatgpt/picker9-doomguard-rusher
+      PICKER9_SHA: 734355a44adf76f274892bf13804d638c52869b0
+      SDL_VIDEODRIVER: dummy
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.COMBO_REF }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install benchmark engine
+        run: pip install -e .
+      - name: Build combined and exact picker9
+        run: |
+          set -euo pipefail
+          bash competition/agents/juraj_v35_cpp/test.sh
+          bash competition/agents/juraj_v35_cpp/build.sh
+          git worktree add --detach /tmp/picker9 "$PICKER9_SHA"
+          bash /tmp/picker9/competition/agents/juraj_v35_cpp/build.sh
+          cat >/tmp/combo.sh <<'EOF'
+          #!/usr/bin/env bash
+          export V35_PICKER_ENABLED=1
+          export V35_DOOMGUARD_ENABLED=1
+          "$GITHUB_WORKSPACE/competition/agents/juraj_v35_cpp/run.sh" "$@"
+          EOF
+          cat >/tmp/p9.sh <<'EOF'
+          #!/usr/bin/env bash
+          export V35_PICKER_ENABLED=1
+          "/tmp/picker9/competition/agents/juraj_v35_cpp/run.sh" "$@"
+          EOF
+          chmod +x /tmp/combo.sh /tmp/p9.sh
+          python -m py_compile competition/agents/doomstack_rusher/agent.py competition/agents/doomstack_rusher/main.py
+      - name: Exact picker9 vs doomstack rusher - 40 games
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/rusher && mkdir -p /tmp/rusher
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py \
+            --candidate /tmp/p9.sh \
+            --baseline competition/agents/doomstack_rusher/run.sh \
+            --start 36500 --seeds 20 --output /tmp/rusher/picker9
+          cat /tmp/rusher/picker9/summary.json
+      - name: Combined vs same doomstack rusher - 40 games
+        run: |
+          set -euo pipefail
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py \
+            --candidate /tmp/combo.sh \
+            --baseline competition/agents/doomstack_rusher/run.sh \
+            --start 36500 --seeds 20 --output /tmp/rusher/combo
+          cat /tmp/rusher/combo/summary.json
+      - name: Analyze stress validity and delta
+        run: |
+          python - <<'PY' | tee /tmp/rusher/result.txt
+          import json,re
+          from pathlib import Path
+          root=Path('/tmp/rusher')
+          p=json.loads((root/'picker9/summary.json').read_text())
+          c=json.loads((root/'combo/summary.json').read_text())
+          def stress(path):
+              games=[json.loads(x) for x in path.read_text().splitlines() if x.strip()]
+              mass55=share25=attacks=0; max_carriers=[]; max_shares=[]
+              for g in games:
+                  carrier=[]; share=[]; attack=False
+                  for line in g.get('stderr','').splitlines():
+                      if '[doomstack_rusher]' not in line: continue
+                      m=re.search(r'phase=(\w+) carrier=(\d+) share=([0-9.]+)',line)
+                      if not m: continue
+                      attack |= m.group(1)=='attack'
+                      carrier.append(int(m.group(2))); share.append(float(m.group(3)))
+                  mc=max(carrier,default=0); ms=max(share,default=0.0)
+                  max_carriers.append(mc); max_shares.append(ms)
+                  mass55 += mc>=55; share25 += ms>=.25; attacks += attack
+              return dict(games=len(games),mass55=mass55,share25=share25,attacks=attacks,
+                          mean_max_carrier=sum(max_carriers)/max(1,len(max_carriers)),
+                          mean_max_share=sum(max_shares)/max(1,len(max_shares)))
+          sp=stress(root/'picker9/games.jsonl'); sc=stress(root/'combo/games.jsonl')
+          delta=c['score']-p['score']
+          valid=(p['errors']==c['errors']==0 and p['illegal_actions']==c['illegal_actions']==0 and
+                 min(sp['mass55'],sc['mass55'])>=20 and min(sp['attacks'],sc['attacks'])>=16)
+          print('picker9',p['W'],p['D'],p['L'],'score',p['score'],'ci',p['paired_ci95'])
+          print('combo',c['W'],c['D'],c['L'],'score',c['score'],'ci',c['paired_ci95'])
+          print('delta_combo_minus_picker9',round(delta,6))
+          print('rusher_vs_picker9',sp)
+          print('rusher_vs_combo',sc)
+          print('TARGETED_RUSHER_STRESS_VALID','YES' if valid else 'NO')
+          if delta >= .05: verdict='STRONG_POSITIVE'
+          elif delta >= .025: verdict='POSITIVE'
+          elif delta > -.025: verdict='NEUTRAL'
+          else: verdict='REGRESSION'
+          print('DOOMGUARD_RUSHER_VERDICT',verdict)
+          assert p['errors']==c['errors']==0 and p['illegal_actions']==c['illegal_actions']==0
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: picker9-doomguard-rusher-results
+          path: /tmp/rusher
+          retention-days: 5
