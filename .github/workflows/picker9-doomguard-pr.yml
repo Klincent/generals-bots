@@ -1,0 +1,107 @@
+name: picker9-doomguard-pr
+on:
+  pull_request:
+    branches: [master]
+permissions:
+  contents: write
+jobs:
+  validate:
+    if: ${{ github.head_ref == 'chatgpt/picker9-doomguard' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      PICKER9_SHA: 734355a44adf76f274892bf13804d638c52869b0
+      SDL_VIDEODRIVER: dummy
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: chatgpt/picker9-doomguard
+          fetch-depth: 0
+      - name: Apply DoomGuard transplant
+        run: |
+          set -euo pipefail
+          if ! grep -q '\[v35_doomguard\]' competition/agents/juraj_v35_cpp/main.cpp; then
+            python tools/apply_picker9_doomguard.py
+          fi
+          grep -q 'doomguard_active_' competition/agents/juraj_v35_cpp/main.cpp
+          grep -q 'EdgePickerState picker_' competition/agents/juraj_v35_cpp/main.cpp
+      - name: Unit tests and build
+        run: |
+          set -euo pipefail
+          bash competition/agents/juraj_v35_cpp/test.sh
+          bash competition/agents/juraj_v35_cpp/build.sh
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install benchmark dependencies
+        run: pip install -e .
+      - name: Build exact picker9 baseline
+        run: |
+          set -euo pipefail
+          git worktree add --detach /tmp/picker9 "$PICKER9_SHA"
+          bash /tmp/picker9/competition/agents/juraj_v35_cpp/build.sh
+          cat >/tmp/combo.sh <<'EOF'
+          #!/usr/bin/env bash
+          export V35_PICKER_ENABLED=1
+          export V35_DOOMGUARD_ENABLED=1
+          "$GITHUB_WORKSPACE/competition/agents/juraj_v35_cpp/run.sh" "$@" 2> >(sed -u 's/^/[COMBO] /' >&2)
+          EOF
+          cat >/tmp/picker9.sh <<'EOF'
+          #!/usr/bin/env bash
+          export V35_PICKER_ENABLED=1
+          "/tmp/picker9/competition/agents/juraj_v35_cpp/run.sh" "$@" 2> >(sed -u 's/^/[P9] /' >&2)
+          EOF
+          chmod +x /tmp/combo.sh /tmp/picker9.sh
+      - name: Fresh preservation screen - 40 games
+        run: |
+          set -euo pipefail
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/combo.sh --baseline /tmp/picker9.sh --start 36200 --seeds 20 --output /tmp/combo/screen
+          cat /tmp/combo/screen/summary.json
+          python - <<'PY'
+          import json
+          s=json.load(open('/tmp/combo/screen/summary.json'))
+          assert s['errors']==0 and s['illegal_actions']==0
+          assert s['score']>=0.475, s
+          PY
+      - name: Untouched holdout - 80 games
+        run: |
+          set -euo pipefail
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/combo.sh --baseline /tmp/picker9.sh --start 36300 --seeds 40 --output /tmp/combo/holdout
+          cat /tmp/combo/holdout/summary.json
+      - name: Summarize combined gate
+        run: |
+          python - <<'PY' | tee /tmp/combo/gate.txt
+          import json,re
+          from pathlib import Path
+          b=Path('/tmp/combo')
+          s=json.loads((b/'screen/summary.json').read_text()); h=json.loads((b/'holdout/summary.json').read_text())
+          games=[json.loads(x) for p in (b/'screen/games.jsonl',b/'holdout/games.jsonl') for x in p.read_text().splitlines() if x.strip()]
+          active=starts=windows=moves=0
+          for g in games:
+            ls=[x for x in g.get('stderr','').splitlines() if '[COMBO] [v35_doomguard]' in x]
+            if not ls: continue
+            v={k:int(x) for k,x in re.findall(r'(\w+)=(-?\d+)',ls[-1])}
+            active+=v.get('starts',0)>0; starts+=v.get('starts',0); windows+=v.get('windows',0); moves+=v.get('moves',0)
+          gate=s['score']>=.475 and h['score']>=.475 and s['errors']==h['errors']==0 and s['illegal_actions']==h['illegal_actions']==0
+          print('screen',s['W'],s['D'],s['L'],'score',s['score'],'ci',s['paired_ci95'])
+          print('holdout',h['W'],h['D'],h['L'],'score',h['score'],'ci',h['paired_ci95'])
+          print('doom_active_games',active,'starts',starts,'windows',windows,'moves',moves,'of',len(games))
+          print('PICKER9_COMBINE_GATE','PASS' if gate else 'FAIL')
+          PY
+      - name: Commit tested combined source
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add competition/agents/juraj_v35_cpp/main.cpp
+          if ! git diff --cached --quiet; then
+            git commit -m 'picker-v9: add gated DoomGuard defensive muster'
+            git pull --rebase origin chatgpt/picker9-doomguard
+            git push origin HEAD:chatgpt/picker9-doomguard
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: picker9-doomguard-results
+          path: /tmp/combo
+          retention-days: 5
