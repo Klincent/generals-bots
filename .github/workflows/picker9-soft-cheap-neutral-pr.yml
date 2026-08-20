@@ -1,0 +1,141 @@
+name: picker9-soft-cheap-neutral-pr
+
+on:
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  screen:
+    if: ${{ github.head_ref == 'tmp/picker9-soft-cheap-neutral-trigger' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: v75
+            sha: 9cc3b78a0003dd17079cd2aa8d6439321fedccc0
+          - name: final
+            sha: 2260b6f19d51a14d7c68770677f22d04dfd88022
+    env:
+      SDL_VIDEODRIVER: dummy
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -e .
+      - name: Apply soft-deficit cheap-neutral bias and build
+        run: |
+          set -euo pipefail
+          git worktree add --detach /tmp/parent ${{ matrix.sha }}
+          if git rev-parse --verify --quiet origin/v35-defense-fresh >/dev/null; then DREF=origin/v35-defense-fresh; else DREF=v35-defense-fresh; fi
+          git worktree add --detach /tmp/defense "$DREF"
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('competition/agents/juraj_v35_cpp/main.cpp')
+          s=p.read_text()
+          old='double u=100-o.army[y]*12+g_.degree(y)*5+(until<=8?30:0);'
+          new='double u=100-o.army[y]*(production_==ProductionState::SOFT_DEFICIT?16:12)+g_.degree(y)*5+(until<=8?30:0);'
+          if old not in s: raise SystemExit('expansion utility anchor not found')
+          p.write_text(s.replace(old,new,1))
+          PY
+          git diff --check
+          bash competition/agents/juraj_v35_cpp/build.sh
+          bash /tmp/parent/competition/agents/juraj_v35_cpp/build.sh
+          bash /tmp/defense/competition/agents/juraj_v35_cpp/build.sh
+          cat >/tmp/patched.sh <<'EOF'
+          #!/usr/bin/env bash
+          export V35_PICKER_ENABLED=1 V35_DOOMGUARD_ENABLED=1
+          exec "$GITHUB_WORKSPACE/competition/agents/juraj_v35_cpp/run.sh" "$@" 2> >(sed 's/^/[PATCHED] /' >&2)
+          EOF
+          cat >/tmp/parent.sh <<'EOF'
+          #!/usr/bin/env bash
+          export V35_PICKER_ENABLED=1 V35_DOOMGUARD_ENABLED=1
+          exec "/tmp/parent/competition/agents/juraj_v35_cpp/run.sh" "$@" 2> >(sed 's/^/[PARENT] /' >&2)
+          EOF
+          chmod +x /tmp/patched.sh /tmp/parent.sh /tmp/defense/competition/agents/juraj_v35_cpp/run.sh
+      - name: Random parent delta
+        run: |
+          OUT=/tmp/random-${{ matrix.name }}
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/patched.sh --baseline /tmp/parent.sh --start 55000 --seeds 10 --output "$OUT"
+          python - "$OUT/summary.json" <<'PY'
+          import json,sys
+          s=json.load(open(sys.argv[1]));print(s);assert s['errors']==0 and s['illegal_actions']==0,s
+          PY
+      - name: Defense candidate screen
+        run: |
+          OUT=/tmp/defense-patched-${{ matrix.name }}
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/patched.sh --baseline /tmp/defense/competition/agents/juraj_v35_cpp/run.sh --start 55020 --seeds 10 --output "$OUT"
+          python - "$OUT/summary.json" <<'PY'
+          import json,sys
+          s=json.load(open(sys.argv[1]));print(s);assert s['errors']==0 and s['illegal_actions']==0,s
+          PY
+      - name: Defense exact-parent control
+        run: |
+          OUT=/tmp/defense-parent-${{ matrix.name }}
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate /tmp/parent.sh --baseline /tmp/defense/competition/agents/juraj_v35_cpp/run.sh --start 55020 --seeds 10 --output "$OUT"
+          python - "$OUT/summary.json" <<'PY'
+          import json,sys
+          s=json.load(open(sys.argv[1]));print(s);assert s['errors']==0 and s['illegal_actions']==0,s
+          PY
+      - name: Production snapshots
+        run: |
+          python - <<'PY' | tee /tmp/production-${{ matrix.name }}.txt
+          import json,re,statistics
+          rows=[json.loads(x) for x in open('/tmp/random-${{ matrix.name }}/games.jsonl')]
+          turns=[50,100,150,200,250,300,400,600,800]
+          d={k:{t:[] for t in turns} for k in ('PATCHED','PARENT')}
+          for g in rows:
+            for line in g.get('stderr','').splitlines():
+              for who in d:
+                if line.startswith(f'[{who}] [v35_land]'):
+                  vals={int(a):int(b) for a,b in re.findall(r'(\d+):(\d+)',line)}
+                  for t in turns:
+                    if t in vals:d[who][t].append(vals[t])
+          for t in turns:
+            a=statistics.mean(d['PATCHED'][t]) if d['PATCHED'][t] else 0
+            b=statistics.mean(d['PARENT'][t]) if d['PARENT'][t] else 0
+            print(f'{t} patched={a:.2f} parent={b:.2f} delta={a-b:+.2f}')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: softcheap-${{ matrix.name }}
+          path: |
+            /tmp/random-${{ matrix.name }}
+            /tmp/defense-patched-${{ matrix.name }}
+            /tmp/defense-parent-${{ matrix.name }}
+            /tmp/production-${{ matrix.name }}.txt
+          retention-days: 14
+
+  aggregate:
+    if: ${{ github.head_ref == 'tmp/picker9-soft-cheap-neutral-trigger' }}
+    needs: screen
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: softcheap-*
+          path: /tmp/results
+      - name: Aggregate verdict inputs
+        run: |
+          python - <<'PY' | tee /tmp/softcheap-summary.txt
+          import json,glob
+          for parent in ('v75','final'):
+            print(parent)
+            for kind in ('random','defense-patched','defense-parent'):
+              p=glob.glob(f'/tmp/results/**/{kind}-{parent}/summary.json',recursive=True)[0]
+              s=json.load(open(p));n=s['W']+s['D']+s['L'];score=(s['W']+.5*s['D'])/n
+              print(f'  {kind}: {s["W"]}/{s["D"]}/{s["L"]} score={score:.4f} errors={s["errors"]} illegal={s["illegal_actions"]}')
+          PY
+          mkdir -p /tmp/summary && cp /tmp/softcheap-summary.txt /tmp/summary/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: picker9-soft-cheap-neutral-summary
+          path: /tmp/summary
+          retention-days: 14
