@@ -6,7 +6,7 @@ permissions:
   contents: write
 jobs:
   validate:
-    if: ${{ github.head_ref == 'chatgpt/picker9-doomguard' }}
+    if: ${{ github.head_ref == 'tmp/picker9-doomguard-trigger' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     env:
