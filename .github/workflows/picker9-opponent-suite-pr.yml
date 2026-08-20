@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   suite:
-    if: github.head_ref == 'chatgpt/picker9-opponent-suite-75'
+    if: github.head_ref == 'tmp/picker9-suite-trigger'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     strategy:
@@ -72,7 +72,7 @@ jobs:
           retention-days: 7
 
   aggregate:
-    if: github.head_ref == 'chatgpt/picker9-opponent-suite-75'
+    if: github.head_ref == 'tmp/picker9-suite-trigger'
     needs: suite
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -88,7 +88,7 @@ jobs:
         id: gate
         run: |
           python - <<'PY' | tee /tmp/opponent-suite-summary.txt
-          import json,glob,os
+          import json,os
           modes=['doomstack','earlyrush','pressure','flood']
           total_w=total_d=total_l=total_err=total_illegal=0
           rows=[]
@@ -98,8 +98,7 @@ jobs:
                   p=f'/tmp/results/suite-{mode}-{variant}/summary.json'
                   s=json.load(open(p)); vals[variant]=s
               c=vals['candidate']; b=vals['picker9']
-              wr=c['W']/c['games']
-              bwr=b['W']/b['games']
+              wr=c['W']/c['games']; bwr=b['W']/b['games']
               rows.append((mode,c['W'],c['D'],c['L'],wr,bwr,wr-bwr))
               total_w+=c['W']; total_d+=c['D']; total_l+=c['L']
               total_err+=c['errors']; total_illegal+=c['illegal_actions']
