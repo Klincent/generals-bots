@@ -1,0 +1,84 @@
+{
+  "cycle": 1,
+  "diagnosis": [
+    "late muster harvests but fails to launch",
+    "too many pass actions"
+  ],
+  "h2h": {
+    "D": 2,
+    "L": 8,
+    "W": 10,
+    "decision_roundtrip_ms": {
+      "max": 17.65099400000736,
+      "p50": 1.1254039999926135,
+      "p95": 1.2000350000107574,
+      "p99": 1.22509199999854
+    },
+    "errors": 0,
+    "games": 20,
+    "illegal_actions": 0,
+    "maps": 10,
+    "paired_ci95": [
+      0.375,
+      0.725
+    ],
+    "paired_score": 0.55,
+    "returncode": 0,
+    "score": 0.55,
+    "seat_score": {
+      "0": 0.45,
+      "1": 0.65
+    },
+    "seed_end": 351904399,
+    "seed_start": 351904390,
+    "turns_mean": 707
+  },
+  "iteration": 19,
+  "loser": "Y",
+  "loss_metrics": {
+    "c1_missing_rate": 0.1,
+    "c2_missing_rate": 0.4,
+    "contact_turn": 114.8,
+    "doom_moves": 2.7,
+    "doom_starts": 2.0,
+    "expansion_actions": 125.9,
+    "land200": 63.9,
+    "land250": 73.55555555555556,
+    "land400": 99.25,
+    "loss_samples": 10,
+    "muster_attack": 0.0,
+    "muster_harvest": 4.5,
+    "muster_windows": 4.5,
+    "no_strategic": 24.4,
+    "passes": 12.7,
+    "picker_aborts": 0.0,
+    "picker_blocked": 0.0,
+    "picker_completions": 0.5,
+    "picker_eff_rejects": 91.9,
+    "picker_mass_rejects": 436.9,
+    "picker_starts": 0.7,
+    "rear_actions": 43.5,
+    "search_actions": 24.3,
+    "threats": 16.6,
+    "turns": 605.9,
+    "war_actions": 137.4
+  },
+  "mutation": {
+    "attempts": [
+      {
+        "accepted": true,
+        "description": "lower late-muster launch requirement",
+        "key": "launch_lower"
+      }
+    ],
+    "description": "lower late-muster launch requirement",
+    "key": "launch_lower",
+    "sha": "de7ac3c6a7d5b2dd08396c86a4c55290a637d118"
+  },
+  "start": 351904390,
+  "tiebreak": null,
+  "x_sha_after": "a1a1c375d1a4cd4f69b993122f403e12892abd6d",
+  "x_sha_before": "a1a1c375d1a4cd4f69b993122f403e12892abd6d",
+  "y_sha_after": "de7ac3c6a7d5b2dd08396c86a4c55290a637d118",
+  "y_sha_before": "16f0174e11a001321ebef698c2a0a4f65fda315f"
+}
