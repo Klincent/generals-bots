@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# trigger: 5x(10 evolution + regression)
 from __future__ import annotations
 import argparse, json, os, re, shutil, subprocess, sys, tempfile
 from pathlib import Path
@@ -24,8 +25,6 @@ def patch_one(s, old, new):
     return s.replace(old,new,1)
 
 def mutate(src: str, iteration: int, phase: str) -> tuple[str,str]:
-    # Deterministic narrow mutations. Only one defense and one attack mutation are
-    # proposed per inner iteration; the benchmark decides whether each survives.
     if phase=='defense':
         choices=[
           ('doom_floor_15_to_13','std::max(1,o.opp_army)*15/100','std::max(1,o.opp_army)*13/100'),
@@ -66,7 +65,6 @@ def losses(out:Path):
     rows=[json.loads(x) for x in open(out/'games.jsonl')]
     bad=[]
     for r in rows:
-        # paired_benchmark records result from candidate perspective when available.
         val=str(r.get('result',r.get('winner',''))).lower()
         if val in ('loss','l','baseline','1') or r.get('candidate_score')==0:
             bad.append({'seed':r.get('seed'),'seat':r.get('candidate_seat'),'turns':r.get('turns')})
@@ -86,23 +84,19 @@ def main():
     start_src=run(['git','show',f'{START_REF}:{AGENT}/main.cpp'],capture=True)
     src=state.get('best_source') or start_src
     base=build_source(src,f'outer{outer}-base')
-    best_summary={'score':state.get('best_score',0.0),'W':0,'L':0,'errors':0,'illegal_actions':0}
     for i in range(1,11):
         seed=60000+outer*1000+i*20
         control_src=src
         control=build_source(control_src,f'o{outer}i{i}-control')
-        # 1 build + 2 test vs previous best
         out=Path(f'/tmp/p9-o{outer}-i{i}-control')
         control_summary=bench(control,base,seed,4,out)
         loss_rows=losses(out)
-        # 3 identify losses + 4 defense repair
         dsrc,dname=mutate(control_src,i,'defense')
         defense=build_source(dsrc,f'o{outer}i{i}-def')
         dout=Path(f'/tmp/p9-o{outer}-i{i}-def')
         dsum=bench(defense,control,seed+4,4,dout)
         chosen_src=dsrc if better(dsum,{'score':.5,'W':0,'L':0,'errors':0,'illegal_actions':0}) else control_src
         chosen=defense if chosen_src==dsrc else control
-        # 4/5 improve attack, rebuild, test against whichever was better
         asrc,aname=mutate(chosen_src,i,'attack')
         attack=build_source(asrc,f'o{outer}i{i}-atk')
         aout=Path(f'/tmp/p9-o{outer}-i{i}-atk')
@@ -113,7 +107,6 @@ def main():
             src=chosen_src; final=dsum if chosen_src==dsrc else control_summary; decision='defense' if chosen_src==dsrc else 'control'
         base=build_source(src,f'o{outer}i{i}-best')
         state['history'].append({'outer':outer,'inner':i,'losses':loss_rows,'defense_mutation':dname,'defense':dsum,'attack_mutation':aname,'attack':asum,'decision':decision,'final':final})
-    # Regression after each 10-iteration block.
     regression=[]; total={'W':0,'D':0,'L':0,'games':0,'errors':0,'illegal_actions':0}
     cand=build_source(src,f'outer{outer}-reg')
     for j,ref in enumerate(OPPONENTS):
