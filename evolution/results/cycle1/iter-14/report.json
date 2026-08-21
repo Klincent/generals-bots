@@ -1,0 +1,84 @@
+{
+  "cycle": 1,
+  "diagnosis": [
+    "picker rarely starts",
+    "too many pass actions"
+  ],
+  "h2h": {
+    "D": 3,
+    "L": 9,
+    "W": 8,
+    "decision_roundtrip_ms": {
+      "max": 13.356539000000112,
+      "p50": 0.8360269999911907,
+      "p95": 0.9001010000133647,
+      "p99": 0.968471999982512
+    },
+    "errors": 0,
+    "games": 20,
+    "illegal_actions": 0,
+    "maps": 10,
+    "paired_ci95": [
+      0.25,
+      0.675
+    ],
+    "paired_score": 0.475,
+    "returncode": 0,
+    "score": 0.475,
+    "seat_score": {
+      "0": 0.45,
+      "1": 0.5
+    },
+    "seed_end": 1195111247,
+    "seed_start": 1195111238,
+    "turns_mean": 739.75
+  },
+  "iteration": 14,
+  "loser": "X",
+  "loss_metrics": {
+    "c1_missing_rate": 0.0,
+    "c2_missing_rate": 0.2222222222222222,
+    "contact_turn": 67.88888888888889,
+    "doom_moves": 50.888888888888886,
+    "doom_starts": 3.2222222222222223,
+    "expansion_actions": 124.88888888888889,
+    "land200": 57.666666666666664,
+    "land250": 65.88888888888889,
+    "land400": 88.875,
+    "loss_samples": 9,
+    "muster_attack": 0.0,
+    "muster_harvest": 0.0,
+    "muster_windows": 0.0,
+    "no_strategic": 18.88888888888889,
+    "passes": 9.11111111111111,
+    "picker_aborts": 0.0,
+    "picker_blocked": 0.0,
+    "picker_completions": 0.4444444444444444,
+    "picker_eff_rejects": 28.0,
+    "picker_mass_rejects": 571.4444444444445,
+    "picker_starts": 0.4444444444444444,
+    "rear_actions": 16.11111111111111,
+    "search_actions": 17.333333333333332,
+    "threats": 14.88888888888889,
+    "turns": 621.1111111111111,
+    "war_actions": 144.0
+  },
+  "mutation": {
+    "attempts": [
+      {
+        "accepted": true,
+        "description": "add +2pp HEALTHY pre-contact expansion share through t250",
+        "key": "early_expansion"
+      }
+    ],
+    "description": "add +2pp HEALTHY pre-contact expansion share through t250",
+    "key": "early_expansion",
+    "sha": "9cdf74ec112c1888727cba15b385f4edb2ac1865"
+  },
+  "start": 1195111238,
+  "tiebreak": null,
+  "x_sha_after": "9cdf74ec112c1888727cba15b385f4edb2ac1865",
+  "x_sha_before": "2ecea84ab8e014926f9ce4a93c79dced07df9a09",
+  "y_sha_after": "b43d6b52a732084ff2599f5d4f9dac143998e3e5",
+  "y_sha_before": "b43d6b52a732084ff2599f5d4f9dac143998e3e5"
+}
