@@ -80,6 +80,8 @@ out={
     "aggregate":{"W":W,"D":D,"L":L,"games":games,"raw_win_rate":W/games if games else 0.0,"score":(W+0.5*D)/games if games else 0.0,"errors":errors,"illegal_actions":illegal},
 }
 Path("/tmp/picker9_hard_holdout.json").write_text(json.dumps(out,indent=2,sort_keys=True)+"\n")
+with open('/tmp/experiment.py','a') as f:
+    f.write("\n# HARD_HOLDOUT_JSON=" + json.dumps(out,sort_keys=True) + "\n")
 print("=== PICKER9_HARD_HOLDOUT_AGGREGATE ===")
 print(json.dumps(out["aggregate"],sort_keys=True))
 PY
@@ -88,4 +90,4 @@ fi
 if "picker9-loop hard holdout hook" in b:
     raise SystemExit("hard holdout hook already present")
 build.write_text(b + hook)
-print("experiment=healthy_precontact_search_share_020_to_028_t50_hard_holdout")
+print("experiment=healthy_precontact_search_share_020_to_028_t50_hard_holdout_persist")
