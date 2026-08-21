@@ -1,0 +1,84 @@
+{
+  "cycle": 1,
+  "diagnosis": [
+    "picker rarely starts",
+    "too many pass actions"
+  ],
+  "h2h": {
+    "D": 5,
+    "L": 6,
+    "W": 9,
+    "decision_roundtrip_ms": {
+      "max": 16.43999499998472,
+      "p50": 0.8121779999896717,
+      "p95": 0.9181599999976697,
+      "p99": 0.9311599999932696
+    },
+    "errors": 0,
+    "games": 20,
+    "illegal_actions": 0,
+    "maps": 10,
+    "paired_ci95": [
+      0.45,
+      0.7
+    ],
+    "paired_score": 0.575,
+    "returncode": 0,
+    "score": 0.575,
+    "seat_score": {
+      "0": 0.7,
+      "1": 0.45
+    },
+    "seed_end": 1760561969,
+    "seed_start": 1760561960,
+    "turns_mean": 729.65
+  },
+  "iteration": 1,
+  "loser": "Y",
+  "loss_metrics": {
+    "c1_missing_rate": 0.0,
+    "c2_missing_rate": 0.3333333333333333,
+    "contact_turn": 91.55555555555556,
+    "doom_moves": 3.3333333333333335,
+    "doom_starts": 2.3333333333333335,
+    "expansion_actions": 119.0,
+    "land200": 62.333333333333336,
+    "land250": 77.55555555555556,
+    "land400": 106.66666666666667,
+    "loss_samples": 9,
+    "muster_attack": 0.0,
+    "muster_harvest": 0.0,
+    "muster_windows": 0.0,
+    "no_strategic": 21.22222222222222,
+    "passes": 10.555555555555555,
+    "picker_aborts": 0.0,
+    "picker_blocked": 0.0,
+    "picker_completions": 0.3333333333333333,
+    "picker_eff_rejects": 5.888888888888889,
+    "picker_mass_rejects": 684.6666666666666,
+    "picker_starts": 0.4444444444444444,
+    "rear_actions": 24.666666666666668,
+    "search_actions": 22.11111111111111,
+    "threats": 29.11111111111111,
+    "turns": 615,
+    "war_actions": 164.22222222222223
+  },
+  "mutation": {
+    "attempts": [
+      {
+        "accepted": true,
+        "description": "lower picker start mass threshold by 2",
+        "key": "picker_mass_lower"
+      }
+    ],
+    "description": "lower picker start mass threshold by 2",
+    "key": "picker_mass_lower",
+    "sha": "dc6a21d337e56d3adf8bd786f818d5b3db4eb66b"
+  },
+  "start": 1760561960,
+  "tiebreak": null,
+  "x_sha_after": "e8ea98b7c3174da174806cad79bd1b22a0f635cc",
+  "x_sha_before": "e8ea98b7c3174da174806cad79bd1b22a0f635cc",
+  "y_sha_after": "dc6a21d337e56d3adf8bd786f818d5b3db4eb66b",
+  "y_sha_before": "687165839cea8ae5e84da26c99af1c0e5aed4543"
+}
