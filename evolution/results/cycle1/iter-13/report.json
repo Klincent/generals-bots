@@ -1,0 +1,84 @@
+{
+  "cycle": 1,
+  "diagnosis": [
+    "picker rarely starts",
+    "too many pass actions"
+  ],
+  "h2h": {
+    "D": 6,
+    "L": 6,
+    "W": 8,
+    "decision_roundtrip_ms": {
+      "max": 19.339561000009553,
+      "p50": 1.1372130000495417,
+      "p95": 1.2559560000227066,
+      "p99": 1.2651819999973668
+    },
+    "errors": 0,
+    "games": 20,
+    "illegal_actions": 0,
+    "maps": 10,
+    "paired_ci95": [
+      0.375,
+      0.7
+    ],
+    "paired_score": 0.55,
+    "returncode": 0,
+    "score": 0.55,
+    "seat_score": {
+      "0": 0.35,
+      "1": 0.75
+    },
+    "seed_end": 1516995449,
+    "seed_start": 1516995440,
+    "turns_mean": 738.05
+  },
+  "iteration": 13,
+  "loser": "Y",
+  "loss_metrics": {
+    "c1_missing_rate": 0.25,
+    "c2_missing_rate": 0.625,
+    "contact_turn": 141.5,
+    "doom_moves": 3.25,
+    "doom_starts": 1.0,
+    "expansion_actions": 97.0,
+    "land200": 68.625,
+    "land250": 84,
+    "land400": 113.66666666666667,
+    "loss_samples": 8,
+    "muster_attack": 0.0,
+    "muster_harvest": 0.0,
+    "muster_windows": 0.0,
+    "no_strategic": 27.375,
+    "passes": 18.375,
+    "picker_aborts": 0.0,
+    "picker_blocked": 0.0,
+    "picker_completions": 0.25,
+    "picker_eff_rejects": 85.125,
+    "picker_mass_rejects": 450.0,
+    "picker_starts": 0.25,
+    "rear_actions": 47.125,
+    "search_actions": 26.875,
+    "threats": 12.875,
+    "turns": 569.625,
+    "war_actions": 92.25
+  },
+  "mutation": {
+    "attempts": [
+      {
+        "accepted": true,
+        "description": "lower picker start mass threshold by 2",
+        "key": "picker_mass_lower"
+      }
+    ],
+    "description": "lower picker start mass threshold by 2",
+    "key": "picker_mass_lower",
+    "sha": "b43d6b52a732084ff2599f5d4f9dac143998e3e5"
+  },
+  "start": 1516995440,
+  "tiebreak": null,
+  "x_sha_after": "2ecea84ab8e014926f9ce4a93c79dced07df9a09",
+  "x_sha_before": "2ecea84ab8e014926f9ce4a93c79dced07df9a09",
+  "y_sha_after": "b43d6b52a732084ff2599f5d4f9dac143998e3e5",
+  "y_sha_before": "e33ca08a6d495f72b3bf82ace09ccf8f22d8b2ea"
+}
