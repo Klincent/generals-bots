@@ -1,6 +1,7 @@
-h_expansion=0 with_war=0 before_tick=0 castle_urgent=0 idle_slot=0 paused=0
+shold=8 min_eff=2.00 starts=0 completions=0 moves=0 delivered=0 aborts=0 active=0 blocked_ticks=0 lost_aborts=0 depleted_aborts=0 source_guard=0 critical_preempt_moves=0 mass_rejects=2 efficiency_rejects=0 planned_mass=0 planned_moves=0
+[v36_picker_opportunity] with_expansion=0 with_war=0 before_tick=0 castle_urgent=0 idle_slot=0 paused=0
 [v35_doomguard] enabled=1 starts=0 releases=0 windows=0 moves=0 unreachable=0 active=0 enemy=-1 eta=1000000 muster=220 reachable=0
-[v35_timing] p50=13.519 p95=13.519 p99=13.519 max=13.519
+[v35_timing] p50=13.631 p95=13.631 p99=13.631 max=13.631
 [v35_plan] c1=73 cost1=35 c2=153 cost2=35 total=70
 [v35_castle_deadline] c1_site=73 c1_cost=35 c1_latest_start=126 c1_required_actions=19 c1_start_turn=-1 c1_build_turn=-1 c2_site=153 c2_cost=35 c2_latest_start=218 c2_required_actions=27 c2_start_turn=-1 c2_build_turn=-1 miss_reason=none
 [v35_castle_live] prevented_invalid_builds=0
@@ -17,7 +18,7 @@ h_expansion=0 with_war=0 before_tick=0 castle_urgent=0 idle_slot=0 paused=0
 [v36_picker] threshold=8 min_eff=2.00 starts=0 completions=0 moves=0 delivered=0 aborts=0 active=0 blocked_ticks=0 lost_aborts=0 depleted_aborts=0 source_guard=0 critical_preempt_moves=0 mass_rejects=0 efficiency_rejects=1 planned_mass=0 planned_moves=0
 [v36_picker_opportunity] with_expansion=0 with_war=0 before_tick=0 castle_urgent=0 idle_slot=0 paused=0
 [v35_doomguard] enabled=1 starts=0 releases=0 windows=0 moves=0 unreachable=0 active=0 enemy=-1 eta=1000000 muster=220 reachable=0
-[v35_timing] p50=12.690 p95=12.690 p99=12.690 max=12.690
+[v35_timing] p50=13.679 p95=13.679 p99=13.679 max=13.679
 [v35_plan] c1=73 cost1=35 c2=153 cost2=35 total=70
 [v36_picker_start] turn=80 my_land=441 opp_land=0 land_delta=441 growth25=0.000 growth50=0.000 my_army=504 opp_army=0 army_delta=504 largest=8 top3=24 top3_share=0.048 surplus=56 moves=18 delivered=56 useful_neutrals=0 enemy_seen=0 contact=0 fronts=0 enemy_general=0 production=0 tick_in=20 c1=0 c2=0 attack_sink=0 allowed=1
 [v35_castle_deadline] c1_site=73 c1_cost=35 c1_latest_start=136 c1_required_actions=9 c1_start_turn=80 c1_build_turn=-1 c2_site=153 c2_cost=35 c2_latest_start=236 c2_required_actions=9 c2_start_turn=-1 c2_build_turn=-1 miss_reason=none
@@ -35,7 +36,7 @@ h_expansion=0 with_war=0 before_tick=0 castle_urgent=0 idle_slot=0 paused=0
 [v36_picker] threshold=8 min_eff=2.00 starts=1 completions=1 moves=18 delivered=56 aborts=0 active=0 blocked_ticks=0 lost_aborts=0 depleted_aborts=0 source_guard=0 critical_preempt_moves=0 mass_rejects=0 efficiency_rejects=0 planned_mass=56 planned_moves=18
 [v36_picker_opportunity] with_expansion=0 with_war=0 before_tick=4 castle_urgent=0 idle_slot=18 paused=17
 [v35_doomguard] enabled=1 starts=0 releases=0 windows=0 moves=0 unreachable=0 active=0 enemy=-1 eta=1000000 muster=220 reachable=0
-[v35_timing] p50=0.540 p95=0.553 p99=12.837 max=12.837
+[v35_timing] p50=0.541 p95=0.563 p99=13.807 max=13.807
 v36 picker economics scenarios passed
 In file included from test_muster.cpp:2:
 main.cpp:111:13: warning: ‘bool grid(std::vector<int>&)’ defined but not used [-Wunused-function]
@@ -54,10 +55,10 @@ main.cpp:111:13: warning: ‘bool grid(std::vector<int>&)’ defined but not use
 [v35_front] meaningful_contact=594 max_active=1 closures=0
 [v35_cycles] candidate_route_rejections=0 selected_preventions=0 executed_reverse=0 executed_short=0
 [v35_logistics] packets=2 objective_changes=2 allowed_reversals=1
-[v36_picker] threshold=16 min_eff=2.00 starts=0 completions=0 moves=0 delivered=0 aborts=0 active=0 blocked_ticks=0 lost_aborts=0 depleted_aborts=0 source_guard=0 critical_preempt_moves=0 mass_rejects=0 efficiency_rejects=0 planned_mass=0 planned_moves=0
+[v36_picker] threshold=14 min_eff=2.00 starts=0 completions=0 moves=0 delivered=0 aborts=0 active=0 blocked_ticks=0 lost_aborts=0 depleted_aborts=0 source_guard=0 critical_preempt_moves=0 mass_rejects=0 efficiency_rejects=0 planned_mass=0 planned_moves=0
 [v36_picker_opportunity] with_expansion=0 with_war=0 before_tick=0 castle_urgent=0 idle_slot=0 paused=0
 [v35_doomguard] enabled=1 starts=0 releases=0 windows=0 moves=0 unreachable=0 active=0 enemy=-1 eta=1000000 muster=220 reachable=0
-[v35_timing] p50=0.069 p95=13.471 p99=13.471 max=13.471
+[v35_timing] p50=0.069 p95=13.489 p99=13.489 max=13.489
 [v35_plan] c1=73 cost1=35 c2=153 cost2=35 total=70
 [v35_castle_deadline] c1_site=73 c1_cost=35 c1_latest_start=112 c1_required_actions=33 c1_start_turn=-1 c1_build_turn=-1 c2_site=153 c2_cost=35 c2_latest_start=220 c2_required_actions=25 c2_start_turn=-1 c2_build_turn=-1 miss_reason=c1_action_infeasible
 [v35_castle_live] prevented_invalid_builds=0
@@ -71,10 +72,10 @@ main.cpp:111:13: warning: ‘bool grid(std::vector<int>&)’ defined but not use
 [v35_front] meaningful_contact=-1 max_active=0 closures=0
 [v35_cycles] candidate_route_rejections=0 selected_preventions=0 executed_reverse=0 executed_short=0
 [v35_logistics] packets=2 objective_changes=2 allowed_reversals=0
-[v36_picker] threshold=16 min_eff=2.00 starts=0 completions=0 moves=0 delivered=0 aborts=0 active=0 blocked_ticks=0 lost_aborts=0 depleted_aborts=0 source_guard=0 critical_preempt_moves=0 mass_rejects=0 efficiency_rejects=0 planned_mass=0 planned_moves=0
+[v36_picker] threshold=14 min_eff=2.00 starts=0 completions=0 moves=0 delivered=0 aborts=0 active=0 blocked_ticks=0 lost_aborts=0 depleted_aborts=0 source_guard=0 critical_preempt_moves=0 mass_rejects=0 efficiency_rejects=0 planned_mass=0 planned_moves=0
 [v36_picker_opportunity] with_expansion=0 with_war=0 before_tick=0 castle_urgent=0 idle_slot=0 paused=0
 [v35_doomguard] enabled=1 starts=0 releases=0 windows=0 moves=0 unreachable=0 active=0 enemy=-1 eta=1000000 muster=220 reachable=0
-[v35_timing] p50=0.560 p95=13.669 p99=13.669 max=13.669
+[v35_timing] p50=0.559 p95=13.644 p99=13.644 max=13.644
 [v35_plan] c1=73 cost1=35 c2=153 cost2=35 total=70
 [v35_castle_deadline] c1_site=73 c1_cost=35 c1_latest_start=128 c1_required_actions=17 c1_start_turn=-1 c1_build_turn=-1 c2_site=153 c2_cost=35 c2_latest_start=228 c2_required_actions=17 c2_start_turn=-1 c2_build_turn=-1 miss_reason=c1_insufficient_army
 [v35_castle_live] prevented_invalid_builds=0
@@ -88,10 +89,10 @@ main.cpp:111:13: warning: ‘bool grid(std::vector<int>&)’ defined but not use
 [v35_front] meaningful_contact=300 max_active=1 closures=0
 [v35_cycles] candidate_route_rejections=0 selected_preventions=0 executed_reverse=0 executed_short=0
 [v35_logistics] packets=2 objective_changes=2 allowed_reversals=1
-[v36_picker] threshold=16 min_eff=2.00 starts=0 completions=0 moves=0 delivered=0 aborts=0 active=0 blocked_ticks=0 lost_aborts=0 depleted_aborts=0 source_guard=0 critical_preempt_moves=0 mass_rejects=0 efficiency_rejects=0 planned_mass=0 planned_moves=0
+[v36_picker] threshold=14 min_eff=2.00 starts=0 completions=0 moves=0 delivered=0 aborts=0 active=0 blocked_ticks=0 lost_aborts=0 depleted_aborts=0 source_guard=0 critical_preempt_moves=0 mass_rejects=0 efficiency_rejects=0 planned_mass=0 planned_moves=0
 [v36_picker_opportunity] with_expansion=0 with_war=0 before_tick=0 castle_urgent=0 idle_slot=0 paused=0
 [v35_doomguard] enabled=1 starts=1 releases=0 windows=1 moves=0 unreachable=0 active=1 enemy=200 eta=2 muster=199 reachable=1
-[v35_timing] p50=0.278 p95=13.579 p99=13.579 max=13.579
+[v35_timing] p50=0.281 p95=13.587 p99=13.587 max=13.587
 v9 late muster/castle/general-capture scenarios passed
 v36 real protocol observation/action cycle passed
 Traceback (most recent call last):
@@ -99,14 +100,13 @@ Traceback (most recent call last):
     main()
   File "/home/runner/work/generals-bots/generals-bots/tools/evolution_orchestrator.py", line 699, in main
     cycle1(state)
-  File "/home/runner/work/generals-bots/generals-bots/tools/evolution_orchestrator.py", line 555, in cycle1
-    s,mx,my,start,out=run_h2h(x,y,state,10,f"cycle1/iter-{i:02d}/h2h")
-                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/generals-bots/generals-bots/tools/evolution_orchestrator.py", line 492, in run_h2h
-    s=bench(xw,yw,start,seeds,out)
-      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/generals-bots/generals-bots/tools/evolution_orchestrator.py", line 111, in bench
-    raise RuntimeError(f"benchmark produced no summary: {p.stderr[-4000:]}")
-RuntimeError: benchmark produced no summary: /opt/hostedtoolcache/Python/3.12.14/x64/bin/python: can't open file '/home/runner/work/generals-bots/generals-bots/competition/agents/juraj_v35_cpp/paired_benchmark.py': [Errno 2] No such file or directory
-
+  File "/home/runner/work/generals-bots/generals-bots/tools/evolution_orchestrator.py", line 554, in cycle1
+    x,y=make_lineages()
+        ^^^^^^^^^^^^^^^
+  File "/home/runner/work/generals-bots/generals-bots/tools/evolution_orchestrator.py", line 480, in make_lineages
+    if ensure_initial_y(y):
+       ^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/generals-bots/generals-bots/tools/evolution_orchestrator.py", line 420, in ensure_initial_y
+    raise RuntimeError("cannot initialize Y: expected expansion anchor not unique")
+RuntimeError: cannot initialize Y: expected expansion anchor not unique
 
