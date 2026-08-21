@@ -1,4 +1,4 @@
-name: picker9-soft-expansion-history-pr
+name: picker9-mix5453-history-pr
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   history:
-    if: ${{ github.head_ref == 'tmp/picker9-soft-expansion-history-trigger' }}
+    if: ${{ github.head_ref == 'tmp/picker9-mix5453-trigger' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     strategy:
@@ -37,7 +37,7 @@ jobs:
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - run: pip install -e .
-      - name: Apply one soft-deficit expansion change and build parent/opponent
+      - name: Apply combined early expansion change and build parent/opponent
         run: |
           set -euo pipefail
           git worktree add --detach /tmp/parent ${{ matrix.parent.sha }}
@@ -48,8 +48,8 @@ jobs:
           from pathlib import Path
           p=Path('competition/agents/juraj_v35_cpp/main.cpp');s=p.read_text()
           old='production_==ProductionState::SEVERE_DEFICIT?.62:production_==ProductionState::SOFT_DEFICIT?.45:.35'
-          new='production_==ProductionState::SEVERE_DEFICIT?.62:production_==ProductionState::SOFT_DEFICIT?.52:.35'
-          if old not in s: raise SystemExit('soft expansion share not found')
+          new='production_==ProductionState::SEVERE_DEFICIT?.62:production_==ProductionState::SOFT_DEFICIT?((!enemy_seen&&o.turn<=250)?.52:.45):((!enemy_seen&&o.turn<=250)?.40:.35)'
+          if old not in s or s.count(old)!=1: raise SystemExit('expansion share anchor mismatch')
           p.write_text(s.replace(old,new,1))
           PY
           git diff --check
@@ -93,22 +93,22 @@ jobs:
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: softhist-${{ matrix.parent.name }}-${{ matrix.opponent }}
+          name: mixhist-${{ matrix.parent.name }}-${{ matrix.opponent }}
           path: /tmp/*-${{ matrix.parent.name }}-*
           retention-days: 14
 
   aggregate:
-    if: ${{ github.head_ref == 'tmp/picker9-soft-expansion-history-trigger' }}
+    if: ${{ github.head_ref == 'tmp/picker9-mix5453-trigger' }}
     needs: history
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/download-artifact@v4
         with:
-          pattern: softhist-*
+          pattern: mixhist-*
           path: /tmp/results
       - name: Aggregate diverse screen
         run: |
-          python - <<'PY' | tee /tmp/soft-history-summary.txt
+          python - <<'PY' | tee /tmp/mix-history-summary.txt
           import json,glob
           opps=['v35-champion-70fresh','v35-defense-fresh','v35-heuristic-rebuild','v35-logistics-recenter','juraj-v3.6-iter1-attack-pass','juraj-v3.6-search-refactor']
           for parent in ('v75','final'):
@@ -125,9 +125,9 @@ jobs:
             tn=tw+td+tl;bn=bw+bd+bl
             print(f'  TOTAL patched={tw}/{td}/{tl} score={(tw+.5*td)/tn:.4f}; parent={bw}/{bd}/{bl} score={(bw+.5*bd)/bn:.4f}; delta={(tw+.5*td)/tn-(bw+.5*bd)/bn:+.4f}')
           PY
-          mkdir -p /tmp/summary && cp /tmp/soft-history-summary.txt /tmp/summary/
+          mkdir -p /tmp/summary && cp /tmp/mix-history-summary.txt /tmp/summary/
       - uses: actions/upload-artifact@v4
         with:
-          name: picker9-soft-expansion-history-summary
+          name: picker9-mix5453-history-summary
           path: /tmp/summary
           retention-days: 14
