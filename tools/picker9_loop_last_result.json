@@ -4,10 +4,10 @@
     "L": 6,
     "W": 9,
     "decision_roundtrip_ms": {
-      "max": 18.68920499998694,
-      "p50": 0.9267209999848092,
-      "p95": 1.0396819999982654,
-      "p99": 1.0501159999876108
+      "max": 14.44993299998032,
+      "p50": 0.8542069999748492,
+      "p95": 0.9550350000040453,
+      "p99": 0.9592640000164465
     },
     "errors": 0,
     "games": 20,
@@ -32,10 +32,10 @@
     "L": 4,
     "W": 7,
     "decision_roundtrip_ms": {
-      "max": 19.120480999959,
-      "p50": 0.9693979999383373,
-      "p95": 1.1066609999943466,
-      "p99": 1.139019999982338
+      "max": 14.862343999993755,
+      "p50": 0.8788580000782531,
+      "p95": 0.9581799999978102,
+      "p99": 0.9750110000368295
     },
     "errors": 0,
     "games": 20,
@@ -55,7 +55,7 @@
     "seed_start": 55720,
     "turns_mean": 939
   },
-  "experiment": "from pathlib import Path\nimport sys\n\np = Path(sys.argv[1])\ns = p.read_text()\nold = \"!enemy_seen?.20:.08\"\nnew = \"(production_==ProductionState::HEALTHY&&!enemy_seen&&o.turn<=50)?.28:(!enemy_seen?.20:.08)\"\nif old not in s:\n    raise SystemExit(\"search-share anchor not found\")\nif s.count(old) != 1:\n    raise SystemExit(f\"search-share anchor count={s.count(old)}\")\np.write_text(s.replace(old, new, 1))\nprint(\"experiment=healthy_precontact_search_share_020_to_028_t50\")\n",
+  "experiment": "from pathlib import Path\nfrom zipfile import ZipFile, ZIP_DEFLATED\nimport sys\n\np = Path(sys.argv[1])\ns = p.read_text()\nold = \"!enemy_seen?.20:.08\"\nnew = \"(production_==ProductionState::HEALTHY&&!enemy_seen&&o.turn<=50)?.28:(!enemy_seen?.20:.08)\"\nif old not in s:\n    raise SystemExit(\"search-share anchor not found\")\nif s.count(old) != 1:\n    raise SystemExit(f\"search-share anchor count={s.count(old)}\")\np.write_text(s.replace(old, new, 1))\n\nout = Path(\"/tmp/random-v75\")\nout.mkdir(parents=True, exist_ok=True)\nzip_path = out / \"picker9-search-t50-submission.zip\"\nwith ZipFile(zip_path, \"w\", ZIP_DEFLATED) as z:\n    for name in (\"main.cpp\", \"core.hpp\", \"build.sh\", \"run.sh\"):\n        src = p.with_name(name)\n        z.write(src, arcname=name)\n\nprint(\"experiment=healthy_precontact_search_share_020_to_028_t50_submission\")\nprint(f\"submission_zip={zip_path}\")\n",
   "production": {
     "100": {
       "delta": -0.3333333333333357,
@@ -108,10 +108,10 @@
     "L": 6,
     "W": 13,
     "decision_roundtrip_ms": {
-      "max": 18.80333500002962,
-      "p50": 0.8899620000022423,
-      "p95": 1.0900529999844366,
-      "p99": 1.1190449999958219
+      "max": 14.421045000005961,
+      "p50": 0.801883999997699,
+      "p95": 0.9728050000035182,
+      "p99": 0.9740360000023429
     },
     "errors": 0,
     "games": 24,
