@@ -1,0 +1,84 @@
+{
+  "cycle": 1,
+  "diagnosis": [
+    "weak early land growth",
+    "too many pass actions"
+  ],
+  "h2h": {
+    "D": 5,
+    "L": 7,
+    "W": 8,
+    "decision_roundtrip_ms": {
+      "max": 18.191384000004973,
+      "p50": 1.0771109999723194,
+      "p95": 1.3009210000234361,
+      "p99": 1.3381560000027548
+    },
+    "errors": 0,
+    "games": 20,
+    "illegal_actions": 0,
+    "maps": 10,
+    "paired_ci95": [
+      0.375,
+      0.675
+    ],
+    "paired_score": 0.525,
+    "returncode": 0,
+    "score": 0.525,
+    "seat_score": {
+      "0": 0.45,
+      "1": 0.6
+    },
+    "seed_end": 146024123,
+    "seed_start": 146024114,
+    "turns_mean": 806.75
+  },
+  "iteration": 8,
+  "loser": "Y",
+  "loss_metrics": {
+    "c1_missing_rate": 0.125,
+    "c2_missing_rate": 0.375,
+    "contact_turn": 99.875,
+    "doom_moves": 4.875,
+    "doom_starts": 3.125,
+    "expansion_actions": 100.125,
+    "land200": 50.375,
+    "land250": 58.875,
+    "land400": 80.16666666666667,
+    "loss_samples": 8,
+    "muster_attack": 0.0,
+    "muster_harvest": 0.0,
+    "muster_windows": 0.0,
+    "no_strategic": 31.375,
+    "passes": 21.25,
+    "picker_aborts": 0.0,
+    "picker_blocked": 0.0,
+    "picker_completions": 0.5,
+    "picker_eff_rejects": 27.125,
+    "picker_mass_rejects": 527.375,
+    "picker_starts": 0.625,
+    "rear_actions": 20.875,
+    "search_actions": 21.0,
+    "threats": 18.125,
+    "turns": 542,
+    "war_actions": 151.75
+  },
+  "mutation": {
+    "attempts": [
+      {
+        "accepted": true,
+        "description": "increase HEALTHY pre-contact expansion share by 1pp through t250",
+        "key": "early_expansion"
+      }
+    ],
+    "description": "increase HEALTHY pre-contact expansion share by 1pp through t250",
+    "key": "early_expansion",
+    "sha": "ac527ff02dd31eaf73bc859a017cb9bc0076e621"
+  },
+  "start": 146024114,
+  "tiebreak": null,
+  "x_sha_after": "e319a8e6f3330542b850678b73b859a703e7bf70",
+  "x_sha_before": "e319a8e6f3330542b850678b73b859a703e7bf70",
+  "y_sha_after": "ac527ff02dd31eaf73bc859a017cb9bc0076e621",
+  "y_sha_before": "52946d9f520d65aa129f0e41b9bf850ccb8310ee"
+}
