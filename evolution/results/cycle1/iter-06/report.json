@@ -1,0 +1,83 @@
+{
+  "cycle": 1,
+  "diagnosis": [
+    "too many pass actions"
+  ],
+  "h2h": {
+    "D": 3,
+    "L": 8,
+    "W": 9,
+    "decision_roundtrip_ms": {
+      "max": 17.321438000010403,
+      "p50": 1.095461000005571,
+      "p95": 1.209564999982149,
+      "p99": 1.2736010000082842
+    },
+    "errors": 0,
+    "games": 20,
+    "illegal_actions": 0,
+    "maps": 10,
+    "paired_ci95": [
+      0.45,
+      0.6
+    ],
+    "paired_score": 0.525,
+    "returncode": 0,
+    "score": 0.525,
+    "seat_score": {
+      "0": 0.45,
+      "1": 0.6
+    },
+    "seed_end": 1181575703,
+    "seed_start": 1181575694,
+    "turns_mean": 777.35
+  },
+  "iteration": 6,
+  "loser": "Y",
+  "loss_metrics": {
+    "c1_missing_rate": 0.0,
+    "c2_missing_rate": 0.1111111111111111,
+    "contact_turn": 116.66666666666667,
+    "doom_moves": 1.3333333333333333,
+    "doom_starts": 1.3333333333333333,
+    "expansion_actions": 132.22222222222223,
+    "land200": 72.66666666666667,
+    "land250": 89.33333333333333,
+    "land400": 114.5,
+    "loss_samples": 9,
+    "muster_attack": 0.0,
+    "muster_harvest": 0.0,
+    "muster_windows": 0.0,
+    "no_strategic": 29.444444444444443,
+    "passes": 17.22222222222222,
+    "picker_aborts": 0.1111111111111111,
+    "picker_blocked": 0.5555555555555556,
+    "picker_completions": 0.7777777777777778,
+    "picker_eff_rejects": 144.11111111111111,
+    "picker_mass_rejects": 610.5555555555555,
+    "picker_starts": 1.0,
+    "rear_actions": 30.555555555555557,
+    "search_actions": 25.77777777777778,
+    "threats": 13.11111111111111,
+    "turns": 713.8888888888889,
+    "war_actions": 186.33333333333334
+  },
+  "mutation": {
+    "attempts": [
+      {
+        "accepted": true,
+        "description": "start known-general late muster 20 turns earlier",
+        "key": "muster_start_earlier"
+      }
+    ],
+    "description": "start known-general late muster 20 turns earlier",
+    "key": "muster_start_earlier",
+    "sha": "52946d9f520d65aa129f0e41b9bf850ccb8310ee"
+  },
+  "start": 1181575694,
+  "tiebreak": null,
+  "x_sha_after": "e8ea98b7c3174da174806cad79bd1b22a0f635cc",
+  "x_sha_before": "e8ea98b7c3174da174806cad79bd1b22a0f635cc",
+  "y_sha_after": "52946d9f520d65aa129f0e41b9bf850ccb8310ee",
+  "y_sha_before": "d6992fb620c9bae419f8c9a895ea5e7f17ead893"
+}
