@@ -1,0 +1,84 @@
+{
+  "cycle": 1,
+  "diagnosis": [
+    "picker rarely starts",
+    "too many pass actions"
+  ],
+  "h2h": {
+    "D": 4,
+    "L": 9,
+    "W": 7,
+    "decision_roundtrip_ms": {
+      "max": 17.19429700000319,
+      "p50": 1.030716000002485,
+      "p95": 1.2090990000501733,
+      "p99": 1.2379529999861916
+    },
+    "errors": 0,
+    "games": 20,
+    "illegal_actions": 0,
+    "maps": 10,
+    "paired_ci95": [
+      0.3,
+      0.6
+    ],
+    "paired_score": 0.45,
+    "returncode": 0,
+    "score": 0.45,
+    "seat_score": {
+      "0": 0.55,
+      "1": 0.35
+    },
+    "seed_end": 1650870820,
+    "seed_start": 1650870811,
+    "turns_mean": 871.55
+  },
+  "iteration": 22,
+  "loser": "X",
+  "loss_metrics": {
+    "c1_missing_rate": 0.1111111111111111,
+    "c2_missing_rate": 0.2222222222222222,
+    "contact_turn": 145.33333333333334,
+    "doom_moves": 7.666666666666667,
+    "doom_starts": 4.555555555555555,
+    "expansion_actions": 109.88888888888889,
+    "land200": 60.55555555555556,
+    "land250": 65.77777777777777,
+    "land400": 99.375,
+    "loss_samples": 9,
+    "muster_attack": 0.0,
+    "muster_harvest": 0.0,
+    "muster_windows": 0.0,
+    "no_strategic": 36.666666666666664,
+    "passes": 27.11111111111111,
+    "picker_aborts": 0.0,
+    "picker_blocked": 0.0,
+    "picker_completions": 0.1111111111111111,
+    "picker_eff_rejects": 27.77777777777778,
+    "picker_mass_rejects": 950.3333333333334,
+    "picker_starts": 0.1111111111111111,
+    "rear_actions": 42.77777777777778,
+    "search_actions": 26.555555555555557,
+    "threats": 25.666666666666668,
+    "turns": 734.4444444444445,
+    "war_actions": 219.44444444444446
+  },
+  "mutation": {
+    "attempts": [
+      {
+        "accepted": true,
+        "description": "increase HEALTHY pre-contact expansion share by 1pp through t250",
+        "key": "early_expansion"
+      }
+    ],
+    "description": "increase HEALTHY pre-contact expansion share by 1pp through t250",
+    "key": "early_expansion",
+    "sha": "ec13149bd966c17abfb7bd50292dea1fedfaf232"
+  },
+  "start": 1650870811,
+  "tiebreak": null,
+  "x_sha_after": "ec13149bd966c17abfb7bd50292dea1fedfaf232",
+  "x_sha_before": "53e414eb371d3af4c2a1db0387f2d944e7485964",
+  "y_sha_after": "c72412aec5d9e11ef7b7431fb1ef00e2fd3c0788",
+  "y_sha_before": "c72412aec5d9e11ef7b7431fb1ef00e2fd3c0788"
+}
