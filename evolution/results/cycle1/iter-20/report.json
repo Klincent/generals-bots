@@ -1,0 +1,83 @@
+{
+  "cycle": 1,
+  "diagnosis": [
+    "too many pass actions"
+  ],
+  "h2h": {
+    "D": 0,
+    "L": 9,
+    "W": 11,
+    "decision_roundtrip_ms": {
+      "max": 18.07110999999395,
+      "p50": 1.0918530000196824,
+      "p95": 1.257968000004439,
+      "p99": 1.269444999991265
+    },
+    "errors": 0,
+    "games": 20,
+    "illegal_actions": 0,
+    "maps": 10,
+    "paired_ci95": [
+      0.4,
+      0.7
+    ],
+    "paired_score": 0.55,
+    "returncode": 0,
+    "score": 0.55,
+    "seat_score": {
+      "0": 0.6,
+      "1": 0.5
+    },
+    "seed_end": 1708027618,
+    "seed_start": 1708027609,
+    "turns_mean": 624.75
+  },
+  "iteration": 20,
+  "loser": "Y",
+  "loss_metrics": {
+    "c1_missing_rate": 0.09090909090909091,
+    "c2_missing_rate": 0.18181818181818182,
+    "contact_turn": 103.27272727272727,
+    "doom_moves": 2.8181818181818183,
+    "doom_starts": 2.0,
+    "expansion_actions": 119.54545454545455,
+    "land200": 67.9,
+    "land250": 80.4,
+    "land400": 107.55555555555556,
+    "loss_samples": 11,
+    "muster_attack": 0.0,
+    "muster_harvest": 0.0,
+    "muster_windows": 0.0,
+    "no_strategic": 21.09090909090909,
+    "passes": 14.454545454545455,
+    "picker_aborts": 0.2727272727272727,
+    "picker_blocked": 0.0,
+    "picker_completions": 1.1818181818181819,
+    "picker_eff_rejects": 158.63636363636363,
+    "picker_mass_rejects": 513.0,
+    "picker_starts": 1.4545454545454546,
+    "rear_actions": 26.363636363636363,
+    "search_actions": 27.727272727272727,
+    "threats": 10.454545454545455,
+    "turns": 578.3636363636364,
+    "war_actions": 130.9090909090909
+  },
+  "mutation": {
+    "attempts": [
+      {
+        "accepted": true,
+        "description": "lower picker minimum efficiency by 0.10",
+        "key": "picker_eff_lower"
+      }
+    ],
+    "description": "lower picker minimum efficiency by 0.10",
+    "key": "picker_eff_lower",
+    "sha": "c72412aec5d9e11ef7b7431fb1ef00e2fd3c0788"
+  },
+  "start": 1708027609,
+  "tiebreak": null,
+  "x_sha_after": "a1a1c375d1a4cd4f69b993122f403e12892abd6d",
+  "x_sha_before": "a1a1c375d1a4cd4f69b993122f403e12892abd6d",
+  "y_sha_after": "c72412aec5d9e11ef7b7431fb1ef00e2fd3c0788",
+  "y_sha_before": "de7ac3c6a7d5b2dd08396c86a4c55290a637d118"
+}
