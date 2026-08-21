@@ -1,0 +1,83 @@
+{
+  "cycle": 1,
+  "diagnosis": [
+    "no single dominant signal; apply conservative concentration/tempo tuning"
+  ],
+  "h2h": {
+    "D": 4,
+    "L": 9,
+    "W": 7,
+    "decision_roundtrip_ms": {
+      "max": 12.660516000011057,
+      "p50": 0.7649719999989202,
+      "p95": 0.8462319999864576,
+      "p99": 0.8582700000090426
+    },
+    "errors": 0,
+    "games": 20,
+    "illegal_actions": 0,
+    "maps": 10,
+    "paired_ci95": [
+      0.3,
+      0.6
+    ],
+    "paired_score": 0.45,
+    "returncode": 0,
+    "score": 0.45,
+    "seat_score": {
+      "0": 0.4,
+      "1": 0.5
+    },
+    "seed_end": 1490227160,
+    "seed_start": 1490227151,
+    "turns_mean": 844.8
+  },
+  "iteration": 16,
+  "loser": "X",
+  "loss_metrics": {
+    "c1_missing_rate": 0.1111111111111111,
+    "c2_missing_rate": 0.3333333333333333,
+    "contact_turn": 100.77777777777777,
+    "doom_moves": 1.2222222222222223,
+    "doom_starts": 1.5555555555555556,
+    "expansion_actions": 121.0,
+    "land200": 63.44444444444444,
+    "land250": 75.44444444444444,
+    "land400": 109,
+    "loss_samples": 9,
+    "muster_attack": 0.0,
+    "muster_harvest": 0.0,
+    "muster_windows": 0.0,
+    "no_strategic": 19.666666666666668,
+    "passes": 6.666666666666667,
+    "picker_aborts": 0.1111111111111111,
+    "picker_blocked": 0.0,
+    "picker_completions": 1.0,
+    "picker_eff_rejects": 128.77777777777777,
+    "picker_mass_rejects": 753.2222222222222,
+    "picker_starts": 1.1111111111111112,
+    "rear_actions": 37.22222222222222,
+    "search_actions": 24.88888888888889,
+    "threats": 12.555555555555555,
+    "turns": 743.1111111111111,
+    "war_actions": 223.55555555555554
+  },
+  "mutation": {
+    "attempts": [
+      {
+        "accepted": true,
+        "description": "harvest one-unit-smaller backline stacks",
+        "key": "muster_threshold_lower"
+      }
+    ],
+    "description": "harvest one-unit-smaller backline stacks",
+    "key": "muster_threshold_lower",
+    "sha": "a1a1c375d1a4cd4f69b993122f403e12892abd6d"
+  },
+  "start": 1490227151,
+  "tiebreak": null,
+  "x_sha_after": "a1a1c375d1a4cd4f69b993122f403e12892abd6d",
+  "x_sha_before": "f9572c8da525b7ed9513ff27d603b96aebbc58a1",
+  "y_sha_after": "b43d6b52a732084ff2599f5d4f9dac143998e3e5",
+  "y_sha_before": "b43d6b52a732084ff2599f5d4f9dac143998e3e5"
+}
