@@ -1,41 +1,41 @@
 {
   "defense_candidate": {
-    "D": 5,
-    "L": 6,
-    "W": 9,
+    "D": 6,
+    "L": 3,
+    "W": 11,
     "decision_roundtrip_ms": {
-      "max": 17.861875999983567,
-      "p50": 0.8436339999775555,
-      "p95": 0.9097280000105457,
-      "p99": 0.9377220000033049
+      "max": 16.526177999992342,
+      "p50": 0.8230700000240176,
+      "p95": 0.8866790000183755,
+      "p99": 0.947179000036158
     },
     "errors": 0,
     "games": 20,
     "illegal_actions": 0,
     "maps": 10,
     "paired_ci95": [
-      0.45,
-      0.725
+      0.6,
+      0.825
     ],
-    "paired_score": 0.575,
-    "score": 0.575,
+    "paired_score": 0.7,
+    "score": 0.7,
     "seat_score": {
-      "0": 0.5,
-      "1": 0.65
+      "0": 0.6,
+      "1": 0.8
     },
     "seed_end": 55729,
     "seed_start": 55720,
-    "turns_mean": 876.65
+    "turns_mean": 862.2
   },
   "defense_parent": {
     "D": 9,
     "L": 4,
     "W": 7,
     "decision_roundtrip_ms": {
-      "max": 15.063715999986016,
-      "p50": 0.835295000001679,
-      "p95": 0.9245990000863458,
-      "p99": 0.9536869999919872
+      "max": 14.969742000005226,
+      "p50": 0.8482800000138013,
+      "p95": 0.9040109999887136,
+      "p99": 0.9162240000364363
     },
     "errors": 0,
     "games": 20,
@@ -55,80 +55,80 @@
     "seed_start": 55720,
     "turns_mean": 939
   },
-  "experiment": "from pathlib import Path\nimport sys\n\np = Path(sys.argv[1])\ns = p.read_text()\nold = \"production_==ProductionState::SEVERE_DEFICIT?.62:production_==ProductionState::SOFT_DEFICIT?.45:.35\"\nnew = \"production_==ProductionState::SEVERE_DEFICIT?.62:production_==ProductionState::SOFT_DEFICIT?((!enemy_seen&&o.turn<=250)?.52:.45):((!enemy_seen&&o.turn<=250)?.40:.35)\"\nif old not in s:\n    raise SystemExit(\"expansion-share anchor not found\")\nif s.count(old) != 1:\n    raise SystemExit(f\"expansion-share anchor count={s.count(old)}\")\np.write_text(s.replace(old, new, 1))\nprint(\"experiment=healthy040_plus_soft052_precontact_t250\")\n",
+  "experiment": "from pathlib import Path\nimport sys\n\np = Path(sys.argv[1])\ns = p.read_text()\nold = \"!enemy_seen?.20:.08\"\nnew = \"(production_==ProductionState::HEALTHY&&!enemy_seen&&o.turn<=100)?.28:(!enemy_seen?.20:.08)\"\nif old not in s:\n    raise SystemExit(\"search-share anchor not found\")\nif s.count(old) != 1:\n    raise SystemExit(f\"search-share anchor count={s.count(old)}\")\np.write_text(s.replace(old, new, 1))\nprint(\"experiment=healthy_precontact_search_share_020_to_028_t100\")\n",
   "production": {
     "100": {
-      "delta": -0.9583333333333357,
-      "parent": 38.333333333333336,
-      "patched": 37.375
+      "delta": -0.25,
+      "parent": 38.166666666666664,
+      "patched": 37.916666666666664
     },
     "150": {
-      "delta": 1.2083333333333357,
-      "parent": 55.625,
-      "patched": 56.833333333333336
+      "delta": -1.4583333333333286,
+      "parent": 58.416666666666664,
+      "patched": 56.958333333333336
     },
     "200": {
-      "delta": -2.0416666666666714,
-      "parent": 69.125,
-      "patched": 67.08333333333333
+      "delta": 3.333333333333343,
+      "parent": 64.95833333333333,
+      "patched": 68.29166666666667
     },
     "250": {
-      "delta": -2.125,
-      "parent": 80.25,
-      "patched": 78.125
+      "delta": 3.333333333333343,
+      "parent": 77.58333333333333,
+      "patched": 80.91666666666667
     },
     "300": {
-      "delta": -3.375,
-      "parent": 90.08333333333333,
-      "patched": 86.70833333333333
+      "delta": 5.666666666666671,
+      "parent": 85.625,
+      "patched": 91.29166666666667
     },
     "400": {
-      "delta": 5.458333333333329,
-      "parent": 102.54166666666667,
-      "patched": 108
+      "delta": 8.291666666666657,
+      "parent": 99.79166666666667,
+      "patched": 108.08333333333333
     },
     "50": {
-      "delta": 0.20833333333333215,
+      "delta": 0.625,
       "parent": 17.666666666666668,
-      "patched": 17.875
+      "patched": 18.291666666666668
     },
     "600": {
-      "delta": -3.526315789473685,
-      "parent": 127.52631578947368,
-      "patched": 124
+      "delta": 12.15789473684211,
+      "parent": 114.36842105263158,
+      "patched": 126.52631578947368
     },
     "800": {
-      "delta": 10.666666666666657,
-      "parent": 135.06666666666666,
-      "patched": 145.73333333333332
+      "delta": 12.59999999999998,
+      "parent": 125.13333333333334,
+      "patched": 137.73333333333332
     }
   },
   "random": {
-    "D": 8,
-    "L": 7,
-    "W": 9,
+    "D": 7,
+    "L": 11,
+    "W": 6,
     "decision_roundtrip_ms": {
-      "max": 16.315929000001006,
-      "p50": 0.7710980000013024,
-      "p95": 0.8864549999998417,
-      "p99": 0.9055740000007972
+      "max": 14.98135200000661,
+      "p50": 0.7554150000004256,
+      "p95": 0.9002310000028046,
+      "p99": 0.9020819999818741
     },
     "errors": 0,
     "games": 24,
     "illegal_actions": 0,
     "maps": 12,
     "paired_ci95": [
-      0.4375,
-      0.6666666666666666
+      0.25,
+      0.5208333333333334
     ],
-    "paired_score": 0.5416666666666666,
-    "score": 0.5416666666666666,
+    "paired_score": 0.3958333333333333,
+    "score": 0.3958333333333333,
     "seat_score": {
-      "0": 0.7083333333333334,
-      "1": 0.375
+      "0": 0.5,
+      "1": 0.2916666666666667
     },
     "seed_end": 55711,
     "seed_start": 55700,
-    "turns_mean": 902.5
+    "turns_mean": 888.125
   }
 }
