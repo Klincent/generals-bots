@@ -1,41 +1,41 @@
 {
   "defense_candidate": {
     "D": 5,
-    "L": 6,
-    "W": 9,
+    "L": 5,
+    "W": 10,
     "decision_roundtrip_ms": {
-      "max": 19.26016999999547,
-      "p50": 1.055972000017391,
-      "p95": 1.1646639999867148,
-      "p99": 1.165516000014577
+      "max": 18.075943999974697,
+      "p50": 0.8783709999988787,
+      "p95": 1.0144880000098055,
+      "p99": 1.0643479999998817
     },
     "errors": 0,
     "games": 20,
     "illegal_actions": 0,
     "maps": 10,
     "paired_ci95": [
-      0.45,
-      0.7
+      0.525,
+      0.725
     ],
-    "paired_score": 0.575,
-    "score": 0.575,
+    "paired_score": 0.625,
+    "score": 0.625,
     "seat_score": {
-      "0": 0.65,
-      "1": 0.5
+      "0": 0.5,
+      "1": 0.75
     },
     "seed_end": 55729,
     "seed_start": 55720,
-    "turns_mean": 894.3
+    "turns_mean": 936.3
   },
   "defense_parent": {
     "D": 9,
     "L": 4,
     "W": 7,
     "decision_roundtrip_ms": {
-      "max": 17.10656599993854,
-      "p50": 1.0727740000220365,
-      "p95": 1.1734910000313903,
-      "p99": 1.2143970000124682
+      "max": 18.267658000013398,
+      "p50": 0.96139899994796,
+      "p95": 1.0678649999817935,
+      "p99": 1.0773479999670599
     },
     "errors": 0,
     "games": 20,
@@ -55,80 +55,80 @@
     "seed_start": 55720,
     "turns_mean": 939
   },
-  "experiment": "from pathlib import Path\nfrom zipfile import ZipFile, ZIP_DEFLATED\nimport shutil\nimport subprocess\nimport sys\n\np = Path(sys.argv[1])\ns = p.read_text()\nold = \"!enemy_seen?.20:.08\"\nnew = \"(production_==ProductionState::HEALTHY&&!enemy_seen&&o.turn<=50)?.28:(!enemy_seen?.20:.08)\"\nif old not in s:\n    raise SystemExit(\"search-share anchor not found\")\nif s.count(old) != 1:\n    raise SystemExit(f\"search-share anchor count={s.count(old)}\")\np.write_text(s.replace(old, new, 1))\n\n# Also keep the ZIP inside the normal loop artifact.\nout = Path(\"/tmp/random-v75\")\nout.mkdir(parents=True, exist_ok=True)\nartifact_zip = out / \"picker9-search-t50-submission.zip\"\nwith ZipFile(artifact_zip, \"w\", ZIP_DEFLATED) as z:\n    for name in (\"main.cpp\", \"core.hpp\", \"build.sh\", \"run.sh\"):\n        z.write(p.with_name(name), arcname=name)\n\n# Materialize the exact same tested candidate on the permanent submission branch.\nbranch = \"submission/picker9-search-t50-20260821\"\nsubdir = Path(\"/tmp/picker9-submission-branch\")\nif subdir.exists():\n    shutil.rmtree(subdir)\nsubprocess.run([\"git\", \"fetch\", \"origin\", branch], check=True)\nsubprocess.run([\"git\", \"worktree\", \"add\", \"-B\", branch, str(subdir), f\"origin/{branch}\"], check=True)\nagent_dir = subdir / \"competition/agents/juraj_v35_cpp\"\nshutil.copy2(p, agent_dir / \"main.cpp\")\nbranch_zip = subdir / \"picker9-search-t50-submission.zip\"\nwith ZipFile(branch_zip, \"w\", ZIP_DEFLATED) as z:\n    for name in (\"main.cpp\", \"core.hpp\", \"build.sh\", \"run.sh\"):\n        z.write(agent_dir / name, arcname=name)\nsubprocess.run([\"git\", \"-C\", str(subdir), \"config\", \"user.name\", \"ChatGPT\"], check=True)\nsubprocess.run([\"git\", \"-C\", str(subdir), \"config\", \"user.email\", \"actions@users.noreply.github.com\"], check=True)\nsubprocess.run([\"git\", \"-C\", str(subdir), \"add\", \"competition/agents/juraj_v35_cpp/main.cpp\", \"picker9-search-t50-submission.zip\"], check=True)\nchanged = subprocess.run([\"git\", \"-C\", str(subdir), \"diff\", \"--cached\", \"--quiet\"]).returncode != 0\nif changed:\n    subprocess.run([\"git\", \"-C\", str(subdir), \"commit\", \"-m\", \"submission: picker9 healthy precontact search boost t50\"], check=True)\n    subprocess.run([\"git\", \"-C\", str(subdir), \"push\", \"origin\", f\"HEAD:{branch}\"], check=True)\n\nprint(\"experiment=healthy_precontact_search_share_020_to_028_t50_submission_materialized\")\nprint(f\"submission_branch={branch}\")\nprint(f\"submission_zip={artifact_zip}\")\n",
+  "experiment": "from pathlib import Path\nimport sys\n\np = Path(sys.argv[1])\ns = p.read_text()\nold = \"!enemy_seen?.20:.08\"\nnew = \"(production_==ProductionState::HEALTHY&&!enemy_seen&&o.turn<=50)?.32:(!enemy_seen?.20:.08)\"\nif old not in s:\n    raise SystemExit(\"search-share anchor not found\")\nif s.count(old) != 1:\n    raise SystemExit(f\"search-share anchor count={s.count(old)}\")\np.write_text(s.replace(old, new, 1))\nprint(\"experiment=healthy_precontact_search_share_020_to_032_t50\")\n",
   "production": {
     "100": {
-      "delta": -0.3333333333333357,
-      "parent": 37.583333333333336,
-      "patched": 37.25
+      "delta": -0.5416666666666643,
+      "parent": 38.416666666666664,
+      "patched": 37.875
     },
     "150": {
-      "delta": 0.125,
-      "parent": 55.708333333333336,
-      "patched": 55.833333333333336
+      "delta": -3.375,
+      "parent": 57.875,
+      "patched": 54.5
     },
     "200": {
-      "delta": 2.8333333333333286,
-      "parent": 65.54166666666667,
-      "patched": 68.375
+      "delta": -0.7083333333333286,
+      "parent": 66.875,
+      "patched": 66.16666666666667
     },
     "250": {
-      "delta": 2.208333333333343,
-      "parent": 78.95833333333333,
-      "patched": 81.16666666666667
+      "delta": -5.666666666666657,
+      "parent": 80.70833333333333,
+      "patched": 75.04166666666667
     },
     "300": {
-      "delta": 0.4166666666666714,
-      "parent": 88.58333333333333,
-      "patched": 89
+      "delta": -1.6666666666666714,
+      "parent": 85.91666666666667,
+      "patched": 84.25
     },
     "400": {
-      "delta": 6.045454545454547,
-      "parent": 103.63636363636364,
-      "patched": 109.68181818181819
+      "delta": 2.8636363636363598,
+      "parent": 98.04545454545455,
+      "patched": 100.9090909090909
     },
     "50": {
-      "delta": 0.625,
+      "delta": 0.5,
       "parent": 17.666666666666668,
-      "patched": 18.291666666666668
+      "patched": 18.166666666666668
     },
     "600": {
-      "delta": 1.3529411764706083,
-      "parent": 128.35294117647058,
-      "patched": 129.7058823529412
+      "delta": 2.2631578947368496,
+      "parent": 122.26315789473684,
+      "patched": 124.52631578947368
     },
     "800": {
-      "delta": 5.428571428571416,
-      "parent": 137.07142857142858,
-      "patched": 142.5
+      "delta": 7.15384615384616,
+      "parent": 130.76923076923077,
+      "patched": 137.92307692307693
     }
   },
   "random": {
-    "D": 5,
-    "L": 6,
-    "W": 13,
+    "D": 10,
+    "L": 9,
+    "W": 5,
     "decision_roundtrip_ms": {
-      "max": 17.761583000037717,
-      "p50": 1.0072599999944032,
-      "p95": 1.1978059999933066,
-      "p99": 1.2051690000021154
+      "max": 18.392966000021715,
+      "p50": 0.8690779999938059,
+      "p95": 0.9901159999969877,
+      "p99": 1.0193279999839433
     },
     "errors": 0,
     "games": 24,
     "illegal_actions": 0,
     "maps": 12,
     "paired_ci95": [
-      0.4791666666666667,
-      0.8125
+      0.25,
+      0.5833333333333334
     ],
-    "paired_score": 0.6458333333333334,
-    "score": 0.6458333333333334,
+    "paired_score": 0.4166666666666667,
+    "score": 0.4166666666666667,
     "seat_score": {
-      "0": 0.8333333333333334,
-      "1": 0.4583333333333333
+      "0": 0.5,
+      "1": 0.3333333333333333
     },
     "seed_end": 55711,
     "seed_start": 55700,
-    "turns_mean": 829.4166666666666
+    "turns_mean": 892.2916666666666
   }
 }
