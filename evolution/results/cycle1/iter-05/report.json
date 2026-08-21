@@ -1,0 +1,83 @@
+{
+  "cycle": 1,
+  "diagnosis": [
+    "picker rarely starts"
+  ],
+  "h2h": {
+    "D": 6,
+    "L": 5,
+    "W": 9,
+    "decision_roundtrip_ms": {
+      "max": 17.418323000001124,
+      "p50": 1.0446979999869654,
+      "p95": 1.129634999983864,
+      "p99": 1.196723999996152
+    },
+    "errors": 0,
+    "games": 20,
+    "illegal_actions": 0,
+    "maps": 10,
+    "paired_ci95": [
+      0.45,
+      0.75
+    ],
+    "paired_score": 0.6,
+    "returncode": 0,
+    "score": 0.6,
+    "seat_score": {
+      "0": 0.65,
+      "1": 0.55
+    },
+    "seed_end": 1923412871,
+    "seed_start": 1923412862,
+    "turns_mean": 910.1
+  },
+  "iteration": 5,
+  "loser": "Y",
+  "loss_metrics": {
+    "c1_missing_rate": 0.0,
+    "c2_missing_rate": 0.4444444444444444,
+    "contact_turn": 87.66666666666667,
+    "doom_moves": 2.5555555555555554,
+    "doom_starts": 2.3333333333333335,
+    "expansion_actions": 110.77777777777777,
+    "land200": 61.666666666666664,
+    "land250": 73.55555555555556,
+    "land400": 88.85714285714286,
+    "loss_samples": 9,
+    "muster_attack": 0.0,
+    "muster_harvest": 0.0,
+    "muster_windows": 0.0,
+    "no_strategic": 20.22222222222222,
+    "passes": 7.0,
+    "picker_aborts": 0.0,
+    "picker_blocked": 0.0,
+    "picker_completions": 0.3333333333333333,
+    "picker_eff_rejects": 59.666666666666664,
+    "picker_mass_rejects": 687.7777777777778,
+    "picker_starts": 0.3333333333333333,
+    "rear_actions": 24.77777777777778,
+    "search_actions": 19.77777777777778,
+    "threats": 10.555555555555555,
+    "turns": 718.5555555555555,
+    "war_actions": 255.66666666666666
+  },
+  "mutation": {
+    "attempts": [
+      {
+        "accepted": true,
+        "description": "lower picker start mass threshold by 2",
+        "key": "picker_mass_lower"
+      }
+    ],
+    "description": "lower picker start mass threshold by 2",
+    "key": "picker_mass_lower",
+    "sha": "d6992fb620c9bae419f8c9a895ea5e7f17ead893"
+  },
+  "start": 1923412862,
+  "tiebreak": null,
+  "x_sha_after": "e8ea98b7c3174da174806cad79bd1b22a0f635cc",
+  "x_sha_before": "e8ea98b7c3174da174806cad79bd1b22a0f635cc",
+  "y_sha_after": "d6992fb620c9bae419f8c9a895ea5e7f17ead893",
+  "y_sha_before": "f9fed07c76271303af628fd2f039904619eb605b"
+}
