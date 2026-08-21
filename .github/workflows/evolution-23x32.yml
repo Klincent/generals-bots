@@ -1,0 +1,122 @@
+name: evolution-23x32
+
+on:
+  push:
+    branches: [evolution/control]
+    paths:
+      - 'evolution/state.json'
+      - 'tools/evolution_orchestrator.py'
+      - '.github/workflows/evolution-23x32.yml'
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: evolution-23x32
+  cancel-in-progress: false
+
+jobs:
+  evolve-one-iteration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 350
+    env:
+      SDL_VIDEODRIVER: dummy
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: evolution/control
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install competition engine
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install numpy jax jaxlib
+          python -m pip install -e . --no-deps
+
+      - name: Syntax check orchestrator
+        run: python -m py_compile tools/evolution_orchestrator.py
+
+      - name: Execute exactly one autonomous iteration
+        id: evolve
+        shell: bash
+        run: |
+          set +e
+          python tools/evolution_orchestrator.py 2>&1 | tee /tmp/evolution-run.log
+          rc=${PIPESTATUS[0]}
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          tail -n 200 /tmp/evolution-run.log > /tmp/evolution-tail.log
+          exit 0
+
+      - name: Record failure for automatic retry
+        if: steps.evolve.outputs.rc != '0'
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,time
+          from pathlib import Path
+          p=Path('evolution/state.json')
+          s=json.loads(p.read_text())
+          s['retry_count']=int(s.get('retry_count',0))+1
+          s['last_error']=Path('/tmp/evolution-tail.log').read_text()[-12000:]
+          s['recovery_nonce']=time.time_ns()
+          p.write_text(json.dumps(s,indent=2,sort_keys=True)+'\n')
+          Path('evolution/last-error.txt').write_text(s['last_error']+'\n')
+          PY
+
+      - name: Compact progress summary
+        if: always()
+        shell: bash
+        run: |
+          cat evolution/state.json
+          echo '--- recent reports ---'
+          find evolution/results -name report.json -type f 2>/dev/null | sort | tail -5 | while read f; do echo "### $f"; cat "$f"; done
+
+      - name: Upload complete per-game evidence for this run
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evolution-evidence-${{ github.run_number }}
+          path: |
+            evolution/results/
+            /tmp/evolution-tail.log
+          if-no-files-found: warn
+          retention-days: 90
+
+      - name: Upload final submission when complete
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: generals-evolution-final-${{ github.run_number }}
+          path: evolution/final/
+          if-no-files-found: ignore
+          retention-days: 90
+
+      - name: Persist state and compact reports, chaining the next iteration
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add evolution/state.json
+          test ! -f evolution/last-error.txt || git add evolution/last-error.txt
+          while IFS= read -r f; do git add "$f"; done < <(find evolution/results -name report.json -type f 2>/dev/null | sort)
+          test ! -f evolution/final/VALIDATION.json || git add evolution/final/VALIDATION.json
+          test ! -f evolution/final/VALIDATION.txt || git add evolution/final/VALIDATION.txt
+          test ! -f evolution/final/generals_final_submission.sha256 || git add evolution/final/generals_final_submission.sha256
+          if ! git diff --cached --quiet; then
+            git commit -m "evolution: persist autonomous progress"
+            git push origin HEAD:evolution/control
+          fi
+
+      - name: Fail visibly only after state was persisted for retry
+        if: steps.evolve.outputs.rc != '0'
+        run: exit 1
