@@ -1,41 +1,41 @@
 {
   "defense_candidate": {
-    "D": 4,
-    "L": 6,
+    "D": 6,
+    "L": 4,
     "W": 10,
     "decision_roundtrip_ms": {
-      "max": 18.40190600000824,
-      "p50": 1.120501000002605,
-      "p95": 1.219800999990639,
-      "p99": 1.2724800000114556
+      "max": 18.128424999986237,
+      "p50": 1.113788999987264,
+      "p95": 1.1889689999975417,
+      "p99": 1.2377190000165683
     },
     "errors": 0,
     "games": 20,
     "illegal_actions": 0,
     "maps": 10,
     "paired_ci95": [
-      0.45,
-      0.775
+      0.5,
+      0.825
     ],
-    "paired_score": 0.6,
-    "score": 0.6,
+    "paired_score": 0.65,
+    "score": 0.65,
     "seat_score": {
-      "0": 0.6,
+      "0": 0.7,
       "1": 0.6
     },
     "seed_end": 55729,
     "seed_start": 55720,
-    "turns_mean": 812.9
+    "turns_mean": 828.05
   },
   "defense_parent": {
     "D": 5,
     "L": 5,
     "W": 10,
     "decision_roundtrip_ms": {
-      "max": 17.962377999992896,
-      "p50": 1.1196189999509443,
-      "p95": 1.2242170000718033,
-      "p99": 1.264216999970813
+      "max": 17.95011199999408,
+      "p50": 1.1131870001008792,
+      "p95": 1.2498229999664545,
+      "p99": 1.2646610000501823
     },
     "errors": 0,
     "games": 20,
@@ -55,7 +55,7 @@
     "seed_start": 55720,
     "turns_mean": 889.8
   },
-  "experiment": "from pathlib import Path\nimport subprocess\nimport sys\n\nFINAL = \"2260b6f19d51a14d7c68770677f22d04dfd88022\"\nREL = \"competition/agents/juraj_v35_cpp/main.cpp\"\n\np = Path(sys.argv[1])\nfinal_src = subprocess.check_output([\"git\", \"show\", f\"{FINAL}:{REL}\"], text=True)\nold = \"!enemy_seen?.20:.08\"\nnew = \"(production_==ProductionState::HEALTHY&&!enemy_seen&&o.turn<=50)?.29:(!enemy_seen?.20:.08)\"\nif final_src.count(old) != 1:\n    raise SystemExit(f\"final search-share anchor count={final_src.count(old)}\")\n\n# Candidate: final 2260b6f + exactly one gameplay change.\np.write_text(final_src.replace(old, new, 1))\n\n# Baseline wrapper built by picker9-loop points at /tmp/parent. Replace only its\n# ephemeral source with unmodified final so random screen is final+patch vs final.\nparent = Path(\"/tmp/parent\") / REL\nif not parent.exists():\n    raise SystemExit(\"ephemeral /tmp/parent source missing\")\nparent.write_text(final_src)\n\nprint(\"experiment=final_2260b6f_healthy_precontact_search_share_020_to_029_t50\")\n",
+  "experiment": "from pathlib import Path\nimport re\nimport subprocess\nimport sys\n\nFINAL = \"2260b6f19d51a14d7c68770677f22d04dfd88022\"\nREL = \"competition/agents/juraj_v35_cpp/main.cpp\"\n\np = Path(sys.argv[1])\nfinal_src = subprocess.check_output([\"git\", \"show\", f\"{FINAL}:{REL}\"], text=True)\ns = final_src\n\n# Keep the best completed small-loop search-share candidate as the base.\nold = \"!enemy_seen?.20:.08\"\nnew = \"(production_==ProductionState::HEALTHY&&!enemy_seen&&o.turn<=50)?.29:(!enemy_seen?.20:.08)\"\nif s.count(old) != 1:\n    raise SystemExit(f\"final search-share anchor count={s.count(old)}\")\ns = s.replace(old, new, 1)\n\n# Picker mitigation 1: late_muster must not hard-disable starting a new edge picker.\nold = \"if(picker_enabled_&&!picker_.active&&!immediate&&general_>=0&&!late_muster){\"\nnew = \"if(picker_enabled_&&!picker_.active&&!immediate&&general_>=0){\"\nif s.count(old) != 1:\n    raise SystemExit(f\"late-muster picker gate anchor count={s.count(old)}\")\ns = s.replace(old, new, 1)\n\n# Picker mitigation 2: after t300, a genuinely useful late harvest may start even\n# when territorial growth has naturally flattened.\nold = \"else if(!growing)++picker_reject_growth_;\"\nnew = \"else if(!growing&&!(o.turn>=300&&best_mass>=std::max(24,edge_picker_threshold_+8)))++picker_reject_growth_;\"\nif s.count(old) != 1:\n    raise SystemExit(f\"growth gate anchor count={s.count(old)}\")\ns = s.replace(old, new, 1)\n\n# Picker mitigation 3: evaluate every contiguous safe segment of an irrelevant\n# wall, rather than only the segment directly connected to the general's wall\n# projection. Mountains / unsafe cells may split a wall; the picker sweeps the\n# chosen segment toward the nearest exit and then returns through owned interior.\npattern = re.compile(\n    r\"for\\(int wall=0;wall<4;\\+\\+wall\\)if\\(wall_irrelevant\\(wall,picker_sink\\)\\)\\{.*?\\}\\}\\n   if\\(best_start>=0\\)\\{\",\n    re.S,\n)\nreplacement = r'''for(int wall=0;wall<4;++wall)if(wall_irrelevant(wall,picker_sink)){\n    int proj=(wall==0||wall==2)?general_%w_:general_/w_,limit=(wall==0||wall==2)?w_:h_;\n    for(int cc=0;cc<limit;){\n     auto ok=[&](int q){int z=wall_cell_at(wall,q);return z>=0&&z!=general_&&picker_transit_safe(o,z);};\n     while(cc<limit&&!ok(cc))++cc;if(cc>=limit)break;\n     int lo=cc;while(cc<limit&&ok(cc))++cc;int hi=cc-1;if(lo>hi)continue;\n     bool proj_in=proj>=lo&&proj<=hi;\n     int target_coord=-1,far=-1;\n     if(proj_in){int dl=proj-lo,dr=hi-proj;target_coord=proj;far=dl>=dr?lo:hi;}\n     else{target_coord=std::abs(lo-proj)<=std::abs(hi-proj)?lo:hi;far=target_coord==lo?hi:lo;}\n     if(far==target_coord)continue;\n     int step=far<target_coord?1:-1,mass=0;\n     for(int q=far;;q+=step){int z=wall_cell_at(wall,q);if(z>=0&&z!=general_&&picker_transit_safe(o,z))mass+=std::max(0,o.army[z]-1);if(q==target_coord)break;}\n     if(mass<=edge_picker_threshold_){++picker_start_mass_rejects_;continue;}\n     int start=wall_cell_at(wall,far),target_cell=wall_cell_at(wall,target_coord);if(start<0||owned_next_to_general(o,start)<0)continue;\n     int sweep=std::abs(far-target_coord),back=(target_cell>=0&&g_.dist[target_cell][general_]<INF)?g_.dist[target_cell][general_]:g_.dist[start][general_];int moves=std::max(1,sweep+std::max(0,back));\n     double eff=double(mass)/moves;if(eff<edge_picker_min_efficiency_){++picker_start_efficiency_rejects_;continue;}double margin=mass-edge_picker_min_efficiency_*moves;\n     int pdir=step;\n     if(best_start<0||std::tuple(-margin,-mass,moves,wall,start)<std::tuple(-best_margin,-best_mass,best_moves,best_wall,best_start)){best_wall=wall;best_start=start;best_dir=pdir;best_mass=mass;best_moves=moves;best_margin=margin;}\n    }\n   }\n   if(best_start>=0){'''\ns, n = pattern.subn(replacement, s, count=1)\nif n != 1:\n    raise SystemExit(f\"wall-segment picker block replacements={n}\")\n\np.write_text(s)\n\n# Baseline remains the unmodified final candidate, so this run measures the\n# search-share + late-picker mitigation as one candidate against exact final.\nparent = Path(\"/tmp/parent\") / REL\nif not parent.exists():\n    raise SystemExit(\"ephemeral /tmp/parent source missing\")\nparent.write_text(final_src)\n\nprint(\"experiment=final_2260b6f_best_search029_plus_late_picker_mitigation\")\n",
   "production": {
     "100": {
       "delta": -1.2083333333333286,
@@ -68,24 +68,24 @@
       "patched": 54.291666666666664
     },
     "200": {
-      "delta": -1.1666666666666572,
-      "parent": 67.45833333333333,
-      "patched": 66.29166666666667
+      "delta": -1.5833333333333286,
+      "parent": 67.70833333333333,
+      "patched": 66.125
     },
     "250": {
-      "delta": -0.7083333333333286,
-      "parent": 78.625,
-      "patched": 77.91666666666667
+      "delta": -0.25,
+      "parent": 78.54166666666667,
+      "patched": 78.29166666666667
     },
     "300": {
-      "delta": -0.9166666666666714,
-      "parent": 87.25,
-      "patched": 86.33333333333333
+      "delta": -2.208333333333343,
+      "parent": 87.79166666666667,
+      "patched": 85.58333333333333
     },
     "400": {
-      "delta": 3.9545454545454675,
-      "parent": 101.27272727272727,
-      "patched": 105.22727272727273
+      "delta": 0.318181818181813,
+      "parent": 102.68181818181819,
+      "patched": 103
     },
     "50": {
       "delta": 0.6666666666666643,
@@ -93,42 +93,42 @@
       "patched": 18.333333333333332
     },
     "600": {
-      "delta": -8.8125,
+      "delta": -8.5,
       "parent": 130.125,
-      "patched": 121.3125
+      "patched": 121.625
     },
     "800": {
-      "delta": -11.090909090909065,
-      "parent": 142.54545454545453,
-      "patched": 131.45454545454547
+      "delta": -7.615384615384613,
+      "parent": 142.92307692307693,
+      "patched": 135.30769230769232
     }
   },
   "random": {
-    "D": 4,
-    "L": 7,
-    "W": 13,
+    "D": 5,
+    "L": 9,
+    "W": 10,
     "decision_roundtrip_ms": {
-      "max": 18.54531699999029,
-      "p50": 1.0298950000020568,
-      "p95": 1.267622999989726,
-      "p99": 1.294524000002184
+      "max": 18.260446999988744,
+      "p50": 1.0349720000135676,
+      "p95": 1.2402739999970436,
+      "p99": 1.2443919999896025
     },
     "errors": 0,
     "games": 24,
     "illegal_actions": 0,
     "maps": 12,
     "paired_ci95": [
-      0.5416666666666666,
-      0.7291666666666666
+      0.375,
+      0.6458333333333334
     ],
-    "paired_score": 0.625,
-    "score": 0.625,
+    "paired_score": 0.5208333333333334,
+    "score": 0.5208333333333334,
     "seat_score": {
-      "0": 0.7083333333333334,
-      "1": 0.5416666666666666
+      "0": 0.5833333333333334,
+      "1": 0.4583333333333333
     },
     "seed_end": 55711,
     "seed_start": 55700,
-    "turns_mean": 807.75
+    "turns_mean": 830.3333333333334
   }
 }
