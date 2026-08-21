@@ -1,0 +1,83 @@
+{
+  "cycle": 1,
+  "diagnosis": [
+    "too many pass actions"
+  ],
+  "h2h": {
+    "D": 5,
+    "L": 5,
+    "W": 10,
+    "decision_roundtrip_ms": {
+      "max": 17.705279000011842,
+      "p50": 1.0726829999896381,
+      "p95": 1.208507000001191,
+      "p99": 1.2326319999829138
+    },
+    "errors": 0,
+    "games": 20,
+    "illegal_actions": 0,
+    "maps": 10,
+    "paired_ci95": [
+      0.45,
+      0.8
+    ],
+    "paired_score": 0.625,
+    "returncode": 0,
+    "score": 0.625,
+    "seat_score": {
+      "0": 0.7,
+      "1": 0.55
+    },
+    "seed_end": 591752291,
+    "seed_start": 591752282,
+    "turns_mean": 872.15
+  },
+  "iteration": 18,
+  "loser": "Y",
+  "loss_metrics": {
+    "c1_missing_rate": 0.0,
+    "c2_missing_rate": 0.0,
+    "contact_turn": 91.8,
+    "doom_moves": 14.7,
+    "doom_starts": 2.5,
+    "expansion_actions": 128.2,
+    "land200": 69.7,
+    "land250": 84.5,
+    "land400": 110.77777777777777,
+    "loss_samples": 10,
+    "muster_attack": 1.8,
+    "muster_harvest": 41.4,
+    "muster_windows": 43.6,
+    "no_strategic": 21.6,
+    "passes": 10.9,
+    "picker_aborts": 0.0,
+    "picker_blocked": 0.0,
+    "picker_completions": 0.9,
+    "picker_eff_rejects": 211.6,
+    "picker_mass_rejects": 540.3,
+    "picker_starts": 0.9,
+    "rear_actions": 72.7,
+    "search_actions": 20.7,
+    "threats": 10.9,
+    "turns": 735.1,
+    "war_actions": 182.4
+  },
+  "mutation": {
+    "attempts": [
+      {
+        "accepted": true,
+        "description": "harvest one-unit-smaller backline stacks",
+        "key": "muster_threshold_lower"
+      }
+    ],
+    "description": "harvest one-unit-smaller backline stacks",
+    "key": "muster_threshold_lower",
+    "sha": "16f0174e11a001321ebef698c2a0a4f65fda315f"
+  },
+  "start": 591752282,
+  "tiebreak": null,
+  "x_sha_after": "a1a1c375d1a4cd4f69b993122f403e12892abd6d",
+  "x_sha_before": "a1a1c375d1a4cd4f69b993122f403e12892abd6d",
+  "y_sha_after": "16f0174e11a001321ebef698c2a0a4f65fda315f",
+  "y_sha_before": "ba909132744eb777d37510ddb541c19583127286"
+}
