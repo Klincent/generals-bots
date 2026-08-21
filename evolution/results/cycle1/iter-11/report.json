@@ -1,0 +1,83 @@
+{
+  "cycle": 1,
+  "diagnosis": [
+    "too many pass actions"
+  ],
+  "h2h": {
+    "D": 11,
+    "L": 5,
+    "W": 4,
+    "decision_roundtrip_ms": {
+      "max": 16.66847600000665,
+      "p50": 1.1194020000004912,
+      "p95": 1.184595000012223,
+      "p99": 1.2178369999844563
+    },
+    "errors": 0,
+    "games": 20,
+    "illegal_actions": 0,
+    "maps": 10,
+    "paired_ci95": [
+      0.4,
+      0.55
+    ],
+    "paired_score": 0.475,
+    "returncode": 0,
+    "score": 0.475,
+    "seat_score": {
+      "0": 0.55,
+      "1": 0.4
+    },
+    "seed_end": 1825894503,
+    "seed_start": 1825894494,
+    "turns_mean": 1013.75
+  },
+  "iteration": 11,
+  "loser": "X",
+  "loss_metrics": {
+    "c1_missing_rate": 0.0,
+    "c2_missing_rate": 0.0,
+    "contact_turn": 111.8,
+    "doom_moves": 0.4,
+    "doom_starts": 0.6,
+    "expansion_actions": 126.8,
+    "land200": 61.8,
+    "land250": 76.6,
+    "land400": 98.5,
+    "loss_samples": 5,
+    "muster_attack": 0.0,
+    "muster_harvest": 0.0,
+    "muster_windows": 0.0,
+    "no_strategic": 18.4,
+    "passes": 9.0,
+    "picker_aborts": 0.2,
+    "picker_blocked": 0.0,
+    "picker_completions": 1.8,
+    "picker_eff_rejects": 122.0,
+    "picker_mass_rejects": 378.6,
+    "picker_starts": 2.0,
+    "rear_actions": 54.0,
+    "search_actions": 29.4,
+    "threats": 8.6,
+    "turns": 774.8,
+    "war_actions": 200.6
+  },
+  "mutation": {
+    "attempts": [
+      {
+        "accepted": true,
+        "description": "start known-general late muster 20 turns earlier",
+        "key": "muster_start_earlier"
+      }
+    ],
+    "description": "start known-general late muster 20 turns earlier",
+    "key": "muster_start_earlier",
+    "sha": "2ecea84ab8e014926f9ce4a93c79dced07df9a09"
+  },
+  "start": 1825894494,
+  "tiebreak": null,
+  "x_sha_after": "2ecea84ab8e014926f9ce4a93c79dced07df9a09",
+  "x_sha_before": "e319a8e6f3330542b850678b73b859a703e7bf70",
+  "y_sha_after": "fa9a9110933cc5b4ce3838bcbb2d665214f006cf",
+  "y_sha_before": "fa9a9110933cc5b4ce3838bcbb2d665214f006cf"
+}
