@@ -7,6 +7,7 @@ on:
       - 'evolution/state.json'
       - 'tools/evolution_orchestrator.py'
       - '.github/workflows/evolution-23x32.yml'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -33,18 +34,22 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Materialize pinned paired benchmark harness
+      - name: Materialize exact pinned competition harness
         shell: bash
         run: |
           set -euo pipefail
-          # evolution/control intentionally contains only orchestration state.  The
-          # gameplay benchmark belongs to the pinned known-good bot snapshot.
+          # Use one internally consistent evaluator snapshot.  paired_benchmark.py
+          # requires the audit-capable matchup.py from the same known-good commit.
           git fetch --no-tags origin chatgpt/picker9-opponent-suite-75
-          mkdir -p competition/agents/juraj_v35_cpp
-          git show 2260b6f19d51a14d7c68770677f22d04dfd88022:competition/agents/juraj_v35_cpp/paired_benchmark.py \
-            > competition/agents/juraj_v35_cpp/paired_benchmark.py
+          git archive 2260b6f19d51a14d7c68770677f22d04dfd88022 competition generals | tar -x
           test -s competition/agents/juraj_v35_cpp/paired_benchmark.py
-          python -m py_compile competition/agents/juraj_v35_cpp/paired_benchmark.py
+          test -s competition/matchup.py
+          test -s competition/protocol.py
+          grep -q -- '--audit-json' competition/matchup.py
+          python -m py_compile \
+            competition/agents/juraj_v35_cpp/paired_benchmark.py \
+            competition/matchup.py \
+            competition/protocol.py
 
       - name: Install competition engine
         shell: bash
