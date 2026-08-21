@@ -8,7 +8,7 @@ on:
       - tools/picker9_loop_experiment.py
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   screen:
@@ -113,11 +113,39 @@ jobs:
                   for t in turns:
                     if t in vals:
                       d[who][t].append(vals[t])
+          out={}
           for t in turns:
             a=statistics.mean(d['PATCHED'][t]) if d['PATCHED'][t] else 0
             b=statistics.mean(d['PARENT'][t]) if d['PARENT'][t] else 0
+            out[str(t)]={'patched':a,'parent':b,'delta':a-b}
             print(f'{t} patched={a:.2f} parent={b:.2f} delta={a-b:+.2f}')
+          json.dump(out,open('/tmp/production-v75.json','w'),indent=2,sort_keys=True)
           PY
+
+      - name: Persist loop result
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, pathlib
+          result={
+            'experiment': pathlib.Path('/tmp/experiment.py').read_text(),
+            'random': json.load(open('/tmp/random-v75/summary.json')),
+            'defense_candidate': json.load(open('/tmp/defense-patched-v75/summary.json')),
+            'defense_parent': json.load(open('/tmp/defense-parent-v75/summary.json')),
+            'production': json.load(open('/tmp/production-v75.json')),
+          }
+          pathlib.Path('/tmp/picker9_loop_last_result.json').write_text(json.dumps(result,indent=2,sort_keys=True)+'\n')
+          PY
+          git fetch origin automation/picker9-loop
+          git worktree add /tmp/loop-result origin/automation/picker9-loop
+          cp /tmp/picker9_loop_last_result.json /tmp/loop-result/tools/picker9_loop_last_result.json
+          cd /tmp/loop-result
+          git config user.name 'ChatGPT'
+          git config user.email 'actions@users.noreply.github.com'
+          git add tools/picker9_loop_last_result.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'ci: record picker9 loop result'
+          git push origin HEAD:automation/picker9-loop
 
       - name: Upload loop artifact
         uses: actions/upload-artifact@v4
@@ -128,6 +156,8 @@ jobs:
             /tmp/defense-patched-v75
             /tmp/defense-parent-v75
             /tmp/production-v75.txt
+            /tmp/production-v75.json
             /tmp/experiment.py
             /tmp/experiment.diff
+            /tmp/picker9_loop_last_result.json
           retention-days: 14
