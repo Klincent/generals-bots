@@ -1,0 +1,83 @@
+{
+  "cycle": 1,
+  "diagnosis": [
+    "no single dominant signal; apply conservative concentration/tempo tuning"
+  ],
+  "h2h": {
+    "D": 1,
+    "L": 9,
+    "W": 10,
+    "decision_roundtrip_ms": {
+      "max": 18.43615999999315,
+      "p50": 1.0761810000019523,
+      "p95": 1.240168999999014,
+      "p99": 1.268434000010643
+    },
+    "errors": 0,
+    "games": 20,
+    "illegal_actions": 0,
+    "maps": 10,
+    "paired_ci95": [
+      0.425,
+      0.65
+    ],
+    "paired_score": 0.525,
+    "returncode": 0,
+    "score": 0.525,
+    "seat_score": {
+      "0": 0.45,
+      "1": 0.6
+    },
+    "seed_end": 1517823889,
+    "seed_start": 1517823880,
+    "turns_mean": 778.15
+  },
+  "iteration": 12,
+  "loser": "Y",
+  "loss_metrics": {
+    "c1_missing_rate": 0.1,
+    "c2_missing_rate": 0.1,
+    "contact_turn": 103.8,
+    "doom_moves": 3.2,
+    "doom_starts": 2.0,
+    "expansion_actions": 113.8,
+    "land200": 69.8,
+    "land250": 82.5,
+    "land400": 99.11111111111111,
+    "loss_samples": 10,
+    "muster_attack": 1.7,
+    "muster_harvest": 27.5,
+    "muster_windows": 29.4,
+    "no_strategic": 17.1,
+    "passes": 4.5,
+    "picker_aborts": 0.0,
+    "picker_blocked": 0.0,
+    "picker_completions": 0.4,
+    "picker_eff_rejects": 64.3,
+    "picker_mass_rejects": 702.3,
+    "picker_starts": 0.5,
+    "rear_actions": 60.7,
+    "search_actions": 25.4,
+    "threats": 10.8,
+    "turns": 754.7,
+    "war_actions": 204.1
+  },
+  "mutation": {
+    "attempts": [
+      {
+        "accepted": true,
+        "description": "harvest one-unit-smaller backline stacks",
+        "key": "muster_threshold_lower"
+      }
+    ],
+    "description": "harvest one-unit-smaller backline stacks",
+    "key": "muster_threshold_lower",
+    "sha": "e33ca08a6d495f72b3bf82ace09ccf8f22d8b2ea"
+  },
+  "start": 1517823880,
+  "tiebreak": null,
+  "x_sha_after": "2ecea84ab8e014926f9ce4a93c79dced07df9a09",
+  "x_sha_before": "2ecea84ab8e014926f9ce4a93c79dced07df9a09",
+  "y_sha_after": "e33ca08a6d495f72b3bf82ace09ccf8f22d8b2ea",
+  "y_sha_before": "fa9a9110933cc5b4ce3838bcbb2d665214f006cf"
+}
