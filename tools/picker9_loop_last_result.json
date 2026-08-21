@@ -1,0 +1,134 @@
+{
+  "defense_candidate": {
+    "D": 9,
+    "L": 5,
+    "W": 6,
+    "decision_roundtrip_ms": {
+      "max": 16.930591000004824,
+      "p50": 1.096490999998423,
+      "p95": 1.185898000017005,
+      "p99": 1.2370310000733298
+    },
+    "errors": 0,
+    "games": 20,
+    "illegal_actions": 0,
+    "maps": 10,
+    "paired_ci95": [
+      0.375,
+      0.675
+    ],
+    "paired_score": 0.525,
+    "score": 0.525,
+    "seat_score": {
+      "0": 0.4,
+      "1": 0.65
+    },
+    "seed_end": 55729,
+    "seed_start": 55720,
+    "turns_mean": 934.2
+  },
+  "defense_parent": {
+    "D": 9,
+    "L": 4,
+    "W": 7,
+    "decision_roundtrip_ms": {
+      "max": 17.00696600005358,
+      "p50": 1.0859899999786649,
+      "p95": 1.1908060000678233,
+      "p99": 1.235229000030813
+    },
+    "errors": 0,
+    "games": 20,
+    "illegal_actions": 0,
+    "maps": 10,
+    "paired_ci95": [
+      0.425,
+      0.725
+    ],
+    "paired_score": 0.575,
+    "score": 0.575,
+    "seat_score": {
+      "0": 0.55,
+      "1": 0.6
+    },
+    "seed_end": 55729,
+    "seed_start": 55720,
+    "turns_mean": 939
+  },
+  "experiment": "from pathlib import Path\nimport sys\n\n# Same gameplay experiment; retrigger after adding persisted-result reporting.\np = Path(sys.argv[1])\ns = p.read_text()\nold = \"!enemy_seen?.20:.08\"\nnew = \"(production_==ProductionState::HEALTHY&&!enemy_seen&&o.turn<=250)?.12:(!enemy_seen?.20:.08)\"\nif old not in s:\n    raise SystemExit(\"search-share anchor not found\")\nif s.count(old) != 1:\n    raise SystemExit(f\"search-share anchor count={s.count(old)}\")\np.write_text(s.replace(old, new, 1))\nprint(\"experiment=healthy_precontact_search_share_020_to_012\")\n",
+  "production": {
+    "100": {
+      "delta": -0.2916666666666643,
+      "parent": 38.416666666666664,
+      "patched": 38.125
+    },
+    "150": {
+      "delta": -2.875,
+      "parent": 57.5,
+      "patched": 54.625
+    },
+    "200": {
+      "delta": -4.666666666666657,
+      "parent": 70.20833333333333,
+      "patched": 65.54166666666667
+    },
+    "250": {
+      "delta": -9.0,
+      "parent": 84.875,
+      "patched": 75.875
+    },
+    "300": {
+      "delta": -10.333333333333329,
+      "parent": 95.75,
+      "patched": 85.41666666666667
+    },
+    "400": {
+      "delta": -9.76190476190476,
+      "parent": 110.85714285714286,
+      "patched": 101.0952380952381
+    },
+    "50": {
+      "delta": -0.04166666666666785,
+      "parent": 17.666666666666668,
+      "patched": 17.625
+    },
+    "600": {
+      "delta": -12.952380952380949,
+      "parent": 131.76190476190476,
+      "patched": 118.80952380952381
+    },
+    "800": {
+      "delta": -8.35294117647058,
+      "parent": 136.88235294117646,
+      "patched": 128.52941176470588
+    }
+  },
+  "random": {
+    "D": 9,
+    "L": 7,
+    "W": 8,
+    "decision_roundtrip_ms": {
+      "max": 18.243750999999975,
+      "p50": 1.0196069999892643,
+      "p95": 1.103763000003255,
+      "p99": 1.2361690000943781
+    },
+    "errors": 0,
+    "games": 24,
+    "illegal_actions": 0,
+    "maps": 12,
+    "paired_ci95": [
+      0.375,
+      0.6666666666666666
+    ],
+    "paired_score": 0.5208333333333334,
+    "score": 0.5208333333333334,
+    "seat_score": {
+      "0": 0.5833333333333334,
+      "1": 0.4583333333333333
+    },
+    "seed_end": 55711,
+    "seed_start": 55700,
+    "turns_mean": 942.7916666666666
+  }
+}
