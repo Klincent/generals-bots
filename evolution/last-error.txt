@@ -1,8 +1,7 @@
-0
-[v36_picker] threshold=8 min_eff=2.00 starts=0 completions=0 moves=0 delivered=0 aborts=0 active=0 blocked_ticks=0 lost_aborts=0 depleted_aborts=0 source_guard=0 critical_preempt_moves=0 mass_rejects=2 efficiency_rejects=0 planned_mass=0 planned_moves=0
+shold=8 min_eff=2.00 starts=0 completions=0 moves=0 delivered=0 aborts=0 active=0 blocked_ticks=0 lost_aborts=0 depleted_aborts=0 source_guard=0 critical_preempt_moves=0 mass_rejects=2 efficiency_rejects=0 planned_mass=0 planned_moves=0
 [v36_picker_opportunity] with_expansion=0 with_war=0 before_tick=0 castle_urgent=0 idle_slot=0 paused=0
 [v35_doomguard] enabled=1 starts=0 releases=0 windows=0 moves=0 unreachable=0 active=0 enemy=-1 eta=1000000 muster=220 reachable=0
-[v35_timing] p50=8.873 p95=8.873 p99=8.873 max=8.873
+[v35_timing] p50=13.502 p95=13.502 p99=13.502 max=13.502
 [v35_plan] c1=73 cost1=35 c2=153 cost2=35 total=70
 [v35_castle_deadline] c1_site=73 c1_cost=35 c1_latest_start=126 c1_required_actions=19 c1_start_turn=-1 c1_build_turn=-1 c2_site=153 c2_cost=35 c2_latest_start=218 c2_required_actions=27 c2_start_turn=-1 c2_build_turn=-1 miss_reason=none
 [v35_castle_live] prevented_invalid_builds=0
@@ -19,7 +18,7 @@
 [v36_picker] threshold=8 min_eff=2.00 starts=0 completions=0 moves=0 delivered=0 aborts=0 active=0 blocked_ticks=0 lost_aborts=0 depleted_aborts=0 source_guard=0 critical_preempt_moves=0 mass_rejects=0 efficiency_rejects=1 planned_mass=0 planned_moves=0
 [v36_picker_opportunity] with_expansion=0 with_war=0 before_tick=0 castle_urgent=0 idle_slot=0 paused=0
 [v35_doomguard] enabled=1 starts=0 releases=0 windows=0 moves=0 unreachable=0 active=0 enemy=-1 eta=1000000 muster=220 reachable=0
-[v35_timing] p50=8.515 p95=8.515 p99=8.515 max=8.515
+[v35_timing] p50=12.783 p95=12.783 p99=12.783 max=12.783
 [v35_plan] c1=73 cost1=35 c2=153 cost2=35 total=70
 [v36_picker_start] turn=80 my_land=441 opp_land=0 land_delta=441 growth25=0.000 growth50=0.000 my_army=504 opp_army=0 army_delta=504 largest=8 top3=24 top3_share=0.048 surplus=56 moves=18 delivered=56 useful_neutrals=0 enemy_seen=0 contact=0 fronts=0 enemy_general=0 production=0 tick_in=20 c1=0 c2=0 attack_sink=0 allowed=1
 [v35_castle_deadline] c1_site=73 c1_cost=35 c1_latest_start=136 c1_required_actions=9 c1_start_turn=80 c1_build_turn=-1 c2_site=153 c2_cost=35 c2_latest_start=236 c2_required_actions=9 c2_start_turn=-1 c2_build_turn=-1 miss_reason=none
@@ -37,7 +36,7 @@
 [v36_picker] threshold=8 min_eff=2.00 starts=1 completions=1 moves=18 delivered=56 aborts=0 active=0 blocked_ticks=0 lost_aborts=0 depleted_aborts=0 source_guard=0 critical_preempt_moves=0 mass_rejects=0 efficiency_rejects=0 planned_mass=56 planned_moves=18
 [v36_picker_opportunity] with_expansion=0 with_war=0 before_tick=4 castle_urgent=0 idle_slot=18 paused=17
 [v35_doomguard] enabled=1 starts=0 releases=0 windows=0 moves=0 unreachable=0 active=0 enemy=-1 eta=1000000 muster=220 reachable=0
-[v35_timing] p50=0.277 p95=0.287 p99=8.480 max=8.480
+[v35_timing] p50=0.541 p95=0.553 p99=12.784 max=12.784
 v36 picker economics scenarios passed
 In file included from test_muster.cpp:2:
 main.cpp:111:13: warning: ‘bool grid(std::vector<int>&)’ defined but not used [-Wunused-function]
@@ -59,7 +58,7 @@ main.cpp:111:13: warning: ‘bool grid(std::vector<int>&)’ defined but not use
 [v36_picker] threshold=14 min_eff=2.00 starts=0 completions=0 moves=0 delivered=0 aborts=0 active=0 blocked_ticks=0 lost_aborts=0 depleted_aborts=0 source_guard=0 critical_preempt_moves=0 mass_rejects=0 efficiency_rejects=0 planned_mass=0 planned_moves=0
 [v36_picker_opportunity] with_expansion=0 with_war=0 before_tick=0 castle_urgent=0 idle_slot=0 paused=0
 [v35_doomguard] enabled=1 starts=0 releases=0 windows=0 moves=0 unreachable=0 active=0 enemy=-1 eta=1000000 muster=220 reachable=0
-[v35_timing] p50=0.045 p95=8.791 p99=8.791 max=8.791
+[v35_timing] p50=0.097 p95=13.443 p99=13.443 max=13.443
 [v35_plan] c1=73 cost1=35 c2=153 cost2=35 total=70
 [v35_castle_deadline] c1_site=73 c1_cost=35 c1_latest_start=112 c1_required_actions=33 c1_start_turn=-1 c1_build_turn=-1 c2_site=153 c2_cost=35 c2_latest_start=220 c2_required_actions=25 c2_start_turn=-1 c2_build_turn=-1 miss_reason=c1_action_infeasible
 [v35_castle_live] prevented_invalid_builds=0
@@ -76,7 +75,7 @@ main.cpp:111:13: warning: ‘bool grid(std::vector<int>&)’ defined but not use
 [v36_picker] threshold=14 min_eff=2.00 starts=0 completions=0 moves=0 delivered=0 aborts=0 active=0 blocked_ticks=0 lost_aborts=0 depleted_aborts=0 source_guard=0 critical_preempt_moves=0 mass_rejects=0 efficiency_rejects=0 planned_mass=0 planned_moves=0
 [v36_picker_opportunity] with_expansion=0 with_war=0 before_tick=0 castle_urgent=0 idle_slot=0 paused=0
 [v35_doomguard] enabled=1 starts=0 releases=0 windows=0 moves=0 unreachable=0 active=0 enemy=-1 eta=1000000 muster=220 reachable=0
-[v35_timing] p50=0.293 p95=8.964 p99=8.964 max=8.964
+[v35_timing] p50=0.565 p95=12.741 p99=12.741 max=12.741
 [v35_plan] c1=73 cost1=35 c2=153 cost2=35 total=70
 [v35_castle_deadline] c1_site=73 c1_cost=35 c1_latest_start=128 c1_required_actions=17 c1_start_turn=-1 c1_build_turn=-1 c2_site=153 c2_cost=35 c2_latest_start=228 c2_required_actions=17 c2_start_turn=-1 c2_build_turn=-1 miss_reason=c1_insufficient_army
 [v35_castle_live] prevented_invalid_builds=0
@@ -93,7 +92,7 @@ main.cpp:111:13: warning: ‘bool grid(std::vector<int>&)’ defined but not use
 [v36_picker] threshold=14 min_eff=2.00 starts=0 completions=0 moves=0 delivered=0 aborts=0 active=0 blocked_ticks=0 lost_aborts=0 depleted_aborts=0 source_guard=0 critical_preempt_moves=0 mass_rejects=0 efficiency_rejects=0 planned_mass=0 planned_moves=0
 [v36_picker_opportunity] with_expansion=0 with_war=0 before_tick=0 castle_urgent=0 idle_slot=0 paused=0
 [v35_doomguard] enabled=1 starts=1 releases=0 windows=1 moves=0 unreachable=0 active=1 enemy=200 eta=2 muster=199 reachable=1
-[v35_timing] p50=0.149 p95=8.919 p99=8.919 max=8.919
+[v35_timing] p50=0.277 p95=12.708 p99=12.708 max=12.708
 v9 late muster/castle/general-capture scenarios passed
 v36 real protocol observation/action cycle passed
 Traceback (most recent call last):
