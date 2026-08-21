@@ -1,0 +1,83 @@
+{
+  "cycle": 1,
+  "diagnosis": [
+    "too many pass actions"
+  ],
+  "h2h": {
+    "D": 4,
+    "L": 9,
+    "W": 7,
+    "decision_roundtrip_ms": {
+      "max": 13.632069999999885,
+      "p50": 0.6754710000080877,
+      "p95": 0.7603859999960605,
+      "p99": 0.7952970000246751
+    },
+    "errors": 0,
+    "games": 20,
+    "illegal_actions": 0,
+    "maps": 10,
+    "paired_ci95": [
+      0.275,
+      0.65
+    ],
+    "paired_score": 0.45,
+    "returncode": 0,
+    "score": 0.45,
+    "seat_score": {
+      "0": 0.6,
+      "1": 0.3
+    },
+    "seed_end": 1411403378,
+    "seed_start": 1411403369,
+    "turns_mean": 828.75
+  },
+  "iteration": 15,
+  "loser": "X",
+  "loss_metrics": {
+    "c1_missing_rate": 0.0,
+    "c2_missing_rate": 0.0,
+    "contact_turn": 113.77777777777777,
+    "doom_moves": 2.0,
+    "doom_starts": 1.5555555555555556,
+    "expansion_actions": 124.77777777777777,
+    "land200": 72.66666666666667,
+    "land250": 82.33333333333333,
+    "land400": 99.28571428571429,
+    "loss_samples": 9,
+    "muster_attack": 0.0,
+    "muster_harvest": 0.0,
+    "muster_windows": 0.0,
+    "no_strategic": 22.11111111111111,
+    "passes": 11.222222222222221,
+    "picker_aborts": 0.1111111111111111,
+    "picker_blocked": 0.0,
+    "picker_completions": 0.6666666666666666,
+    "picker_eff_rejects": 14.444444444444445,
+    "picker_mass_rejects": 721.7777777777778,
+    "picker_starts": 0.7777777777777778,
+    "rear_actions": 33.44444444444444,
+    "search_actions": 25.666666666666668,
+    "threats": 6.555555555555555,
+    "turns": 652.8888888888889,
+    "war_actions": 162.77777777777777
+  },
+  "mutation": {
+    "attempts": [
+      {
+        "accepted": true,
+        "description": "start known-general late muster 20 turns earlier",
+        "key": "muster_start_earlier"
+      }
+    ],
+    "description": "start known-general late muster 20 turns earlier",
+    "key": "muster_start_earlier",
+    "sha": "f9572c8da525b7ed9513ff27d603b96aebbc58a1"
+  },
+  "start": 1411403369,
+  "tiebreak": null,
+  "x_sha_after": "f9572c8da525b7ed9513ff27d603b96aebbc58a1",
+  "x_sha_before": "9cdf74ec112c1888727cba15b385f4edb2ac1865",
+  "y_sha_after": "b43d6b52a732084ff2599f5d4f9dac143998e3e5",
+  "y_sha_before": "b43d6b52a732084ff2599f5d4f9dac143998e3e5"
+}
