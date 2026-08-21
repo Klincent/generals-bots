@@ -1,0 +1,84 @@
+{
+  "cycle": 1,
+  "diagnosis": [
+    "late muster harvests but fails to launch",
+    "too many pass actions"
+  ],
+  "h2h": {
+    "D": 4,
+    "L": 9,
+    "W": 7,
+    "decision_roundtrip_ms": {
+      "max": 17.72010100000898,
+      "p50": 1.0285700000167708,
+      "p95": 1.219936000012467,
+      "p99": 1.2453239999956622
+    },
+    "errors": 0,
+    "games": 20,
+    "illegal_actions": 0,
+    "maps": 10,
+    "paired_ci95": [
+      0.25,
+      0.65
+    ],
+    "paired_score": 0.45,
+    "returncode": 0,
+    "score": 0.45,
+    "seat_score": {
+      "0": 0.55,
+      "1": 0.35
+    },
+    "seed_end": 356881703,
+    "seed_start": 356881694,
+    "turns_mean": 784.65
+  },
+  "iteration": 7,
+  "loser": "X",
+  "loss_metrics": {
+    "c1_missing_rate": 0.0,
+    "c2_missing_rate": 0.2222222222222222,
+    "contact_turn": 122.22222222222223,
+    "doom_moves": 1.8888888888888888,
+    "doom_starts": 1.6666666666666667,
+    "expansion_actions": 106.33333333333333,
+    "land200": 65.22222222222223,
+    "land250": 84.875,
+    "land400": 101.5,
+    "loss_samples": 9,
+    "muster_attack": 0.0,
+    "muster_harvest": 6.0,
+    "muster_windows": 6.222222222222222,
+    "no_strategic": 23.11111111111111,
+    "passes": 16.88888888888889,
+    "picker_aborts": 0.3333333333333333,
+    "picker_blocked": 0.0,
+    "picker_completions": 1.4444444444444444,
+    "picker_eff_rejects": 36.55555555555556,
+    "picker_mass_rejects": 1015.4444444444445,
+    "picker_starts": 1.7777777777777777,
+    "rear_actions": 52.888888888888886,
+    "search_actions": 27.555555555555557,
+    "threats": 30.555555555555557,
+    "turns": 733.4444444444445,
+    "war_actions": 204.55555555555554
+  },
+  "mutation": {
+    "attempts": [
+      {
+        "accepted": true,
+        "description": "lower late-muster launch requirement",
+        "key": "launch_lower"
+      }
+    ],
+    "description": "lower late-muster launch requirement",
+    "key": "launch_lower",
+    "sha": "e319a8e6f3330542b850678b73b859a703e7bf70"
+  },
+  "start": 356881694,
+  "tiebreak": null,
+  "x_sha_after": "e319a8e6f3330542b850678b73b859a703e7bf70",
+  "x_sha_before": "e8ea98b7c3174da174806cad79bd1b22a0f635cc",
+  "y_sha_after": "52946d9f520d65aa129f0e41b9bf850ccb8310ee",
+  "y_sha_before": "52946d9f520d65aa129f0e41b9bf850ccb8310ee"
+}
