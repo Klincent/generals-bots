@@ -1,6 +1,7 @@
 from pathlib import Path
 import sys
 
+# Same gameplay experiment; retrigger after adding persisted-result reporting.
 p = Path(sys.argv[1])
 s = p.read_text()
 old = "!enemy_seen?.20:.08"
