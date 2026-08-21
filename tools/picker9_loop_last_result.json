@@ -1,61 +1,61 @@
 {
   "defense_candidate": {
-    "D": 6,
-    "L": 5,
-    "W": 9,
+    "D": 4,
+    "L": 6,
+    "W": 10,
     "decision_roundtrip_ms": {
-      "max": 18.777595999836194,
-      "p50": 1.110539999899629,
-      "p95": 1.2323709997872356,
-      "p99": 1.2941029999637976
+      "max": 18.40190600000824,
+      "p50": 1.120501000002605,
+      "p95": 1.219800999990639,
+      "p99": 1.2724800000114556
     },
     "errors": 0,
     "games": 20,
     "illegal_actions": 0,
     "maps": 10,
     "paired_ci95": [
-      0.375,
-      0.8
+      0.45,
+      0.775
     ],
     "paired_score": 0.6,
     "score": 0.6,
     "seat_score": {
-      "0": 0.5,
-      "1": 0.7
+      "0": 0.6,
+      "1": 0.6
     },
     "seed_end": 55729,
     "seed_start": 55720,
-    "turns_mean": 833.5
+    "turns_mean": 812.9
   },
   "defense_parent": {
-    "D": 9,
-    "L": 4,
-    "W": 7,
+    "D": 5,
+    "L": 5,
+    "W": 10,
     "decision_roundtrip_ms": {
-      "max": 19.004142999847318,
-      "p50": 1.127795000002152,
-      "p95": 1.2354170000890008,
-      "p99": 1.2955849999798374
+      "max": 17.962377999992896,
+      "p50": 1.1196189999509443,
+      "p95": 1.2242170000718033,
+      "p99": 1.264216999970813
     },
     "errors": 0,
     "games": 20,
     "illegal_actions": 0,
     "maps": 10,
     "paired_ci95": [
-      0.425,
-      0.725
+      0.475,
+      0.775
     ],
-    "paired_score": 0.575,
-    "score": 0.575,
+    "paired_score": 0.625,
+    "score": 0.625,
     "seat_score": {
       "0": 0.55,
-      "1": 0.6
+      "1": 0.7
     },
     "seed_end": 55729,
     "seed_start": 55720,
-    "turns_mean": 939
+    "turns_mean": 889.8
   },
-  "experiment": "from pathlib import Path\nimport sys\n\np = Path(sys.argv[1])\ns = p.read_text()\nold = \"!enemy_seen?.20:.08\"\nnew = \"(production_==ProductionState::HEALTHY&&!enemy_seen&&o.turn<=50)?.29:(!enemy_seen?.20:.08)\"\nif old not in s:\n    raise SystemExit(\"search-share anchor not found\")\nif s.count(old) != 1:\n    raise SystemExit(f\"search-share anchor count={s.count(old)}\")\np.write_text(s.replace(old, new, 1))\nprint(\"experiment=healthy_precontact_search_share_020_to_029_t50\")\n",
+  "experiment": "from pathlib import Path\nimport subprocess\nimport sys\n\nFINAL = \"2260b6f19d51a14d7c68770677f22d04dfd88022\"\nREL = \"competition/agents/juraj_v35_cpp/main.cpp\"\n\np = Path(sys.argv[1])\nfinal_src = subprocess.check_output([\"git\", \"show\", f\"{FINAL}:{REL}\"], text=True)\nold = \"!enemy_seen?.20:.08\"\nnew = \"(production_==ProductionState::HEALTHY&&!enemy_seen&&o.turn<=50)?.29:(!enemy_seen?.20:.08)\"\nif final_src.count(old) != 1:\n    raise SystemExit(f\"final search-share anchor count={final_src.count(old)}\")\n\n# Candidate: final 2260b6f + exactly one gameplay change.\np.write_text(final_src.replace(old, new, 1))\n\n# Baseline wrapper built by picker9-loop points at /tmp/parent. Replace only its\n# ephemeral source with unmodified final so random screen is final+patch vs final.\nparent = Path(\"/tmp/parent\") / REL\nif not parent.exists():\n    raise SystemExit(\"ephemeral /tmp/parent source missing\")\nparent.write_text(final_src)\n\nprint(\"experiment=final_2260b6f_healthy_precontact_search_share_020_to_029_t50\")\n",
   "production": {
     "100": {
       "delta": -1.2083333333333286,
@@ -63,29 +63,29 @@
       "patched": 37.083333333333336
     },
     "150": {
-      "delta": -3.125,
-      "parent": 57.458333333333336,
-      "patched": 54.333333333333336
+      "delta": -3.0833333333333357,
+      "parent": 57.375,
+      "patched": 54.291666666666664
     },
     "200": {
-      "delta": -0.9166666666666714,
-      "parent": 67.04166666666667,
-      "patched": 66.125
+      "delta": -1.1666666666666572,
+      "parent": 67.45833333333333,
+      "patched": 66.29166666666667
     },
     "250": {
-      "delta": 1.7916666666666572,
-      "parent": 77.66666666666667,
-      "patched": 79.45833333333333
+      "delta": -0.7083333333333286,
+      "parent": 78.625,
+      "patched": 77.91666666666667
     },
     "300": {
-      "delta": 0.25,
-      "parent": 86.66666666666667,
-      "patched": 86.91666666666667
+      "delta": -0.9166666666666714,
+      "parent": 87.25,
+      "patched": 86.33333333333333
     },
     "400": {
-      "delta": 7.714285714285708,
-      "parent": 99.47619047619048,
-      "patched": 107.19047619047619
+      "delta": 3.9545454545454675,
+      "parent": 101.27272727272727,
+      "patched": 105.22727272727273
     },
     "50": {
       "delta": 0.6666666666666643,
@@ -93,42 +93,42 @@
       "patched": 18.333333333333332
     },
     "600": {
-      "delta": -1.2000000000000028,
-      "parent": 123.66666666666667,
-      "patched": 122.46666666666667
+      "delta": -8.8125,
+      "parent": 130.125,
+      "patched": 121.3125
     },
     "800": {
-      "delta": -14.545454545454561,
-      "parent": 146.45454545454547,
-      "patched": 131.9090909090909
+      "delta": -11.090909090909065,
+      "parent": 142.54545454545453,
+      "patched": 131.45454545454547
     }
   },
   "random": {
-    "D": 6,
+    "D": 4,
     "L": 7,
-    "W": 11,
+    "W": 13,
     "decision_roundtrip_ms": {
-      "max": 18.915943999900264,
-      "p50": 1.0443220000979636,
-      "p95": 1.2146340000072087,
-      "p99": 1.2954050000644202
+      "max": 18.54531699999029,
+      "p50": 1.0298950000020568,
+      "p95": 1.267622999989726,
+      "p99": 1.294524000002184
     },
     "errors": 0,
     "games": 24,
     "illegal_actions": 0,
     "maps": 12,
     "paired_ci95": [
-      0.3958333333333333,
-      0.75
+      0.5416666666666666,
+      0.7291666666666666
     ],
-    "paired_score": 0.5833333333333334,
-    "score": 0.5833333333333334,
+    "paired_score": 0.625,
+    "score": 0.625,
     "seat_score": {
-      "0": 0.75,
-      "1": 0.4166666666666667
+      "0": 0.7083333333333334,
+      "1": 0.5416666666666666
     },
     "seed_end": 55711,
     "seed_start": 55700,
-    "turns_mean": 778.0833333333334
+    "turns_mean": 807.75
   }
 }
