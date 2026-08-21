@@ -1,0 +1,83 @@
+{
+  "cycle": 1,
+  "diagnosis": [
+    "too many pass actions"
+  ],
+  "h2h": {
+    "D": 5,
+    "L": 7,
+    "W": 8,
+    "decision_roundtrip_ms": {
+      "max": 17.117967000018552,
+      "p50": 1.0388830000067628,
+      "p95": 1.142646000005243,
+      "p99": 1.2128770000003897
+    },
+    "errors": 0,
+    "games": 20,
+    "illegal_actions": 0,
+    "maps": 10,
+    "paired_ci95": [
+      0.4,
+      0.675
+    ],
+    "paired_score": 0.525,
+    "returncode": 0,
+    "score": 0.525,
+    "seat_score": {
+      "0": 0.8,
+      "1": 0.25
+    },
+    "seed_end": 1096842893,
+    "seed_start": 1096842884,
+    "turns_mean": 825.3
+  },
+  "iteration": 4,
+  "loser": "Y",
+  "loss_metrics": {
+    "c1_missing_rate": 0.125,
+    "c2_missing_rate": 0.375,
+    "contact_turn": 95.0,
+    "doom_moves": 3.0,
+    "doom_starts": 2.0,
+    "expansion_actions": 118.25,
+    "land200": 65.375,
+    "land250": 74,
+    "land400": 84.625,
+    "loss_samples": 8,
+    "muster_attack": 0.0,
+    "muster_harvest": 0.0,
+    "muster_windows": 0.0,
+    "no_strategic": 23.375,
+    "passes": 16.5,
+    "picker_aborts": 0.0,
+    "picker_blocked": 0.0,
+    "picker_completions": 0.625,
+    "picker_eff_rejects": 77.875,
+    "picker_mass_rejects": 754.625,
+    "picker_starts": 0.625,
+    "rear_actions": 20.25,
+    "search_actions": 24.875,
+    "threats": 31.125,
+    "turns": 758.5,
+    "war_actions": 184.375
+  },
+  "mutation": {
+    "attempts": [
+      {
+        "accepted": true,
+        "description": "start known-general late muster 20 turns earlier",
+        "key": "muster_start_earlier"
+      }
+    ],
+    "description": "start known-general late muster 20 turns earlier",
+    "key": "muster_start_earlier",
+    "sha": "f9fed07c76271303af628fd2f039904619eb605b"
+  },
+  "start": 1096842884,
+  "tiebreak": null,
+  "x_sha_after": "e8ea98b7c3174da174806cad79bd1b22a0f635cc",
+  "x_sha_before": "e8ea98b7c3174da174806cad79bd1b22a0f635cc",
+  "y_sha_after": "f9fed07c76271303af628fd2f039904619eb605b",
+  "y_sha_before": "bbcc24ad41215873be5d30df396fd6159e11cc34"
+}
