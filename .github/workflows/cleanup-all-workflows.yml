@@ -56,7 +56,6 @@ jobs:
               continue
             fi
 
-            find "$wt/.github/workflows" -type f -print | sort > /tmp/files-before.txt
             rm -rf "$wt/.github/workflows"
             (
               cd "$wt"
@@ -112,3 +111,5 @@ jobs:
           git rm .github/workflows/cleanup-all-workflows.yml
           git commit -m 'ci: finish one-time workflow cleanup'
           git push origin master
+
+# explicit retrigger
