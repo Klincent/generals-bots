@@ -58,10 +58,14 @@ def test_state_transition_validation():
 
 def test_structural_catalog_is_real_and_wide():
     data,_=load_schema(); enums={g['name']:g for g in data['genes'] if g['type']=='enum'}
-    assert len(enums)>=7
-    assert 'adaptive' in enums['muster_topology']['allowed']
-    assert 'safest' in enums['logistics_route_policy']['allowed']
-    assert 'opportunity' in enums['fallback_policy']['allowed']
+    assert len(enums)==7
+    assert {'single','dual','triple'} <= set(enums['muster_topology']['allowed'])
+    assert {'largest','forward','central'} <= set(enums['muster_anchor_policy']['allowed'])
+    assert {'full','split'} <= set(enums['chunk_transfer_policy']['allowed'])
+    assert {'interior','shortest'} <= set(enums['logistics_route_policy']['allowed'])
+    assert {'block_first','reinforce_first'} <= set(enums['defense_policy']['allowed'])
+    assert {'balanced','aggressive','consolidate'} <= set(enums['fallback_policy']['allowed'])
+    assert {'margin','mass','efficiency','speed'} <= set(enums['picker_start_policy']['allowed'])
 
 
 def test_freeze_render_consistency(tmp_path:Path):
