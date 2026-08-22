@@ -1,0 +1,153 @@
+name: evolution4-genome
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/evolution4-genome.yml'
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: evolution4-genome
+  cancel-in-progress: false
+
+jobs:
+  evolve:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    env:
+      SDL_VIDEODRIVER: dummy
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - name: Checkout durable evolution4 control
+        uses: actions/checkout@v4
+        with:
+          ref: evolution4/control
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name ChatGPT
+          git config user.email actions@users.noreply.github.com
+
+      - name: Capture remote pre-state and STOP
+        id: pre
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin evolution4/control evolution4/founder-x0 evolution4/founder-y0 evolution4/template evolution4/champion evolution3/control master
+          git show origin/evolution4/control:evolution4/state.json > /tmp/pre-state.json
+          python - <<'PY' | tee /tmp/pre-summary.txt
+          import json
+          s=json.load(open('/tmp/pre-state.json'))
+          print('pre phase=',s['phase'],'generation=',s['generation'],'retry=',s.get('retry_count',0))
+          PY
+          if git cat-file -e origin/evolution4/control:evolution4/STOP 2>/dev/null; then
+            echo stopped=true >> "$GITHUB_OUTPUT"
+          else
+            echo stopped=false >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-python@v5
+        if: steps.pre.outputs.stopped != 'true'
+        with:
+          python-version: '3.12'
+
+      - name: Install evaluator dependencies
+        if: steps.pre.outputs.stopped != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install pytest numpy jax jaxlib
+          python -m pip install -e . --no-deps
+
+      - name: Static validation and genetic-engine tests
+        if: steps.pre.outputs.stopped != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/evolution4/*.py
+          pytest -q tests/test_evolution4.py
+
+      - name: Execute exactly one evolution4 transaction
+        id: tx
+        if: steps.pre.outputs.stopped != 'true'
+        shell: bash
+        run: |
+          set +e
+          python -m tools.evolution4.orchestrator 2>&1 | tee /tmp/evolution4.log
+          rc=${PIPESTATUS[0]}
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Fetch and validate remote post-state
+        id: post
+        if: always() && steps.pre.outputs.stopped != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin evolution4/control
+          git show origin/evolution4/control:evolution4/state.json > /tmp/post-state.json
+          python - <<'PY'
+          import json, os, sys
+          pre=json.load(open('/tmp/pre-state.json')); post=json.load(open('/tmp/post-state.json'))
+          rc=int(os.environ.get('TX_RC','0'))
+          bp, bg=pre['phase'], int(pre['generation']); ap, ag=post['phase'], int(post['generation'])
+          print('post phase=',ap,'generation=',ag,'retry=',post.get('retry_count',0),'last_error=',post.get('last_error'))
+          if rc==0:
+              if bp=='bootstrap' and not (ap=='exploration' and ag==0):
+                  raise SystemExit(f'FALSE GREEN: bootstrap did not become exploration/0: {ap}/{ag}')
+              if bp in ('exploration','exploitation') and ag != bg+1:
+                  raise SystemExit(f'FALSE GREEN: generation did not increment exactly once: {bg}->{ag}')
+              if bp=='final' and not (ap=='done' and ag==bg):
+                  raise SystemExit(f'FALSE GREEN: final did not become done: {ap}/{ag}')
+          PY
+        env:
+          TX_RC: ${{ steps.tx.outputs.rc }}
+
+      - name: Upload transaction evidence
+        if: always() && steps.pre.outputs.stopped != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: evolution4-${{ github.run_number }}
+          path: |
+            /tmp/evolution4.log
+            /tmp/pre-state.json
+            /tmp/post-state.json
+            evolution4/heartbeat.json
+            evolution4/results/
+            evolution4/checkpoints/
+            evolution4/final/
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Dispatch next transaction when allowed
+        if: always() && steps.pre.outputs.stopped != 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TX_RC: ${{ steps.tx.outputs.rc }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin evolution4/control
+          if git cat-file -e origin/evolution4/control:evolution4/STOP 2>/dev/null; then
+            echo 'evolution4 STOP present; no dispatch.'
+            exit 0
+          fi
+          git show origin/evolution4/control:evolution4/state.json > /tmp/latest-state.json
+          phase=$(python -c "import json;print(json.load(open('/tmp/latest-state.json'))['phase'])")
+          retry=$(python -c "import json;print(int(json.load(open('/tmp/latest-state.json')).get('retry_count',0)))")
+          echo "phase=$phase retry=$retry rc=$TX_RC"
+          if [ "$phase" = done ] || [ "$phase" = stopped ]; then exit 0; fi
+          if [ "$retry" -ge 3 ]; then exit 0; fi
+          # Retry infrastructure failures as well as continue successful transactions.
+          gh workflow run evolution4-genome.yml --repo "$GITHUB_REPOSITORY" --ref master
+
+      - name: Fail visibly on transaction error
+        if: steps.pre.outputs.stopped != 'true' && steps.tx.outputs.rc != '0'
+        run: exit 1
