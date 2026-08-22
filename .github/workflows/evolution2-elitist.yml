@@ -29,23 +29,37 @@ jobs:
           ref: evolution2/control
           fetch-depth: 0
 
+      - name: Emergency STOP check
+        id: stop
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -e evolution2/STOP ]; then
+            echo 'stopped=true' >> "$GITHUB_OUTPUT"
+            echo 'evolution2/STOP present; no work performed'
+          else
+            echo 'stopped=false' >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Setup Python
+        if: steps.stop.outputs.stopped != 'true'
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
-      - name: Materialize pinned competition harness
+      - name: Materialize pinned evaluator
+        if: steps.stop.outputs.stopped != 'true'
         shell: bash
         run: |
           set -euo pipefail
-          git fetch --no-tags origin evolution2/start-x-original evolution2/start-y-original
           git archive 2260b6f19d51a14d7c68770677f22d04dfd88022 competition generals | tar -x
           test -s competition/agents/juraj_v35_cpp/paired_benchmark.py
           test -s competition/matchup.py
           grep -q -- '--audit-json' competition/matchup.py
           python -m py_compile competition/agents/juraj_v35_cpp/paired_benchmark.py competition/matchup.py competition/protocol.py
 
-      - name: Install benchmark dependencies
+      - name: Install evaluator dependencies
+        if: steps.stop.outputs.stopped != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -53,31 +67,23 @@ jobs:
           python -m pip install numpy jax jaxlib
           python -m pip install -e . --no-deps
 
-      - name: Validate elitist engine
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m py_compile \
-            tools/evolution2_common.py \
-            tools/evolution2_mutations.py \
-            tools/evolution2_main.py \
-            tools/evolution2_cycle2_policy.py \
-            tools/evolution2_opponent_policy.py \
-            tools/evolution2_entry.py
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+      - name: Validate elitist orchestrator
+        if: steps.stop.outputs.stopped != 'true'
+        run: python -m py_compile tools/evolution2_orchestrator.py
 
-      - name: Execute one evolution2 transaction
+      - name: Execute exactly one transaction
         id: evolve
+        if: steps.stop.outputs.stopped != 'true'
         shell: bash
         run: |
           set +e
-          python tools/evolution2_entry.py 2>&1 | tee /tmp/evolution2.log
+          python tools/evolution2_orchestrator.py 2>&1 | tee /tmp/evolution2.log
           rc=${PIPESTATUS[0]}
           echo "rc=$rc" >> "$GITHUB_OUTPUT"
           exit 0
 
-      - name: Report durable state
+      - name: Read durable state
+        if: always() && steps.stop.outputs.stopped != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -92,50 +98,38 @@ jobs:
           PY
 
       - name: Upload evidence
+        if: always() && steps.stop.outputs.stopped != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: evolution2-evidence-${{ github.run_number }}
           path: |
             evolution2/baseline/
             evolution2/results/
+            evolution2/final/
             evolution2/last-error.txt
             /tmp/evolution2.log
-          if-no-files-found: warn
-          retention-days: 90
-
-      - name: Upload final submission when present
-        uses: actions/upload-artifact@v4
-        with:
-          name: evolution2-final-${{ github.run_number }}
-          path: evolution2/final/
           if-no-files-found: ignore
           retention-days: 90
 
-      - name: Decide and dispatch next transaction
+      - name: Dispatch next transaction
+        if: steps.stop.outputs.stopped != 'true'
         shell: bash
         run: |
           set -euo pipefail
           git fetch --no-tags origin evolution2/control
           if git cat-file -e origin/evolution2/control:evolution2/STOP 2>/dev/null; then
-            echo 'evolution2/STOP is present. Loop remains stopped.'
+            echo 'STOP present; recursive dispatch disabled.'
             exit 0
           fi
           git show origin/evolution2/control:evolution2/state.json > /tmp/evolution2-state.json
           phase=$(python -c "import json; print(json.load(open('/tmp/evolution2-state.json'))['phase'])")
           retry=$(python -c "import json; print(int(json.load(open('/tmp/evolution2-state.json')).get('retry_count',0)))")
           rc='${{ steps.evolve.outputs.rc }}'
-          echo "phase=$phase retry_count=$retry transaction_rc=$rc"
-          if [ "$phase" = done ]; then
-            echo 'Evolution2 complete; no further dispatch.'
-            exit 0
-          fi
-          if [ "$retry" -ge 3 ]; then
-            echo 'Three consecutive infrastructure failures; hard stop.'
-            exit 1
-          fi
-          if [ "$rc" != 0 ]; then
-            echo "::warning::Evolution2 transaction failed; durable state recorded and one automatic retry will be dispatched."
-          fi
+          echo "phase=$phase retry_count=$retry rc=$rc"
+          if [ "$phase" = done ]; then exit 0; fi
+          if [ "$retry" -ge 3 ]; then echo 'Three consecutive infrastructure failures; hard stop.'; exit 1; fi
           gh workflow run evolution2-elitist.yml --repo "$GITHUB_REPOSITORY" --ref master
 
-# repaired preflight launch 2026-08-22T07:xx+02
+      - name: Fail visibly after durable recovery state
+        if: steps.stop.outputs.stopped != 'true' && steps.evolve.outputs.rc != '0'
+        run: exit 1
