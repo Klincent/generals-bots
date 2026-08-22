@@ -46,7 +46,7 @@ jobs:
           (cd /tmp/e4submit && zip -r /tmp/juraj_evolution4_g01_ff6f6a_experimental.zip juraj_v35)
           sha256sum /tmp/juraj_evolution4_g01_ff6f6a_experimental.zip > /tmp/juraj_evolution4_g01_ff6f6a_experimental.zip.sha256
           unzip -l /tmp/juraj_evolution4_g01_ff6f6a_experimental.zip
-      - name: Publish temporary transport copy
+      - name: Publish temporary transport chunks
         shell: bash
         run: |
           set -euo pipefail
@@ -56,11 +56,13 @@ jobs:
           git worktree add /tmp/e4master origin/master
           OUT=/tmp/e4master/evolution4/package_output
           mkdir -p "$OUT"
-          cp /tmp/juraj_evolution4_g01_ff6f6a_experimental.zip "$OUT/juraj_evolution4_g01_ff6f6a_experimental.zip"
+          rm -f "$OUT"/bin-* "$OUT"/binchunks.txt
+          split -b 3000 -d -a 2 /tmp/juraj_evolution4_g01_ff6f6a_experimental.zip "$OUT/bin-"
+          (cd "$OUT" && ls bin-* | sort > binchunks.txt)
           cp /tmp/juraj_evolution4_g01_ff6f6a_experimental.zip.sha256 "$OUT/juraj_evolution4_g01_ff6f6a_experimental.zip.sha256"
           cd /tmp/e4master
-          git add evolution4/package_output/juraj_evolution4_g01_ff6f6a_experimental.zip evolution4/package_output/juraj_evolution4_g01_ff6f6a_experimental.zip.sha256
-          git commit -m 'artifact: temporary binary e4 g01 ff6f6a submission transport'
+          git add evolution4/package_output
+          git commit -m 'artifact: binary chunks e4 g01 ff6f6a submission transport'
           git push origin HEAD:master
       - uses: actions/upload-artifact@v4
         with:
