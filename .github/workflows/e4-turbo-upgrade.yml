@@ -34,11 +34,12 @@ jobs:
           cd ../../..
           git add competition/agents/juraj_v35_cpp/main.cpp competition/agents/juraj_v35_cpp/evolution4_genome.hpp
           if ! git diff --cached --quiet; then
-            git commit -m 'evolution4 turbo: enable structural algorithm runtime'
+            git commit -m 'evolution4 turbo: repair structural runtime compatibility'
             git push origin HEAD:evolution4/turbo-template
           fi
-      - name: Verify structural markers
+      - name: Verify structural markers and legacy-single compatibility
         run: |
           grep -q '\[e4_structural\]' competition/agents/juraj_v35_cpp/main.cpp
           grep -q 'muster_topology' competition/agents/juraj_v35_cpp/evolution4_genome.hpp
           grep -q 'picker_start_policy' competition/agents/juraj_v35_cpp/evolution4_genome.hpp
+          grep -q 'want==1?(donor_count\[ai\]<=2||donor_mass\[ai\]<20)' competition/agents/juraj_v35_cpp/main.cpp
