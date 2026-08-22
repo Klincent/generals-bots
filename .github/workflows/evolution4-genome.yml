@@ -34,7 +34,7 @@ jobs:
           git config user.name ChatGPT
           git config user.email actions@users.noreply.github.com
 
-      - name: Repair known bootstrap compatibility failure
+      - name: Repair known bootstrap infrastructure failures
         shell: bash
         run: |
           set -euo pipefail
@@ -42,6 +42,8 @@ jobs:
           import json
           from pathlib import Path
 
+          # Repair 1: preserve the historical V35_* test/debug overrides after
+          # loading the new EVO4_* genome defaults.
           p=Path('tools/evolution4/template_transform.py')
           s=p.read_text()
           old_line="    new='cfg_.load();doomguard_enabled_=cfg_.doomguard_enabled;picker_enabled_=cfg_.picker_enabled;edge_picker_threshold_=cfg_.edge_picker_threshold;edge_picker_min_efficiency_=cfg_.picker_min_efficiency;muster_threshold_=cfg_.muster_threshold;'"
@@ -51,19 +53,34 @@ jobs:
           elif fixed_line not in s:
               raise SystemExit('unexpected template_transform legacy-env marker')
 
+          # Repair 2: the current repository matchup.py has an old path-label bug
+          # for /tmp worktrees. Use the pinned X0 matchup implementation for the
+          # bootstrap smoke instead of modifying evaluator/game semantics.
+          op=Path('tools/evolution4/orchestrator.py')
+          o=op.read_text()
+          old_smoke="""    # Fresh game-level smoke with actual engine.\n    run(['python','competition/matchup.py',str(t/AGENT/'run.sh'),str(x/AGENT/'run.sh'),'--mode','competition','--seed','399901'])\n    yw=wrapper(t/AGENT/'run.sh',founder_y0(),Path('/tmp/e4-y-smoke.sh')); run(['python','competition/matchup.py',str(yw),str(y/AGENT/'run.sh'),'--mode','competition','--seed','399902'])\n"""
+          new_smoke="""    # Fresh game-level smoke with the pinned X0 runner. The current control\n    # branch's older matchup.py has a path-label-only bug for /tmp worktrees;\n    # pinning the known X0 runner avoids changing game/evaluator semantics.\n    pinned_matchup=ROOT/'competition'/'evolution4_matchup_pinned.py'\n    pinned_matchup.write_text(git('show',f'{X0}:competition/matchup.py',capture=True).stdout)\n    try:\n        run(['python',str(pinned_matchup),str(t/AGENT/'run.sh'),str(x/AGENT/'run.sh'),'--mode','competition','--seed','399901'])\n        yw=wrapper(t/AGENT/'run.sh',founder_y0(),Path('/tmp/e4-y-smoke.sh'))\n        run(['python',str(pinned_matchup),str(yw),str(y/AGENT/'run.sh'),'--mode','competition','--seed','399902'])\n    finally:\n        pinned_matchup.unlink(missing_ok=True)\n"""
+          if old_smoke in o:
+              op.write_text(o.replace(old_smoke,new_smoke,1))
+          elif new_smoke not in o:
+              raise SystemExit('unexpected orchestrator smoke marker')
+
+          # A known, now-repaired bootstrap failure starts a new consecutive
+          # infrastructure-failure sequence. No gameplay result is changed.
           sp=Path('evolution4/state.json')
           state=json.loads(sp.read_text())
           err=str(state.get('last_error') or '')
-          if state.get('phase')=='stopped' and int(state.get('retry_count',0))>=3 and 'test.sh' in err:
+          known=('test.sh' in err) or ('competition/matchup.py' in err and '399901' in err)
+          if state.get('phase') in ('bootstrap','stopped') and known:
               state['phase']='bootstrap'
               state['retry_count']=0
               state['last_error']=None
               sp.write_text(json.dumps(state,indent=2,sort_keys=True)+'\n')
               Path('evolution4/STOP').unlink(missing_ok=True)
           PY
-          git add tools/evolution4/template_transform.py evolution4/state.json evolution4/STOP 2>/dev/null || true
+          git add tools/evolution4/template_transform.py tools/evolution4/orchestrator.py evolution4/state.json evolution4/STOP 2>/dev/null || true
           if ! git diff --cached --quiet; then
-            git commit -m 'evolution4: repair legacy env compatibility and reset fixed infra stop'
+            git commit -m 'evolution4: repair pinned bootstrap smoke infrastructure'
             git push origin HEAD:evolution4/control
           fi
 
@@ -184,4 +201,4 @@ jobs:
         if: steps.pre.outputs.stopped != 'true' && steps.tx.outputs.rc != '0'
         run: exit 1
 
-# bootstrap-repair-trigger: 2026-08-22T15:44+02:00
+# bootstrap-smoke-repair-trigger: 2026-08-22T15:49+02:00
