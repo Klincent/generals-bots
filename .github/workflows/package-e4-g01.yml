@@ -46,7 +46,7 @@ jobs:
           (cd /tmp/e4submit && zip -r /tmp/juraj_evolution4_g01_ff6f6a_experimental.zip juraj_v35)
           sha256sum /tmp/juraj_evolution4_g01_ff6f6a_experimental.zip > /tmp/juraj_evolution4_g01_ff6f6a_experimental.zip.sha256
           unzip -l /tmp/juraj_evolution4_g01_ff6f6a_experimental.zip
-      - name: Publish temporary transport copy
+      - name: Publish temporary transport chunks
         shell: bash
         run: |
           set -euo pipefail
@@ -54,12 +54,16 @@ jobs:
           git config user.email actions@users.noreply.github.com
           git fetch --no-tags origin master
           git worktree add /tmp/e4master origin/master
-          mkdir -p /tmp/e4master/evolution4/package_output
-          base64 -w0 /tmp/juraj_evolution4_g01_ff6f6a_experimental.zip > /tmp/e4master/evolution4/package_output/juraj_evolution4_g01_ff6f6a_experimental.zip.b64
-          cp /tmp/juraj_evolution4_g01_ff6f6a_experimental.zip.sha256 /tmp/e4master/evolution4/package_output/juraj_evolution4_g01_ff6f6a_experimental.zip.sha256
+          OUT=/tmp/e4master/evolution4/package_output
+          mkdir -p "$OUT"
+          rm -f "$OUT"/chunk-* "$OUT"/chunks.txt
+          base64 -w0 /tmp/juraj_evolution4_g01_ff6f6a_experimental.zip > /tmp/e4zip.b64
+          split -b 8000 -d -a 2 /tmp/e4zip.b64 "$OUT/chunk-"
+          (cd "$OUT" && ls chunk-* | sort > chunks.txt)
+          cp /tmp/juraj_evolution4_g01_ff6f6a_experimental.zip.sha256 "$OUT/juraj_evolution4_g01_ff6f6a_experimental.zip.sha256"
           cd /tmp/e4master
           git add evolution4/package_output
-          git commit -m 'artifact: temporary e4 g01 ff6f6a submission transport'
+          git commit -m 'artifact: chunked e4 g01 ff6f6a submission transport'
           git push origin HEAD:master
       - uses: actions/upload-artifact@v4
         with:
