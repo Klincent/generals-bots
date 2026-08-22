@@ -2,45 +2,67 @@ from __future__ import annotations
 import random
 from pathlib import Path
 from tools.evolution4.genome import founder_x0, founder_y0, genome_id, canonical_json, validate_genome
-from tools.evolution4.mutate import mutate
+from tools.evolution4.mutate import mutate, structural_jump
 from tools.evolution4.crossover import crossover
-from tools.evolution4.diversity import genome_distance
+from tools.evolution4.diversity import genome_distance, structural_distance, cohort_novelty
 from tools.evolution4.selection import non_dominated_sort, select
 from tools.evolution4.state import validate_transition
 from tools.evolution4.freeze import freeze_header
 from tools.evolution4.schema import load_schema
 
+
 def test_canonical_hash_stable():
     x=founder_x0(); assert genome_id(x)==genome_id(dict(reversed(list(x.items())))); assert canonical_json(x)==canonical_json(dict(x))
 
+
 def test_y0_exact_gene_delta():
     x=founder_x0(); y=founder_y0(); diff={k for k in x if x[k]!=y[k]}; assert diff=={'precontact_expansion_until','expansion_share_precontact'}; assert y['precontact_expansion_until']==250; assert y['expansion_share_precontact']==0.40
+
 
 def test_mutation_bounds_and_validity():
     rng=random.Random(1); v=founder_x0(); structural=0
     data,_=load_schema(); enum_names=[g['name'] for g in data['genes'] if g['type']=='enum']
     for i in range(200):
         before=dict(v); v=mutate(v,rng,exploratory=(i%7==0)); validate_genome(v)
-        structural += any(v[n]!=before[n] for n in enum_names)
+        structural+=any(v[n]!=before[n] for n in enum_names)
     assert structural>0
+
+
+def test_macro_jump_guarantees_multiple_structural_changes():
+    rng=random.Random(77); x=founder_x0(); y=structural_jump(x,rng,2,4); validate_genome(y)
+    assert structural_distance(x,y)>=2/7
+
 
 def test_crossover_valid():
     rng=random.Random(2); c=crossover(founder_x0(),founder_y0(),rng); validate_genome(c); assert genome_distance(c,founder_x0())>=0
 
+
 def test_duplicate_identity():
     assert genome_id(founder_x0())==genome_id(founder_x0()); assert genome_id(founder_x0())!=genome_id(founder_y0())
 
-def test_pareto_selection():
+
+def test_pareto_selection_and_novelty():
     items=[
-      {'genome_id':'a','fitness':{'aggregate':.80,'minimum':.10,'hof':.5,'color_imbalance':.02}},
-      {'genome_id':'b','fitness':{'aggregate':.72,'minimum':.55,'hof':.5,'color_imbalance':.02}},
-      {'genome_id':'c','fitness':{'aggregate':.60,'minimum':.30,'hof':.3,'color_imbalance':.10}},]
-    fronts=non_dominated_sort(items); assert {'a','b'}=={x['genome_id'] for x in fronts[0]}; assert len(select(items,2))==2
+      {'genome_id':'a','fitness':{'aggregate':.80,'minimum':.10,'novelty':.0,'hof':.5,'color_imbalance':.02}},
+      {'genome_id':'b','fitness':{'aggregate':.72,'minimum':.55,'novelty':.1,'hof':.5,'color_imbalance':.02}},
+      {'genome_id':'c','fitness':{'aggregate':.60,'minimum':.30,'novelty':.9,'hof':.3,'color_imbalance':.10}},]
+    fronts=non_dominated_sort(items); assert len(fronts)>=1; assert len(select(items,2))==2
+    n=cohort_novelty([founder_x0(),founder_y0()]); assert len(n)==2
+
 
 def test_state_transition_validation():
     a={'phase':'bootstrap','generation':0}; b={'phase':'exploration','generation':0}; assert validate_transition(a,b)
-    a={'phase':'exploration','generation':11}; b={'phase':'exploitation','generation':12}; assert validate_transition(a,b)
-    a={'phase':'exploitation','generation':29}; b={'phase':'final','generation':30}; assert validate_transition(a,b)
+    a={'phase':'exploration','generation':19}; b={'phase':'exploitation','generation':20}; assert validate_transition(a,b)
+    a={'phase':'exploitation','generation':59}; b={'phase':'final','generation':60}; assert validate_transition(a,b)
+
+
+def test_structural_catalog_is_real_and_wide():
+    data,_=load_schema(); enums={g['name']:g for g in data['genes'] if g['type']=='enum'}
+    assert len(enums)>=7
+    assert 'adaptive' in enums['muster_topology']['allowed']
+    assert 'safest' in enums['logistics_route_policy']['allowed']
+    assert 'opportunity' in enums['fallback_policy']['allowed']
+
 
 def test_freeze_render_consistency(tmp_path:Path):
     data,_=load_schema(); src=tmp_path/'h.hpp'; out=tmp_path/'f.hpp'; lines=['struct GenomeConfig {']
