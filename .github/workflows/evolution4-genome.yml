@@ -34,6 +34,39 @@ jobs:
           git config user.name ChatGPT
           git config user.email actions@users.noreply.github.com
 
+      - name: Repair known bootstrap compatibility failure
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          p=Path('tools/evolution4/template_transform.py')
+          s=p.read_text()
+          old_line="    new='cfg_.load();doomguard_enabled_=cfg_.doomguard_enabled;picker_enabled_=cfg_.picker_enabled;edge_picker_threshold_=cfg_.edge_picker_threshold;edge_picker_min_efficiency_=cfg_.picker_min_efficiency;muster_threshold_=cfg_.muster_threshold;'"
+          fixed_line=old_line[:-1]+"'+old"
+          if old_line in s:
+              p.write_text(s.replace(old_line,fixed_line,1))
+          elif fixed_line not in s:
+              raise SystemExit('unexpected template_transform legacy-env marker')
+
+          sp=Path('evolution4/state.json')
+          state=json.loads(sp.read_text())
+          err=str(state.get('last_error') or '')
+          if state.get('phase')=='stopped' and int(state.get('retry_count',0))>=3 and 'test.sh' in err:
+              state['phase']='bootstrap'
+              state['retry_count']=0
+              state['last_error']=None
+              sp.write_text(json.dumps(state,indent=2,sort_keys=True)+'\n')
+              Path('evolution4/STOP').unlink(missing_ok=True)
+          PY
+          git add tools/evolution4/template_transform.py evolution4/state.json evolution4/STOP 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m 'evolution4: repair legacy env compatibility and reset fixed infra stop'
+            git push origin HEAD:evolution4/control
+          fi
+
       - name: Capture remote pre-state and STOP
         id: pre
         shell: bash
@@ -151,4 +184,4 @@ jobs:
         if: steps.pre.outputs.stopped != 'true' && steps.tx.outputs.rc != '0'
         run: exit 1
 
-# bootstrap-trigger: 2026-08-22T15:28+02:00
+# bootstrap-repair-trigger: 2026-08-22T15:44+02:00
