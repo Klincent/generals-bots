@@ -57,7 +57,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -m py_compile tools/evolution2_common.py tools/evolution2_mutations.py tools/evolution2_main.py tools/evolution2_entry.py
+          python -m py_compile \
+            tools/evolution2_common.py \
+            tools/evolution2_mutations.py \
+            tools/evolution2_main.py \
+            tools/evolution2_cycle2_policy.py \
+            tools/evolution2_opponent_policy.py \
+            tools/evolution2_entry.py
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
 
@@ -81,7 +87,7 @@ jobs:
           python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
           import json
           s=json.load(open('/tmp/evolution2-state.json'))
-          for k in ('phase','cycle1_attempted','cycle1_promoted','cycle1_rejected','cycle2_attempted','cycle2_x_promoted','cycle2_y_promoted','cycle2_x_rejected','cycle2_y_rejected','current_x_champion_sha','current_y_champion_sha','retry_count','last_error'):
+          for k in ('phase','cycle1_attempted','cycle1_promoted','cycle1_rejected','cycle2_attempted','cycle2_x_promoted','cycle2_y_promoted','cycle2_x_rejected','cycle2_y_rejected','cycle2_x_skipped','cycle2_y_skipped','current_x_champion_sha','current_y_champion_sha','retry_count','last_error'):
               print(f'- **{k}**: {s.get(k)}')
           PY
 
@@ -131,3 +137,5 @@ jobs:
             echo "::warning::Evolution2 transaction failed; durable state recorded and one automatic retry will be dispatched."
           fi
           gh workflow run evolution2-elitist.yml --repo "$GITHUB_REPOSITORY" --ref master
+
+# hardened elitist launch 2026-08-22
