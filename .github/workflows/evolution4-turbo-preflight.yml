@@ -1,0 +1,83 @@
+name: evolution4-turbo-preflight
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'evolution4/turbo-preflight-kick.txt'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: evolution4/turbo-structural
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest numpy jax jaxlib
+          python -m pip install -e . --no-deps
+      - name: Validate nested engine and real structural schema
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/evolution4/*.py
+          pytest -q tests/test_evolution4.py
+          python - <<'PY'
+          from tools.evolution4.schema import load_schema
+          from tools.evolution4.genome import founder_x0, validate_genome
+          from tools.evolution4.mutate import structural_jump
+          from tools.evolution4.nested import evolution_policy
+          import random
+          data,_=load_schema(); enums=[g for g in data['genes'] if g['type']=='enum']
+          assert len(data['genes']) >= 55
+          assert len(enums) == 7
+          x=founder_x0(); y=structural_jump(x,random.Random(20260822),2,4); validate_genome(y)
+          assert sum(x[g['name']] != y[g['name']] for g in enums) >= 2
+          print('NESTED PYTHON PREFLIGHT OK genes=',len(data['genes']),'structural=',len(enums))
+          PY
+      - name: Clean-build and backward-equivalence
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin evolution4/template evolution4/turbo-template
+          rm -rf /tmp/e4-old-template /tmp/e4-turbo-template
+          git worktree prune
+          git worktree add --detach /tmp/e4-old-template origin/evolution4/template
+          git worktree add --detach /tmp/e4-turbo-template origin/evolution4/turbo-template
+          (cd /tmp/e4-old-template/competition/agents/juraj_v35_cpp && ./build.sh)
+          (cd /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp && ./build.sh)
+          grep -q '\[e4_structural\]' /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/main.cpp
+          grep -q 'cfg_.muster_topology' /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/main.cpp
+          grep -q 'cfg_.muster_anchor_policy' /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/main.cpp
+          grep -q 'cfg_.chunk_transfer_policy' /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/main.cpp
+          grep -q 'cfg_.logistics_route_policy' /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/main.cpp
+          grep -q 'cfg_.defense_policy' /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/main.cpp
+          grep -q 'cfg_.fallback_policy' /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/main.cpp
+          grep -q 'cfg_.picker_start_policy' /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/main.cpp
+          python -m tools.evolution4.equivalence_check \
+            --original /tmp/e4-old-template/competition/agents/juraj_v35_cpp/run.sh \
+            --template /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/run.sh \
+            --env-json '{}' --seeds 12
+          echo 'NESTED C++ PREFLIGHT OK'
+      - name: Persist successful preflight proof
+        run: |
+          set -euo pipefail
+          git config user.name ChatGPT
+          git config user.email actions@users.noreply.github.com
+          python - <<'PY'
+          import json,datetime,os
+          p={'ok':True,'validated_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'workflow_run_id':os.environ.get('GITHUB_RUN_ID'),'checks':['py_compile','pytest','schema-55-genes-7-real-structural','macro-jump','clean-cpp-build','12-seed-backward-equivalence']}
+          open('evolution4/NESTED_PREFLIGHT.json','w').write(json.dumps(p,indent=2,sort_keys=True)+'\n')
+          PY
+          git add evolution4/NESTED_PREFLIGHT.json
+          git commit -m 'evolution4 turbo: record nested preflight success'
+          git push origin HEAD:evolution4/turbo-structural
