@@ -8,7 +8,7 @@ from tools.evolution4.diversity import genome_distance
 from tools.evolution4.selection import non_dominated_sort, select
 from tools.evolution4.state import validate_transition
 from tools.evolution4.freeze import freeze_header
-from tools.evolution4.template_transform import HEADER
+from tools.evolution4.schema import load_schema
 
 def test_canonical_hash_stable():
     x=founder_x0(); assert genome_id(x)==genome_id(dict(reversed(list(x.items())))); assert canonical_json(x)==canonical_json(dict(x))
@@ -17,8 +17,12 @@ def test_y0_exact_gene_delta():
     x=founder_x0(); y=founder_y0(); diff={k for k in x if x[k]!=y[k]}; assert diff=={'precontact_expansion_until','expansion_share_precontact'}; assert y['precontact_expansion_until']==250; assert y['expansion_share_precontact']==0.40
 
 def test_mutation_bounds_and_validity():
-    rng=random.Random(1); v=founder_x0()
-    for _ in range(200): v=mutate(v,rng,exploratory=(_%7==0)); validate_genome(v)
+    rng=random.Random(1); v=founder_x0(); structural=0
+    data,_=load_schema(); enum_names=[g['name'] for g in data['genes'] if g['type']=='enum']
+    for i in range(200):
+        before=dict(v); v=mutate(v,rng,exploratory=(i%7==0)); validate_genome(v)
+        structural += any(v[n]!=before[n] for n in enum_names)
+    assert structural>0
 
 def test_crossover_valid():
     rng=random.Random(2); c=crossover(founder_x0(),founder_y0(),rng); validate_genome(c); assert genome_distance(c,founder_x0())>=0
@@ -39,4 +43,13 @@ def test_state_transition_validation():
     a={'phase':'exploitation','generation':29}; b={'phase':'final','generation':30}; assert validate_transition(a,b)
 
 def test_freeze_render_consistency(tmp_path:Path):
-    src=tmp_path/'h.hpp'; out=tmp_path/'f.hpp'; src.write_text(HEADER); v=founder_y0(); freeze_header(src,v,out); text=out.read_text(); assert 'precontact_expansion_until=250' in text; assert 'expansion_share_precontact=.4' in text or 'expansion_share_precontact=0.4' in text
+    data,_=load_schema(); src=tmp_path/'h.hpp'; out=tmp_path/'f.hpp'; lines=['struct GenomeConfig {']
+    for g in data['genes']:
+        v=g['default']; t=g['type']
+        if t=='bool': ctype='bool'; lit='true' if v else 'false'
+        elif t=='int': ctype='int'; lit=str(v)
+        elif t=='float': ctype='double'; lit=str(v)
+        else: ctype='std::string'; lit='"'+str(v)+'"'
+        lines.append(f' {ctype} {g["name"]}={lit};')
+    lines.append('};'); src.write_text('\n'.join(lines)+'\n')
+    v=founder_y0(); freeze_header(src,v,out); text=out.read_text(); assert 'precontact_expansion_until=250' in text; assert 'expansion_share_precontact=.4' in text or 'expansion_share_precontact=0.4' in text; assert 'muster_topology="single"' in text
