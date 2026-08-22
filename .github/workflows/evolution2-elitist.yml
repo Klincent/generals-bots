@@ -50,7 +50,7 @@ jobs:
         run: |
           set -euo pipefail
           python -m pip install --upgrade pip
-          python -m pip install numpy
+          python -m pip install numpy jax jaxlib
           python -m pip install -e . --no-deps
 
       - name: Validate elitist engine
@@ -138,4 +138,4 @@ jobs:
           fi
           gh workflow run evolution2-elitist.yml --repo "$GITHUB_REPOSITORY" --ref master
 
-# hardened elitist launch 2026-08-22
+# hardened elitist launch with pinned JAX dependencies
