@@ -2,6 +2,10 @@ name: evolution4-genome
 
 on:
   workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/evolution4-genome.yml'
 
 permissions:
   contents: write
@@ -9,7 +13,7 @@ permissions:
 
 concurrency:
   group: evolution4-genome
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   evolve:
@@ -35,15 +39,13 @@ jobs:
         run: |
           set -euo pipefail
           git fetch --no-tags origin master evolution4/control
-          if git cat-file -e origin/master:tools/evolution4/migrate_dead_genome_archive.py 2>/dev/null; then
-            git show origin/master:tools/evolution4/migrate_dead_genome_archive.py > /tmp/e4-migrate.py
-            python /tmp/e4-migrate.py
-            python -m py_compile tools/evolution4/orchestrator.py tools/evolution4/telemetry.py
-            git add tools/evolution4/orchestrator.py tools/evolution4/telemetry.py evolution4/state.json
-            if ! git diff --cached --quiet; then
-              git commit -m 'evolution4: migrate random exploration and dead-genome archive'
-              git push origin HEAD:evolution4/control
-            fi
+          git show origin/master:tools/evolution4/migrate_dead_genome_archive.py > /tmp/e4-migrate.py
+          python /tmp/e4-migrate.py
+          python -m py_compile tools/evolution4/orchestrator.py tools/evolution4/telemetry.py tools/evolution4/evaluator.py
+          git add tools/evolution4/orchestrator.py tools/evolution4/telemetry.py tools/evolution4/evaluator.py evolution4/state.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'evolution4: migrate random exploration, benchmark retry, and dead-genome archive'
+            git push origin HEAD:evolution4/control
           fi
 
       - name: Capture remote pre-state and STOP
@@ -113,12 +115,9 @@ jobs:
           bp,bg=pre['phase'],int(pre['generation']); ap,ag=post['phase'],int(post['generation'])
           print('POST phase=',ap,'generation=',ag,'retry=',post.get('retry_count',0),'last_error=',post.get('last_error'),'tested=',post.get('tested_genome_count',0),'dead=',post.get('dead_genome_count',0))
           if rc==0:
-              if bp=='bootstrap' and not (ap=='exploration' and ag==0):
-                  raise SystemExit(f'FALSE GREEN bootstrap {ap}/{ag}')
-              if bp in ('exploration','exploitation') and ag != bg+1:
-                  raise SystemExit(f'FALSE GREEN generation {bg}->{ag}')
-              if bp=='final' and not (ap=='done' and ag==bg):
-                  raise SystemExit(f'FALSE GREEN final {ap}/{ag}')
+              if bp=='bootstrap' and not (ap=='exploration' and ag==0): raise SystemExit(f'FALSE GREEN bootstrap {ap}/{ag}')
+              if bp in ('exploration','exploitation') and ag != bg+1: raise SystemExit(f'FALSE GREEN generation {bg}->{ag}')
+              if bp=='final' and not (ap=='done' and ag==bg): raise SystemExit(f'FALSE GREEN final {ap}/{ag}')
           PY
 
       - name: Upload transaction evidence
@@ -146,10 +145,7 @@ jobs:
         run: |
           set -euo pipefail
           git fetch --no-tags origin evolution4/control
-          if git cat-file -e origin/evolution4/control:evolution4/STOP 2>/dev/null; then
-            echo 'evolution4 STOP present; no dispatch.'
-            exit 0
-          fi
+          if git cat-file -e origin/evolution4/control:evolution4/STOP 2>/dev/null; then echo 'evolution4 STOP present; no dispatch.'; exit 0; fi
           git show origin/evolution4/control:evolution4/state.json > /tmp/latest-state.json
           phase=$(python -c "import json;print(json.load(open('/tmp/latest-state.json'))['phase'])")
           retry=$(python -c "import json;print(int(json.load(open('/tmp/latest-state.json')).get('retry_count',0)))")
