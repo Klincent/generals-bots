@@ -1,16 +1,19 @@
 {
-  "genome_id": "289d3e1a071b29f205282cf495f92e8bd22c1e8151fac6aae373a4ff2f2cf546",
+  "genome_id": "1c9a2a3fc357df66d8dd9b26aa64c09ea6f01cb7a728a73bf90a568e638c8ef3",
   "meta": {
-    "founder": "X0",
-    "gameplay_sha": "2260b6f19d51a14d7c68770677f22d04dfd88022",
-    "schema_migrated_from_v1": true
+    "kind": "structural-crossover",
+    "parents": [
+      "0fcb85f8eb3e8c510608e45fed9d6dc277c3453195c66b6511d348b56c2e19a4",
+      "6eb476c7b03305801ad1e5f412422ea52e546102b3cd9ff7814a4c64643f3463"
+    ],
+    "turbo_generation": 0
   },
   "values": {
     "adjacent_reserve_base": 2,
     "castle1_target_turn": 150,
     "castle2_target_turn": 250,
     "chunk_transfer_policy": "full",
-    "defense_policy": "block_first",
+    "defense_policy": "reinforce_first",
     "doomguard_enabled": true,
     "edge_picker_threshold": 16,
     "expansion_share_healthy": 0.35,
@@ -37,12 +40,12 @@
     "muster_opp_divisor": 2,
     "muster_ratio_den": 6,
     "muster_ratio_num": 5,
-    "muster_start_turn": 300,
+    "muster_start_turn": 325,
     "muster_threshold": 8,
     "muster_topology": "single",
     "picker_enabled": true,
     "picker_growth25": 0.08,
-    "picker_growth50": 0.06,
+    "picker_growth50": 0.04815580228192017,
     "picker_growth_land_pct": 45,
     "picker_mature_land_pct": 35,
     "picker_mature_turn": 150,
@@ -51,9 +54,9 @@
     "picker_not_behind_den": 4,
     "picker_not_behind_num": 5,
     "picker_start_policy": "margin",
-    "picker_top3_share_max": 0.55,
-    "precontact_expansion_until": -1,
-    "production_recover_gap": 10,
+    "picker_top3_share_max": 0.5889147975016686,
+    "precontact_expansion_until": 250,
+    "production_recover_gap": 9,
     "production_recover_slope": 0.1,
     "production_severe_gap": 18,
     "production_soft_gap": 8,

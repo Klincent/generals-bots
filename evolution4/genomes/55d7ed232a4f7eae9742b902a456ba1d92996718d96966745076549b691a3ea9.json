@@ -1,22 +1,25 @@
 {
-  "genome_id": "289d3e1a071b29f205282cf495f92e8bd22c1e8151fac6aae373a4ff2f2cf546",
+  "genome_id": "55d7ed232a4f7eae9742b902a456ba1d92996718d96966745076549b691a3ea9",
   "meta": {
-    "founder": "X0",
-    "gameplay_sha": "2260b6f19d51a14d7c68770677f22d04dfd88022",
-    "schema_migrated_from_v1": true
+    "kind": "structural-crossover",
+    "parents": [
+      "2c2d5ab6fe8a8d26482996501ae5325848a2a3db4a09f03edc0e5453adc88bdf",
+      "6eb476c7b03305801ad1e5f412422ea52e546102b3cd9ff7814a4c64643f3463"
+    ],
+    "turbo_generation": 0
   },
   "values": {
     "adjacent_reserve_base": 2,
     "castle1_target_turn": 150,
     "castle2_target_turn": 250,
-    "chunk_transfer_policy": "full",
+    "chunk_transfer_policy": "split",
     "defense_policy": "block_first",
     "doomguard_enabled": true,
     "edge_picker_threshold": 16,
     "expansion_share_healthy": 0.35,
     "expansion_share_precontact": 0.35,
     "expansion_share_severe": 0.62,
-    "expansion_share_soft": 0.45,
+    "expansion_share_soft": 0.4043248061184949,
     "expansion_wait_limit": 4,
     "fallback_policy": "balanced",
     "free_share_peace": 0.15,
@@ -28,7 +31,7 @@
     "late_finish_enemy_bonus": 15,
     "late_finish_enemy_mult": 2.0,
     "late_finish_turn": 900,
-    "logistics_route_policy": "interior",
+    "logistics_route_policy": "shortest",
     "muster_anchor_policy": "largest",
     "muster_army_margin": 80,
     "muster_enemy_bonus": 20,
@@ -36,7 +39,7 @@
     "muster_launch_base": 90,
     "muster_opp_divisor": 2,
     "muster_ratio_den": 6,
-    "muster_ratio_num": 5,
+    "muster_ratio_num": 3,
     "muster_start_turn": 300,
     "muster_threshold": 8,
     "muster_topology": "single",
@@ -49,7 +52,7 @@
     "picker_min_efficiency": 2.0,
     "picker_neutrals_max": 3,
     "picker_not_behind_den": 4,
-    "picker_not_behind_num": 5,
+    "picker_not_behind_num": 3,
     "picker_start_policy": "margin",
     "picker_top3_share_max": 0.55,
     "precontact_expansion_until": -1,

@@ -11,7 +11,7 @@ from .telemetry import aggregate as telemetry_aggregate, suggested_chromosome
 from .evaluator import ROOT, AGENT, worktree, build, wrapper, plain_wrapper, resolve_opponents, paired, combine, color_imbalance, run
 from .freeze import freeze_header, inline_for_submission
 
-CONTROL='evolution4/control'; TEMPLATE='evolution4/template'; CHAMPION='evolution4/champion'
+CONTROL='evolution4/turbo-structural'; TEMPLATE='evolution4/turbo-template'; CHAMPION='evolution4/turbo-champion'
 XBR='evolution4/founder-x0'; YBR='evolution4/founder-y0'
 X0='2260b6f19d51a14d7c68770677f22d04dfd88022'; Y0='687165839cea8ae5e84da26c99af1c0e5aed4543'
 E4=ROOT/'evolution4'; STATE=E4/'state.json'; HEART=E4/'heartbeat.json'; STOP=E4/'STOP'; GENOMES=E4/'genomes'; RESULTS=E4/'results'; CHECKPOINTS=E4/'checkpoints'; FINAL=E4/'final'
@@ -326,10 +326,10 @@ def generation(s,txid):
     else: s.setdefault('rejected_promotions',[]).append({'generation':g,**evidence})
     dead_ids=archive_generation_results(s,g,rows1,rows2,top4)
     nxt,elites,bias=next_population(top4,g,dead_ids); s['current_population']=nxt; s['breeding_elites']=elites; s['generation']=g
-    if g>=30: s['phase']='final'
-    elif g>=12: s['phase']='exploitation'
+    if g>=60: s['phase']='final'
+    elif g>=20: s['phase']='exploitation'
     else: s['phase']='exploration'
-    report={'generation':g,'phase':s['phase'],'stage1':rows1,'stage2':rows2,'top4':[x['genome_id'] for x in top4],'mutation_bias':bias,'promotion':evidence,'promoted_commit':prom}; p=RESULTS/f'g{g:02d}'/'report.json'; dump(p,report); s.setdefault('generation_history',[]).append({'generation':g,'top4':[x['genome_id'] for x in top4],'promotion_decision':evidence['decision'],'official_champion_genome_id':s['official_champion_genome_id']})
+    report={'generation':g,'phase':s['phase'],'mode':s.get('mode','turbo_structural'),'genome_schema_version':s.get('genome_schema_version',2),'stage1':rows1,'stage2':rows2,'top4':[x['genome_id'] for x in top4],'mutation_bias':bias,'promotion':evidence,'promoted_commit':prom}; p=RESULTS/f'g{g:02d}'/'report.json'; dump(p,report); s.setdefault('generation_history',[]).append({'generation':g,'top4':[x['genome_id'] for x in top4],'promotion_decision':evidence['decision'],'official_champion_genome_id':s['official_champion_genome_id']})
     extra=[]
     if g%5==0: extra.append(audit(s,opps,g))
     if g==0 or g%5==0 or int(s.get('champion_promotions_since_checkpoint',0))>=3: extra.extend(checkpoint(s))
