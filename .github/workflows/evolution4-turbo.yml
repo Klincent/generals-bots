@@ -1,0 +1,173 @@
+name: evolution4-turbo
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - 'evolution4/turbo-kick.txt'
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: evolution4-turbo
+  cancel-in-progress: false
+
+jobs:
+  evolve:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    env:
+      SDL_VIDEODRIVER: dummy
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - name: Checkout Turbo durable control
+        uses: actions/checkout@v4
+        with:
+          ref: evolution4/turbo-structural
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name ChatGPT
+          git config user.email actions@users.noreply.github.com
+
+      - name: Capture Turbo pre-state and STOP
+        id: pre
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin evolution4/turbo-structural evolution4/turbo-template evolution4/turbo-champion evolution4/template
+          git show origin/evolution4/turbo-structural:evolution4/state.json > /tmp/pre-state.json
+          python - <<'PY'
+          import json
+          s=json.load(open('/tmp/pre-state.json'))
+          print('TURBO PRE mode=',s.get('mode'),'schema=',s.get('genome_schema_version'),'phase=',s['phase'],'generation=',s['generation'],'retry=',s.get('retry_count',0),'champion=',s.get('official_champion_genome_id'),'tested=',s.get('tested_genome_count',0),'dead=',s.get('dead_genome_count',0))
+          assert s.get('mode')=='turbo_structural'
+          assert int(s.get('genome_schema_version',0))>=2
+          assert len(s.get('current_population',[]))==16
+          PY
+          if git cat-file -e origin/evolution4/turbo-structural:evolution4/STOP 2>/dev/null; then
+            echo stopped=true >> "$GITHUB_OUTPUT"
+          else
+            echo stopped=false >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-python@v5
+        if: steps.pre.outputs.stopped != 'true'
+        with:
+          python-version: '3.12'
+
+      - name: Install evaluator dependencies
+        if: steps.pre.outputs.stopped != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install pytest numpy jax jaxlib
+          python -m pip install -e . --no-deps
+
+      - name: Genetic engine and structural schema tests
+        if: steps.pre.outputs.stopped != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/evolution4/*.py
+          pytest -q tests/test_evolution4.py
+          python - <<'PY'
+          from tools.evolution4.schema import load_schema
+          data,_=load_schema(); enums=[g for g in data['genes'] if g['type']=='enum']
+          assert len(data['genes'])>=55
+          assert len(enums)>=7
+          print('TURBO GENOME genes=',len(data['genes']),'structural=',len(enums))
+          PY
+
+      - name: Structural C++ preflight and backward-equivalence
+        if: steps.pre.outputs.stopped != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/e4-old-template /tmp/e4-turbo-template
+          git worktree prune
+          git worktree add --detach /tmp/e4-old-template origin/evolution4/template
+          git worktree add --detach /tmp/e4-turbo-template origin/evolution4/turbo-template
+          (cd /tmp/e4-old-template/competition/agents/juraj_v35_cpp && ./build.sh)
+          (cd /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp && ./build.sh)
+          grep -q 'cfg_.muster_topology' /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/main.cpp
+          grep -q 'cfg_.picker_start_policy' /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/main.cpp
+          grep -q 'cfg_.defense_policy' /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/main.cpp
+          python -m tools.evolution4.equivalence_check \
+            --original /tmp/e4-old-template/competition/agents/juraj_v35_cpp/run.sh \
+            --template /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/run.sh \
+            --env-json '{}' --seeds 12
+          echo 'TURBO STRUCTURAL PREFLIGHT OK'
+
+      - name: Execute exactly one Turbo evolution transaction
+        id: tx
+        if: steps.pre.outputs.stopped != 'true'
+        shell: bash
+        run: |
+          set +e
+          python -m tools.evolution4.orchestrator 2>&1 | tee /tmp/evolution4-turbo.log
+          rc=${PIPESTATUS[0]}
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Fetch and validate Turbo post-state
+        if: always() && steps.pre.outputs.stopped != 'true'
+        shell: bash
+        env:
+          TX_RC: ${{ steps.tx.outputs.rc }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin evolution4/turbo-structural
+          git show origin/evolution4/turbo-structural:evolution4/state.json > /tmp/post-state.json
+          python - <<'PY'
+          import json,os
+          pre=json.load(open('/tmp/pre-state.json')); post=json.load(open('/tmp/post-state.json'))
+          rc=int(os.environ.get('TX_RC','0')); bg=int(pre['generation']); ag=int(post['generation'])
+          print('TURBO POST phase=',post['phase'],'generation=',ag,'retry=',post.get('retry_count',0),'last_error=',post.get('last_error'),'tested=',post.get('tested_genome_count',0),'dead=',post.get('dead_genome_count',0))
+          if rc==0 and pre['phase'] in ('exploration','exploitation') and ag != bg+1:
+              raise SystemExit(f'FALSE GREEN turbo generation {bg}->{ag}')
+          if post.get('mode')!='turbo_structural': raise SystemExit('Turbo mode lost')
+          PY
+
+      - name: Upload Turbo transaction evidence
+        if: always() && steps.pre.outputs.stopped != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: evolution4-turbo-${{ github.run_number }}
+          path: |
+            /tmp/evolution4-turbo.log
+            /tmp/pre-state.json
+            /tmp/post-state.json
+            evolution4/heartbeat.json
+            evolution4/results/
+            evolution4/checkpoints/
+            evolution4/final/
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Dispatch next Turbo generation when allowed
+        if: always() && steps.pre.outputs.stopped != 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TX_RC: ${{ steps.tx.outputs.rc }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin evolution4/turbo-structural
+          if git cat-file -e origin/evolution4/turbo-structural:evolution4/STOP 2>/dev/null; then echo 'Turbo STOP present; no dispatch.'; exit 0; fi
+          git show origin/evolution4/turbo-structural:evolution4/state.json > /tmp/latest-state.json
+          phase=$(python -c "import json;print(json.load(open('/tmp/latest-state.json'))['phase'])")
+          retry=$(python -c "import json;print(int(json.load(open('/tmp/latest-state.json')).get('retry_count',0)))")
+          echo "turbo phase=$phase retry=$retry rc=$TX_RC"
+          if [ "$phase" = done ] || [ "$phase" = stopped ]; then exit 0; fi
+          if [ "$retry" -ge 3 ]; then exit 0; fi
+          gh workflow run evolution4-turbo.yml --repo "$GITHUB_REPOSITORY" --ref master
+
+      - name: Fail visibly on Turbo transaction error
+        if: steps.pre.outputs.stopped != 'true' && steps.tx.outputs.rc != '0'
+        run: exit 1
