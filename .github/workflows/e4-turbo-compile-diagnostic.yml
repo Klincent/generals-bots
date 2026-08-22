@@ -1,0 +1,75 @@
+name: evolution4-turbo-compile-diagnostic
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/e4-turbo-compile-diagnostic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  compile:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: evolution4/turbo-template
+          fetch-depth: 0
+      - name: Apply and compile structural phenotype
+        id: build
+        shell: bash
+        run: |
+          set -u
+          git config user.name ChatGPT
+          git config user.email actions@users.noreply.github.com
+          git fetch --no-tags origin evolution4/turbo-structural
+          git show origin/evolution4/turbo-structural:tools/evolution4/apply_turbo_structural_cpp.py > /tmp/apply_turbo.py
+          set +e
+          {
+            python /tmp/apply_turbo.py competition/agents/juraj_v35_cpp/main.cpp
+            arc=$?
+            echo APPLY_RC=$arc
+            if [ "$arc" -eq 0 ]; then
+              (cd competition/agents/juraj_v35_cpp && ./build.sh)
+              brc=$?
+            else
+              brc=$arc
+            fi
+            echo BUILD_RC=$brc
+            exit "$brc"
+          } > /tmp/turbo-compile.log 2>&1
+          rc=$?
+          set -e
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          if [ "$rc" -eq 0 ]; then
+            git add competition/agents/juraj_v35_cpp/main.cpp competition/agents/juraj_v35_cpp/evolution4_genome.hpp
+            if ! git diff --cached --quiet; then
+              git commit -m 'evolution4 turbo: activate structural C++ phenotype'
+              git push origin HEAD:evolution4/turbo-template
+            fi
+          fi
+          exit 0
+      - name: Persist compile diagnostics
+        shell: bash
+        env:
+          BUILD_RC: ${{ steps.build.outputs.rc }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin evolution4/turbo-structural
+          git worktree add /tmp/turbo-control origin/evolution4/turbo-structural
+          cp /tmp/turbo-compile.log /tmp/turbo-control/evolution4/turbo_compile.log
+          printf 'build_rc=%s\n' "$BUILD_RC" > /tmp/turbo-control/evolution4/turbo_compile.status
+          cd /tmp/turbo-control
+          git config user.name ChatGPT
+          git config user.email actions@users.noreply.github.com
+          git add evolution4/turbo_compile.log evolution4/turbo_compile.status
+          if ! git diff --cached --quiet; then
+            git commit -m 'evolution4 turbo: structural compile diagnostics'
+            git push origin HEAD:evolution4/turbo-structural
+          fi
+      - name: Fail if structural phenotype did not build
+        if: steps.build.outputs.rc != '0'
+        run: exit 1
