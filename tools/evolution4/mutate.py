@@ -15,10 +15,23 @@ def mutate(values: dict, rng: random.Random, exploratory: bool=False, bias_chrom
         q = [g for g in genes if g['chromosome'] == bias_chromosome]
         if q: pool = q
     count = rng.randint(4,8) if exploratory else rng.randint(1,3)
+    chosen=[]
+    # Turbo Evolution: structural genes are first-class mutations, not rare accidents.
+    # Exploratory offspring almost always change at least one algorithm; ordinary
+    # offspring still have a material chance of doing so while preserving local search.
+    enum_genes=[g for g in genes if g['type']=='enum']
+    structural_p=0.90 if exploratory else 0.40
+    if enum_genes and rng.random()<structural_p:
+        chosen.append(rng.choice(enum_genes))
+    remaining=[g for g in pool if g not in chosen]
+    need=max(0,min(count,len(genes))-len(chosen))
+    if need:
+        if len(remaining)<need:
+            remaining=[g for g in genes if g not in chosen]
+        chosen.extend(rng.sample(remaining,min(need,len(remaining))))
     out = dict(values)
-    chosen = rng.sample(pool, min(count, len(pool)))
     for g in chosen:
-        n=g['name']; t=g['type']; old=out[n]
+        n=g['name']; t=g['type']; old=out.get(n,g['default'])
         if t == 'bool': out[n] = not old
         elif t == 'enum':
             opts=[x for x in g['allowed'] if x != old]; out[n]=rng.choice(opts)
