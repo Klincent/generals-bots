@@ -130,9 +130,17 @@ def bootstrap(s,txid):
     if git('cat-file','-e','origin/evolution3/control:evolution3/STOP',check=False).returncode: raise RuntimeError('evolution3 STOP missing')
     if git('cat-file','-e','origin/master:.github/workflows/evolution3-elitist.yml',check=False).returncode==0: raise RuntimeError('evolution3 workflow still present')
     x,y=founder_worktrees(); t=ensure_template(); equivalence(x,t,'{}',12); equivalence(y,t,y_env_json(),12)
-    # Fresh game-level smoke with actual engine.
-    run(['python','competition/matchup.py',str(t/AGENT/'run.sh'),str(x/AGENT/'run.sh'),'--mode','competition','--seed','399901'])
-    yw=wrapper(t/AGENT/'run.sh',founder_y0(),Path('/tmp/e4-y-smoke.sh')); run(['python','competition/matchup.py',str(yw),str(y/AGENT/'run.sh'),'--mode','competition','--seed','399902'])
+    # Fresh game-level smoke with the pinned X0 runner. The current control
+    # branch's older matchup.py has a path-label-only bug for /tmp worktrees;
+    # pinning the known X0 runner avoids changing game/evaluator semantics.
+    pinned_matchup=ROOT/'competition'/'evolution4_matchup_pinned.py'
+    pinned_matchup.write_text(git('show',f'{X0}:competition/matchup.py',capture=True).stdout)
+    try:
+        run(['python',str(pinned_matchup),str(t/AGENT/'run.sh'),str(x/AGENT/'run.sh'),'--mode','competition','--seed','399901'])
+        yw=wrapper(t/AGENT/'run.sh',founder_y0(),Path('/tmp/e4-y-smoke.sh'))
+        run(['python',str(pinned_matchup),str(yw),str(y/AGENT/'run.sh'),'--mode','competition','--seed','399902'])
+    finally:
+        pinned_matchup.unlink(missing_ok=True)
     opps=resolve_opponents(); manifest=[{k:o[k] for k in ('archetype','ref','sha')} for o in opps]; dump(E4/'opponent_suite.json',manifest)
     xgid=save_genome(GENOMES/'founder-x0.json',founder_x0(),{'founder':'X0','gameplay_sha':X0}); ygid=save_genome(GENOMES/'founder-y0.json',founder_y0(),{'founder':'Y0','gameplay_sha':Y0})
     # Canonical id-named copies are the durable population objects.
