@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "description": "Turbo Evolution structural/algorithmic genes layered on top of the original parameter genome.",
+  "genes": [
+    {"name":"muster_topology","chromosome":"muster_structure","type":"enum","default":"single","allowed":["single","dual","triple"],"env":"EVO4_MUSTER_TOPOLOGY","description":"Number/topology of independently gathering attack chunks."},
+    {"name":"muster_anchor_policy","chromosome":"muster_structure","type":"enum","default":"largest","allowed":["largest","forward","central"],"env":"EVO4_MUSTER_ANCHOR_POLICY","description":"Algorithm used to choose chunk anchors."},
+    {"name":"chunk_transfer_policy","chromosome":"muster_structure","type":"enum","default":"full","allowed":["full","split"],"env":"EVO4_CHUNK_TRANSFER_POLICY","description":"Whether harvest/launch moves transfer the full movable stack or split it."},
+    {"name":"logistics_route_policy","chromosome":"logistics_structure","type":"enum","default":"interior","allowed":["interior","shortest"],"env":"EVO4_LOGISTICS_ROUTE_POLICY","description":"Routing algorithm for logistics/recentering moves."},
+    {"name":"defense_policy","chromosome":"defense_structure","type":"enum","default":"block_first","allowed":["block_first","reinforce_first"],"env":"EVO4_DEFENSE_POLICY","description":"Threat-response algorithm: intercept choke first or reinforce general first."},
+    {"name":"fallback_policy","chromosome":"fallback_structure","type":"enum","default":"balanced","allowed":["balanced","aggressive","consolidate"],"env":"EVO4_FALLBACK_POLICY","description":"Ordering algorithm used when the strategic scheduler has no candidate."},
+    {"name":"picker_start_policy","chromosome":"picker_structure","type":"enum","default":"margin","allowed":["margin","mass","efficiency","speed"],"env":"EVO4_PICKER_START_POLICY","description":"Algorithm used to select among viable edge-picker sweeps."}
+  ]
+}
