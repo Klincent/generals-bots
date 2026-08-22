@@ -155,3 +155,5 @@ jobs:
       - name: Fail visibly after durable recovery state
         if: steps.stop.outputs.stopped != 'true' && steps.evolve.outputs.rc != '0'
         run: exit 1
+
+# explicit launch trigger after workflow registration
