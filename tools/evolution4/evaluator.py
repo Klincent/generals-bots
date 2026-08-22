@@ -1,5 +1,5 @@
 from __future__ import annotations
-import json, os, shutil, subprocess
+import json, os, shutil, subprocess, time
 from pathlib import Path
 from .genome import env_for
 
@@ -20,24 +20,20 @@ OPPONENT_SPECS=[
  ('gatherer-economy',['juraj-v3.6-edge-picker-economics','v35-heuristic-rebuild','v35-iterative-1to6']),
  ('recent-reference',['chatgpt/picker9-opponent-suite-75','v35-heuristic-rebuild','v35-castle-recapture'])]
 
-def run(cmd,cwd=ROOT,check=True,capture=False,env=None):
-    p=subprocess.run(cmd,cwd=cwd,text=True,capture_output=capture,env=env)
+def run(cmd,cwd=ROOT,check=True,capture=False,env=None,timeout=None):
+    try:
+        p=subprocess.run(cmd,cwd=cwd,text=True,capture_output=capture,env=env,timeout=timeout)
+    except subprocess.TimeoutExpired as e:
+        raise RuntimeError(f'command timeout after {timeout}s: {cmd}') from e
     if check and p.returncode:
         raise RuntimeError(f'command failed {p.returncode}: {cmd}\n{p.stdout if capture else ""}\n{p.stderr if capture else ""}')
     return p
 
 def _git_show(spec:str)->str:
-    p=run(['git','show',spec],capture=True)
+    p=run(['git','show',spec],capture=True,timeout=30)
     return p.stdout
 
 def ensure_pinned_evaluator():
-    """Materialize immutable X0 evaluator scripts in repo-local paths.
-
-    The X0 paired harness hardcodes competition/matchup.py. We rewrite only that
-    script path to our pinned copy; game logic and evaluator scoring remain byte-
-    for-byte from X0. Files are working-tree infrastructure and are never added to
-    champion/submission commits.
-    """
     matchup=_git_show(f'{EVAL_SHA}:competition/matchup.py')
     paired_src=_git_show(f'{EVAL_SHA}:competition/agents/juraj_v35_cpp/paired_benchmark.py')
     paired_src=paired_src.replace("'competition/matchup.py'", "'competition/evolution4_matchup_pinned.py'")
@@ -48,20 +44,20 @@ def ensure_pinned_evaluator():
     PINNED_PAIRED.write_text(paired_src)
 
 def worktree(ref:str,dest:Path)->Path:
-    # GitHub-hosted runners start clean. Avoid calling `git worktree remove` on
-    # paths that are not actually registered; Git prints a scary but harmless
-    # `fatal: ... is not a working tree` for that case.
-    listed=run(['git','worktree','list','--porcelain'],capture=True).stdout
+    listed=run(['git','worktree','list','--porcelain'],capture=True,timeout=30).stdout
     marker=f'worktree {dest}\n'
     if marker in listed:
-        run(['git','worktree','remove','--force',str(dest)])
+        run(['git','worktree','remove','--force',str(dest)],timeout=30)
     elif dest.exists():
         shutil.rmtree(dest,ignore_errors=True)
-    run(['git','worktree','prune'],check=False,capture=True)
-    run(['git','worktree','add','--detach',str(dest),ref])
+    run(['git','worktree','prune'],check=False,capture=True,timeout=30)
+    print(f'[evolution4] prepare worktree {dest.name} <- {ref}',flush=True)
+    run(['git','worktree','add','--detach',str(dest),ref],timeout=60)
     return dest
 
-def build(tree:Path): run(['bash',str(tree/AGENT/'build.sh')])
+def build(tree:Path):
+    print(f'[evolution4] build {tree}',flush=True)
+    run(['bash',str(tree/AGENT/'build.sh')],timeout=120)
 
 def wrapper(run_sh:Path, values:dict, out:Path)->Path:
     out.parent.mkdir(parents=True,exist_ok=True)
@@ -74,34 +70,49 @@ def plain_wrapper(run_sh:Path,out:Path)->Path:
     out.parent.mkdir(parents=True,exist_ok=True); out.write_text('#!/usr/bin/env bash\nset -euo pipefail\nexec '+json.dumps(str(run_sh))+'\n'); out.chmod(0o755); return out
 
 def resolve_opponents()->list[dict]:
-    run(['git','fetch','--no-tags','origin','+refs/heads/*:refs/remotes/origin/*'])
+    run(['git','fetch','--no-tags','origin','+refs/heads/*:refs/remotes/origin/*'],timeout=120)
     used=set(); ready=[]
     for i,(cat,refs) in enumerate(OPPONENT_SPECS):
         chosen=None
         for ref in refs:
             if ref in used: continue
-            ok=run(['git','rev-parse','--verify',f'origin/{ref}'],check=False,capture=True)
+            ok=run(['git','rev-parse','--verify',f'origin/{ref}'],check=False,capture=True,timeout=15)
             if ok.returncode: continue
             tree=worktree(f'origin/{ref}',Path(f'/tmp/e4-opp-{i}'))
             try: build(tree)
-            except Exception: continue
-            chosen={'archetype':cat,'ref':ref,'tree':str(tree),'run':str(tree/AGENT/'run.sh'),'sha':run(['git','rev-parse','HEAD'],cwd=tree,capture=True).stdout.strip()}; break
-        if chosen: ready.append(chosen); used.add(chosen['ref'])
+            except Exception as e:
+                print(f'[evolution4] opponent rejected {cat} {ref}: {e}',flush=True)
+                continue
+            chosen={'archetype':cat,'ref':ref,'tree':str(tree),'run':str(tree/AGENT/'run.sh'),'sha':run(['git','rev-parse','HEAD'],cwd=tree,capture=True,timeout=15).stdout.strip()}; break
+        if chosen:
+            print(f'[evolution4] opponent ready {i+1}/{len(OPPONENT_SPECS)} {cat} {chosen["ref"]}',flush=True)
+            ready.append(chosen); used.add(chosen['ref'])
     core={'normal-expansion','defense-turtle','logistics-recenter','attack-pass','search-hunter','doomer-rusher','picker-muster','gatherer-economy'}
     have={x['archetype'] for x in ready}
     if not core.issubset(have) or len(ready)<8: raise RuntimeError(f'opponent suite insufficient: {len(ready)} {sorted(have)}')
+    print(f'[evolution4] opponent suite ready: {len(ready)} archetypes',flush=True)
     return ready
 
 def paired(candidate:Path,baseline:Path,start:int,seeds:int,out:Path)->dict:
     ensure_pinned_evaluator()
     shutil.rmtree(out,ignore_errors=True); out.mkdir(parents=True,exist_ok=True)
     cmd=['python',str(PINNED_PAIRED.relative_to(ROOT)),'--candidate',str(candidate),'--baseline',str(baseline),'--start',str(start),'--seeds',str(seeds),'--output',str(out)]
-    p=run(cmd,check=False,capture=True)
+    tag=str(out.relative_to(ROOT)) if out.is_relative_to(ROOT) else str(out)
+    # A batch is seeds*2 games. Give each game up to ~45 s plus startup margin.
+    timeout=max(120, int(seeds)*2*45+60)
+    print(f'[evolution4] BENCH START {tag} seeds={seeds} games={seeds*2} seed_start={start} timeout={timeout}s',flush=True)
+    t0=time.monotonic()
+    try:
+        p=run(cmd,check=False,capture=True,timeout=timeout)
+    except Exception as e:
+        print(f'[evolution4] BENCH TIMEOUT/ERROR {tag} elapsed={time.monotonic()-t0:.1f}s: {e}',flush=True)
+        raise
     (out/'driver.stdout').write_text(p.stdout); (out/'driver.stderr').write_text(p.stderr)
     if p.returncode: raise RuntimeError(f'paired benchmark failed {p.returncode}: {p.stderr[-3000:]}')
     if not (out/'summary.json').exists(): raise RuntimeError('paired benchmark produced no summary.json')
     s=json.loads((out/'summary.json').read_text())
     if s.get('errors',0) or s.get('illegal_actions',0): raise RuntimeError(f'benchmark protocol failure {s}')
+    print(f'[evolution4] BENCH DONE {tag} elapsed={time.monotonic()-t0:.1f}s W/D/L={s.get("W")}/{s.get("D")}/{s.get("L")} score={s.get("score",s.get("paired_score"))}',flush=True)
     return s
 
 def combine(summaries:list[dict])->dict:
