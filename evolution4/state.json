@@ -1,38 +1,465 @@
 {
   "audit_count": 0,
-  "breeding_elites": [],
+  "baseline": {
+    "opponents": [
+      {
+        "archetype": "aggressive-expansion",
+        "ref": "juraj-v3.6-short-cycle-only",
+        "sha": "7cf71946964e166cbd16926f0c51266ef1e0e76f"
+      },
+      {
+        "archetype": "defense-turtle",
+        "ref": "v35-defense-fresh",
+        "sha": "0d8410378ab0c47b87f8127b54bb0068339de6f4"
+      },
+      {
+        "archetype": "doomer-rusher",
+        "ref": "chatgpt/picker9-doomguard-rusher",
+        "sha": "8187289deaa1b49391e1cdb41057a99e84f45a98"
+      },
+      {
+        "archetype": "recent-reference",
+        "ref": "chatgpt/picker9-opponent-suite-75",
+        "sha": "844e4f100d1bdd1aed17effdab3ca6f1659e83c1"
+      }
+    ],
+    "representative_suite": [
+      {
+        "archetype": "aggressive-expansion",
+        "x0": {
+          "D": 0,
+          "L": 0,
+          "W": 6,
+          "decision_roundtrip_ms": {
+            "max": 14.419048000036128,
+            "p50": 0.7620009999982358,
+            "p95": 0.8468510000056995,
+            "p99": 0.8468510000056995
+          },
+          "errors": 0,
+          "games": 6,
+          "illegal_actions": 0,
+          "maps": 3,
+          "paired_ci95": [
+            1.0,
+            1.0
+          ],
+          "paired_score": 1.0,
+          "score": 1.0,
+          "seat_score": {
+            "0": 1.0,
+            "1": 1.0
+          },
+          "seed_end": 400024,
+          "seed_start": 400022,
+          "turns_mean": 699.3333333333334
+        },
+        "y0": {
+          "D": 0,
+          "L": 0,
+          "W": 6,
+          "decision_roundtrip_ms": {
+            "max": 14.335754999990513,
+            "p50": 0.7401390000154606,
+            "p95": 0.8409569999798805,
+            "p99": 0.8409569999798805
+          },
+          "errors": 0,
+          "games": 6,
+          "illegal_actions": 0,
+          "maps": 3,
+          "paired_ci95": [
+            1.0,
+            1.0
+          ],
+          "paired_score": 1.0,
+          "score": 1.0,
+          "seat_score": {
+            "0": 1.0,
+            "1": 1.0
+          },
+          "seed_end": 400024,
+          "seed_start": 400022,
+          "turns_mean": 570.5
+        }
+      },
+      {
+        "archetype": "defense-turtle",
+        "x0": {
+          "D": 5,
+          "L": 1,
+          "W": 0,
+          "decision_roundtrip_ms": {
+            "max": 14.771374000019932,
+            "p50": 0.7590369999661561,
+            "p95": 0.8738820000075975,
+            "p99": 0.8738820000075975
+          },
+          "errors": 0,
+          "games": 6,
+          "illegal_actions": 0,
+          "maps": 3,
+          "paired_ci95": [
+            0.25,
+            0.5
+          ],
+          "paired_score": 0.4166666666666667,
+          "score": 0.4166666666666667,
+          "seat_score": {
+            "0": 0.5,
+            "1": 0.3333333333333333
+          },
+          "seed_end": 400044,
+          "seed_start": 400042,
+          "turns_mean": 1088.5
+        },
+        "y0": {
+          "D": 5,
+          "L": 1,
+          "W": 0,
+          "decision_roundtrip_ms": {
+            "max": 15.134133000060501,
+            "p50": 0.8116650000147274,
+            "p95": 0.8837110000285975,
+            "p99": 0.8837110000285975
+          },
+          "errors": 0,
+          "games": 6,
+          "illegal_actions": 0,
+          "maps": 3,
+          "paired_ci95": [
+            0.25,
+            0.5
+          ],
+          "paired_score": 0.4166666666666667,
+          "score": 0.4166666666666667,
+          "seat_score": {
+            "0": 0.5,
+            "1": 0.3333333333333333
+          },
+          "seed_end": 400044,
+          "seed_start": 400042,
+          "turns_mean": 1196.6666666666667
+        }
+      },
+      {
+        "archetype": "doomer-rusher",
+        "x0": {
+          "D": 1,
+          "L": 3,
+          "W": 2,
+          "decision_roundtrip_ms": {
+            "max": 14.736099000060676,
+            "p50": 0.7900859999381282,
+            "p95": 0.911531000042487,
+            "p99": 0.911531000042487
+          },
+          "errors": 0,
+          "games": 6,
+          "illegal_actions": 0,
+          "maps": 3,
+          "paired_ci95": [
+            0.0,
+            0.75
+          ],
+          "paired_score": 0.4166666666666667,
+          "score": 0.4166666666666667,
+          "seat_score": {
+            "0": 0.16666666666666666,
+            "1": 0.6666666666666666
+          },
+          "seed_end": 400064,
+          "seed_start": 400062,
+          "turns_mean": 590.6666666666666
+        },
+        "y0": {
+          "D": 2,
+          "L": 2,
+          "W": 2,
+          "decision_roundtrip_ms": {
+            "max": 15.04756899998938,
+            "p50": 0.8128810000016529,
+            "p95": 0.9024390000149651,
+            "p99": 0.9024390000149651
+          },
+          "errors": 0,
+          "games": 6,
+          "illegal_actions": 0,
+          "maps": 3,
+          "paired_ci95": [
+            0.25,
+            0.75
+          ],
+          "paired_score": 0.5,
+          "score": 0.5,
+          "seat_score": {
+            "0": 0.5,
+            "1": 0.5
+          },
+          "seed_end": 400064,
+          "seed_start": 400062,
+          "turns_mean": 859.8333333333334
+        }
+      },
+      {
+        "archetype": "recent-reference",
+        "x0": {
+          "D": 2,
+          "L": 2,
+          "W": 2,
+          "decision_roundtrip_ms": {
+            "max": 16.920976999927007,
+            "p50": 0.8018469999342415,
+            "p95": 0.9565479999764648,
+            "p99": 0.9565479999764648
+          },
+          "errors": 0,
+          "games": 6,
+          "illegal_actions": 0,
+          "maps": 3,
+          "paired_ci95": [
+            0.5,
+            0.5
+          ],
+          "paired_score": 0.5,
+          "score": 0.5,
+          "seat_score": {
+            "0": 0.8333333333333334,
+            "1": 0.16666666666666666
+          },
+          "seed_end": 400084,
+          "seed_start": 400082,
+          "turns_mean": 1093.6666666666667
+        },
+        "y0": {
+          "D": 1,
+          "L": 2,
+          "W": 3,
+          "decision_roundtrip_ms": {
+            "max": 16.200552999976026,
+            "p50": 0.727620000020579,
+            "p95": 0.9030180000308974,
+            "p99": 0.9030180000308974
+          },
+          "errors": 0,
+          "games": 6,
+          "illegal_actions": 0,
+          "maps": 3,
+          "paired_ci95": [
+            0.0,
+            1.0
+          ],
+          "paired_score": 0.5833333333333334,
+          "score": 0.5833333333333334,
+          "seat_score": {
+            "0": 0.5,
+            "1": 0.6666666666666666
+          },
+          "seed_end": 400084,
+          "seed_start": 400082,
+          "turns_mean": 805.5
+        }
+      }
+    ],
+    "x0_v_y0": {
+      "D": 1,
+      "L": 5,
+      "W": 4,
+      "decision_roundtrip_ms": {
+        "max": 15.14978800003064,
+        "p50": 0.7148619999952643,
+        "p95": 0.8130560000267906,
+        "p99": 0.8130560000267906
+      },
+      "errors": 0,
+      "games": 10,
+      "illegal_actions": 0,
+      "maps": 5,
+      "paired_ci95": [
+        0.35,
+        0.5
+      ],
+      "paired_score": 0.45,
+      "score": 0.45,
+      "seat_score": {
+        "0": 0.2,
+        "1": 0.7
+      },
+      "seed_end": 400004,
+      "seed_start": 400000,
+      "turns_mean": 763.7
+    }
+  },
+  "breeding_elites": [
+    "919ff69a411c834e745bb1fdfcc45e0aa542f888c98a42b62a813f511ef92134",
+    "5fd0067aec41208da847d70ef24537dc1d5c148226fbb04e5716a74afcf79911"
+  ],
   "champion_promotion_history": [],
   "champion_promotions_since_checkpoint": 0,
-  "current_population": [],
+  "current_population": [
+    "919ff69a411c834e745bb1fdfcc45e0aa542f888c98a42b62a813f511ef92134",
+    "5fd0067aec41208da847d70ef24537dc1d5c148226fbb04e5716a74afcf79911",
+    "0fc6c54d6f250d3881e1240255665eb67f0d87038e967d76ad6551a1eae6b0ae",
+    "905f970a9d968cb80ffd02ba452b8535c4c58f296504b81b84b5d005f8cb613b",
+    "55b45ffb24ee23a00438dbebe63e14cf23177f900c7de406333b91002a6badc2",
+    "8b98b47a575fb81c4b469d15916109d160fd1a5663dc1c3c982166dfc3235154",
+    "160efbc7f70bc9986f91b5cdf294f0684727c853cfd72ce5eba25064a554f65e",
+    "24b5480fd6f6bea674d3e572521672d818b1a277651ad2278c315d65fa7a264b",
+    "5292bde3a79bb7dfea9368915a73cdddda55d597fd407888971d0eac2043f65a",
+    "ff6f6a107fefd05d451f616a12a23d8e4b6335f24cf7effed30adcf9329cd1c8",
+    "4eec9b60a5671d6e322a66d012f5038ec94e2e371dbe4084d291bef1272bfe48",
+    "5c2c8e57bae35dd3d3ae554af484981d1bb17ac6f83baa7b631ae2d667ab31b5",
+    "e65edbf6ae0a653f2be3727eaf3ee0c071d1301307c026f37770d22307ff69c1",
+    "ca2a4480aee8892bba44392b1fb7acf14ef962e79f0ff8d4863891344d2e0dec",
+    "f5ad1821205bcc4cd187e111ab418c9336a740688e4560b97734e4d587cf7656",
+    "58b207491dde80c820fb4cba08a0fab5e10f2df2e2070ab1a20f67ae2fac1b66"
+  ],
   "experiment_version": 4,
   "founder_x0": {
     "branch": "evolution4/founder-x0",
     "gameplay_sha": "2260b6f19d51a14d7c68770677f22d04dfd88022",
-    "genome_id": null,
-    "runtime_hashes": {}
+    "genome_id": "919ff69a411c834e745bb1fdfcc45e0aa542f888c98a42b62a813f511ef92134",
+    "runtime_hashes": {
+      "build.sh": "7e022c2c59996406b18c4221c2ceb3cb3980aeb6b2446bb5d5d6a127d0dfaa64",
+      "core.hpp": "cd956d634c4791b3a077918cc587da0013e40c5822ae36f7361154862ac7f542",
+      "main.cpp": "521d7fb9a65085344ae17101223f7a6525b161402bbe37aa90fc7b64ae575bfe",
+      "run.sh": "ac272996e744283df3042ad61cb0de34de945fcb2bf40fcee14d87afa7e1e0ae"
+    }
   },
   "founder_y0": {
     "branch": "evolution4/founder-y0",
     "gameplay_sha": "687165839cea8ae5e84da26c99af1c0e5aed4543",
-    "genome_id": null,
-    "runtime_hashes": {}
+    "genome_id": "5fd0067aec41208da847d70ef24537dc1d5c148226fbb04e5716a74afcf79911",
+    "runtime_hashes": {
+      "build.sh": "7e022c2c59996406b18c4221c2ceb3cb3980aeb6b2446bb5d5d6a127d0dfaa64",
+      "core.hpp": "cd956d634c4791b3a077918cc587da0013e40c5822ae36f7361154862ac7f542",
+      "main.cpp": "3723038bb6bbe70f15abc94303206683573e569f01caeaa8fb5b465c0a9acceb",
+      "run.sh": "ac272996e744283df3042ad61cb0de34de945fcb2bf40fcee14d87afa7e1e0ae"
+    }
   },
   "generation": 0,
   "generation_history": [],
-  "hall_of_fame": [],
+  "hall_of_fame": [
+    {
+      "commit_sha": "2260b6f19d51a14d7c68770677f22d04dfd88022",
+      "genome_id": "919ff69a411c834e745bb1fdfcc45e0aa542f888c98a42b62a813f511ef92134",
+      "label": "X0",
+      "runtime_hashes": {
+        "build.sh": "7e022c2c59996406b18c4221c2ceb3cb3980aeb6b2446bb5d5d6a127d0dfaa64",
+        "core.hpp": "cd956d634c4791b3a077918cc587da0013e40c5822ae36f7361154862ac7f542",
+        "main.cpp": "521d7fb9a65085344ae17101223f7a6525b161402bbe37aa90fc7b64ae575bfe",
+        "run.sh": "ac272996e744283df3042ad61cb0de34de945fcb2bf40fcee14d87afa7e1e0ae"
+      }
+    },
+    {
+      "commit_sha": "687165839cea8ae5e84da26c99af1c0e5aed4543",
+      "genome_id": "5fd0067aec41208da847d70ef24537dc1d5c148226fbb04e5716a74afcf79911",
+      "label": "Y0",
+      "runtime_hashes": {
+        "build.sh": "7e022c2c59996406b18c4221c2ceb3cb3980aeb6b2446bb5d5d6a127d0dfaa64",
+        "core.hpp": "cd956d634c4791b3a077918cc587da0013e40c5822ae36f7361154862ac7f542",
+        "main.cpp": "3723038bb6bbe70f15abc94303206683573e569f01caeaa8fb5b465c0a9acceb",
+        "run.sh": "ac272996e744283df3042ad61cb0de34de945fcb2bf40fcee14d87afa7e1e0ae"
+      }
+    }
+  ],
   "last_checkpoint_generation": -1,
   "last_error": null,
-  "last_successful_state_hash": null,
-  "last_successful_transaction_id": null,
+  "last_successful_state_hash": "4d7c5571be63136e82eb7ae8034824c8acb9432e594f73f4b6e39a773666b2ee",
+  "last_successful_transaction_id": "ed2a9a58-3c35-401f-ae8b-d6a23da24ab2",
   "official_champion_commit_sha": "2260b6f19d51a14d7c68770677f22d04dfd88022",
-  "official_champion_genome_id": null,
-  "official_champion_runtime_hashes": {},
+  "official_champion_genome_id": "919ff69a411c834e745bb1fdfcc45e0aa542f888c98a42b62a813f511ef92134",
+  "official_champion_runtime_hashes": {
+    "build.sh": "7e022c2c59996406b18c4221c2ceb3cb3980aeb6b2446bb5d5d6a127d0dfaa64",
+    "core.hpp": "cd956d634c4791b3a077918cc587da0013e40c5822ae36f7361154862ac7f542",
+    "main.cpp": "521d7fb9a65085344ae17101223f7a6525b161402bbe37aa90fc7b64ae575bfe",
+    "run.sh": "ac272996e744283df3042ad61cb0de34de945fcb2bf40fcee14d87afa7e1e0ae"
+  },
+  "opponent_suite": [
+    {
+      "archetype": "normal-expansion",
+      "ref": "juraj-v3.6-expansion-cycle-hardening",
+      "sha": "01e1acc8ae89d8b8ab992846d138b3785be550ae"
+    },
+    {
+      "archetype": "aggressive-expansion",
+      "ref": "juraj-v3.6-short-cycle-only",
+      "sha": "7cf71946964e166cbd16926f0c51266ef1e0e76f"
+    },
+    {
+      "archetype": "defense-turtle",
+      "ref": "v35-defense-fresh",
+      "sha": "0d8410378ab0c47b87f8127b54bb0068339de6f4"
+    },
+    {
+      "archetype": "logistics-recenter",
+      "ref": "v35-logistics-recenter",
+      "sha": "7dcd6a6a01dd40758a019c7a70be44287c443a9e"
+    },
+    {
+      "archetype": "attack-pass",
+      "ref": "juraj-v3.6-iter1-attack-pass",
+      "sha": "1566caa3ea1e3f64e1e38bf0e03b4da61d704a83"
+    },
+    {
+      "archetype": "search-hunter",
+      "ref": "juraj-v3.6-search-refactor",
+      "sha": "9b95b11201c6e824065044eed3133a081a2bf43e"
+    },
+    {
+      "archetype": "doomer-rusher",
+      "ref": "chatgpt/picker9-doomguard-rusher",
+      "sha": "8187289deaa1b49391e1cdb41057a99e84f45a98"
+    },
+    {
+      "archetype": "picker-muster",
+      "ref": "chatgpt/picker-v9-muster-castle",
+      "sha": "9490aa6b548092c40160dcc0415d2507993f77c9"
+    },
+    {
+      "archetype": "gatherer-economy",
+      "ref": "juraj-v3.6-edge-picker-economics",
+      "sha": "f9d82ebb2ece1e96e800a46891a29a9b9c399c24"
+    },
+    {
+      "archetype": "recent-reference",
+      "ref": "chatgpt/picker9-opponent-suite-75",
+      "sha": "844e4f100d1bdd1aed17effdab3ca6f1659e83c1"
+    }
+  ],
   "pending_promotion": null,
-  "phase": "bootstrap",
+  "phase": "exploration",
   "rejected_promotions": [],
   "retry_count": 0,
   "rollback_history": [],
   "seed_ledger": {
-    "next_seed": 400000
+    "next_seed": 400102,
+    "ranges": [
+      {
+        "label": "bootstrap-x0-y0",
+        "maps": 5,
+        "start": 400000
+      },
+      {
+        "label": "bootstrap-aggressive-expansion",
+        "maps": 3,
+        "start": 400022
+      },
+      {
+        "label": "bootstrap-defense-turtle",
+        "maps": 3,
+        "start": 400042
+      },
+      {
+        "label": "bootstrap-doomer-rusher",
+        "maps": 3,
+        "start": 400062
+      },
+      {
+        "label": "bootstrap-recent-reference",
+        "maps": 3,
+        "start": 400082
+      }
+    ]
   }
 }
