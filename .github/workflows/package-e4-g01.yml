@@ -1,0 +1,55 @@
+name: package-e4-g01-ff6f6a
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/package-e4-g01.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: submission/evolution4-g01-ff6f6a-experimental-20260822
+          fetch-depth: 1
+      - name: Build clean four-file submission
+        shell: bash
+        run: |
+          set -euo pipefail
+          AG=competition/agents/juraj_v35_cpp
+          rm -rf /tmp/e4submit
+          mkdir -p /tmp/e4submit/juraj_v35
+          python - <<'PY'
+          from pathlib import Path
+          ag=Path('competition/agents/juraj_v35_cpp')
+          main=(ag/'main.cpp').read_text()
+          hdr=(ag/'evolution4_genome.hpp').read_text().replace('#pragma once\n','',1)
+          needle='#include "evolution4_genome.hpp"'
+          if needle not in main:
+              raise SystemExit('genome header include missing')
+          main=main.replace(needle,hdr,1)
+          out=Path('/tmp/e4submit/juraj_v35')
+          (out/'main.cpp').write_text(main)
+          for f in ('core.hpp','build.sh','run.sh'):
+              (out/f).write_bytes((ag/f).read_bytes())
+          PY
+          chmod +x /tmp/e4submit/juraj_v35/build.sh /tmp/e4submit/juraj_v35/run.sh
+          (cd /tmp/e4submit/juraj_v35 && ./build.sh)
+          rm -f /tmp/e4submit/juraj_v35/agent
+          test "$(find /tmp/e4submit/juraj_v35 -maxdepth 1 -type f | wc -l)" -eq 4
+          (cd /tmp/e4submit && zip -r /tmp/juraj_evolution4_g01_ff6f6a_experimental.zip juraj_v35)
+          sha256sum /tmp/juraj_evolution4_g01_ff6f6a_experimental.zip > /tmp/juraj_evolution4_g01_ff6f6a_experimental.zip.sha256
+          unzip -l /tmp/juraj_evolution4_g01_ff6f6a_experimental.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: juraj-evolution4-g01-ff6f6a-experimental
+          path: |
+            /tmp/juraj_evolution4_g01_ff6f6a_experimental.zip
+            /tmp/juraj_evolution4_g01_ff6f6a_experimental.zip.sha256
+          retention-days: 30
