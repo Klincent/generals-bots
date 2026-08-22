@@ -48,8 +48,16 @@ def ensure_pinned_evaluator():
     PINNED_PAIRED.write_text(paired_src)
 
 def worktree(ref:str,dest:Path)->Path:
-    run(['git','worktree','remove','--force',str(dest)],check=False)
-    shutil.rmtree(dest,ignore_errors=True)
+    # GitHub-hosted runners start clean. Avoid calling `git worktree remove` on
+    # paths that are not actually registered; Git prints a scary but harmless
+    # `fatal: ... is not a working tree` for that case.
+    listed=run(['git','worktree','list','--porcelain'],capture=True).stdout
+    marker=f'worktree {dest}\n'
+    if marker in listed:
+        run(['git','worktree','remove','--force',str(dest)])
+    elif dest.exists():
+        shutil.rmtree(dest,ignore_errors=True)
+    run(['git','worktree','prune'],check=False,capture=True)
     run(['git','worktree','add','--detach',str(dest),ref])
     return dest
 
