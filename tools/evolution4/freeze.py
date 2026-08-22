@@ -8,7 +8,9 @@ NON_BEHAVIORAL={'picker_neutrals_max'}
 def _lit(v):
     if isinstance(v,bool): return 'true' if v else 'false'
     if isinstance(v,int): return str(v)
-    return format(float(v),'.12g')
+    if isinstance(v,float): return format(float(v),'.12g')
+    if isinstance(v,str): return '"'+v.replace('\\','\\\\').replace('"','\\"')+'"'
+    raise TypeError(f'unsupported freeze literal {type(v).__name__}')
 
 def freeze_header(template_header:Path, values:dict, out_header:Path):
     s=template_header.read_text(); c=canonical_values(values)
