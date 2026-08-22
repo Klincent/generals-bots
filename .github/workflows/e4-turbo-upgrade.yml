@@ -18,7 +18,7 @@ jobs:
         with:
           ref: evolution4/turbo-template
           fetch-depth: 0
-      - name: Apply structural C++ algorithms
+      - name: Apply nested structural C++ algorithms
         shell: bash
         run: |
           set -euo pipefail
@@ -26,7 +26,9 @@ jobs:
           git config user.email actions@users.noreply.github.com
           git fetch --no-tags origin evolution4/turbo-structural
           git show origin/evolution4/turbo-structural:tools/evolution4/apply_turbo_structural_cpp.py > /tmp/apply_turbo.py
+          git show origin/evolution4/turbo-structural:tools/evolution4/apply_nested_cpp_v2.py > /tmp/apply_nested.py
           python /tmp/apply_turbo.py competition/agents/juraj_v35_cpp/main.cpp
+          python /tmp/apply_nested.py competition/agents/juraj_v35_cpp/main.cpp
           cd competition/agents/juraj_v35_cpp
           ./build.sh
           if [ -x ./test.sh ]; then ./test.sh; fi
@@ -34,12 +36,15 @@ jobs:
           cd ../../..
           git add competition/agents/juraj_v35_cpp/main.cpp competition/agents/juraj_v35_cpp/evolution4_genome.hpp
           if ! git diff --cached --quiet; then
-            git commit -m 'evolution4 turbo: repair structural runtime compatibility'
+            git commit -m 'evolution4 turbo: activate nested structural v2 runtime'
             git push origin HEAD:evolution4/turbo-template
           fi
-      - name: Verify structural markers and legacy-single compatibility
+      - name: Verify nested structural phenotype
         run: |
           grep -q '\[e4_structural\]' competition/agents/juraj_v35_cpp/main.cpp
-          grep -q 'muster_topology' competition/agents/juraj_v35_cpp/evolution4_genome.hpp
-          grep -q 'picker_start_policy' competition/agents/juraj_v35_cpp/evolution4_genome.hpp
+          grep -q '\[e4_nested_v2\]' competition/agents/juraj_v35_cpp/main.cpp
+          grep -q 'logistics_route_policy=="safest"' competition/agents/juraj_v35_cpp/main.cpp
+          grep -q 'defense_policy=="adaptive"' competition/agents/juraj_v35_cpp/main.cpp
+          grep -q 'muster_topology=="adaptive"' competition/agents/juraj_v35_cpp/main.cpp
+          grep -q 'fallback_policy=="opportunity"' competition/agents/juraj_v35_cpp/main.cpp
           grep -q 'want==1?(donor_count\[ai\]<=2||donor_mass\[ai\]<20)' competition/agents/juraj_v35_cpp/main.cpp
