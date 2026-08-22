@@ -2,8 +2,9 @@ name: evolution3-elitist
 
 on:
   workflow_dispatch:
-  issues:
+  pull_request:
     types: [opened]
+    branches: [master]
 
 permissions:
   contents: write
@@ -15,7 +16,7 @@ concurrency:
 
 jobs:
   transaction:
-    if: ${{ github.event_name != 'issues' || github.event.issue.title == 'START EVOLUTION3 ELITIST LOOP' }}
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.title == 'START EVOLUTION3 ELITIST LOOP' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 180
     env:
