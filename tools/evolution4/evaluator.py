@@ -34,14 +34,17 @@ def _git_show(spec:str)->str:
     return p.stdout
 
 def ensure_pinned_evaluator():
+    # Deterministic idempotent writes; safe when several evaluation threads call it.
     matchup=_git_show(f'{EVAL_SHA}:competition/matchup.py')
     paired_src=_git_show(f'{EVAL_SHA}:competition/agents/juraj_v35_cpp/paired_benchmark.py')
     paired_src=paired_src.replace("'competition/matchup.py'", "'competition/evolution4_matchup_pinned.py'")
     if "competition/evolution4_matchup_pinned.py" not in paired_src:
         raise RuntimeError('failed to pin paired benchmark matchup path')
     PINNED_MATCHUP.parent.mkdir(parents=True,exist_ok=True)
-    PINNED_MATCHUP.write_text(matchup)
-    PINNED_PAIRED.write_text(paired_src)
+    if not PINNED_MATCHUP.exists() or PINNED_MATCHUP.read_text()!=matchup:
+        PINNED_MATCHUP.write_text(matchup)
+    if not PINNED_PAIRED.exists() or PINNED_PAIRED.read_text()!=paired_src:
+        PINNED_PAIRED.write_text(paired_src)
 
 def worktree(ref:str,dest:Path)->Path:
     listed=run(['git','worktree','list','--porcelain'],capture=True,timeout=30).stdout
@@ -98,7 +101,6 @@ def paired(candidate:Path,baseline:Path,start:int,seeds:int,out:Path)->dict:
     shutil.rmtree(out,ignore_errors=True); out.mkdir(parents=True,exist_ok=True)
     cmd=['python',str(PINNED_PAIRED.relative_to(ROOT)),'--candidate',str(candidate),'--baseline',str(baseline),'--start',str(start),'--seeds',str(seeds),'--output',str(out)]
     tag=str(out.relative_to(ROOT)) if out.is_relative_to(ROOT) else str(out)
-    # A batch is seeds*2 games. Give each game up to ~45 s plus startup margin.
     timeout=max(120, int(seeds)*2*45+60)
     print(f'[evolution4] BENCH START {tag} seeds={seeds} games={seeds*2} seed_start={start} timeout={timeout}s',flush=True)
     t0=time.monotonic()
