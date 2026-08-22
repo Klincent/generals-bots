@@ -1,0 +1,44 @@
+name: evolution4-turbo-structural-upgrade
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/e4-turbo-upgrade.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  upgrade-template:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: evolution4/turbo-template
+          fetch-depth: 0
+      - name: Apply structural C++ algorithms
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name ChatGPT
+          git config user.email actions@users.noreply.github.com
+          git fetch --no-tags origin evolution4/turbo-structural
+          git show origin/evolution4/turbo-structural:tools/evolution4/apply_turbo_structural_cpp.py > /tmp/apply_turbo.py
+          python /tmp/apply_turbo.py competition/agents/juraj_v35_cpp/main.cpp
+          cd competition/agents/juraj_v35_cpp
+          ./build.sh
+          if [ -x ./test.sh ]; then ./test.sh; fi
+          rm -f agent
+          cd ../../..
+          git add competition/agents/juraj_v35_cpp/main.cpp competition/agents/juraj_v35_cpp/evolution4_genome.hpp
+          if ! git diff --cached --quiet; then
+            git commit -m 'evolution4 turbo: enable structural algorithm runtime'
+            git push origin HEAD:evolution4/turbo-template
+          fi
+      - name: Verify structural markers
+        run: |
+          grep -q '\[e4_structural\]' competition/agents/juraj_v35_cpp/main.cpp
+          grep -q 'muster_topology' competition/agents/juraj_v35_cpp/evolution4_genome.hpp
+          grep -q 'picker_start_policy' competition/agents/juraj_v35_cpp/evolution4_genome.hpp
