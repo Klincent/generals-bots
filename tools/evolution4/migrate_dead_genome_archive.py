@@ -5,8 +5,28 @@ from pathlib import Path
 
 ROOT = Path.cwd()
 ORCH = ROOT / 'tools/evolution4/orchestrator.py'
+TELEMETRY = ROOT / 'tools/evolution4/telemetry.py'
 STATE = ROOT / 'evolution4/state.json'
 RESULTS = ROOT / 'evolution4/results'
+
+
+def patch_telemetry() -> bool:
+    text = TELEMETRY.read_text()
+    if 'def _exploration_is_active() -> bool:' in text:
+        return False
+    if 'import re\n' not in text or 'def suggested_chromosome(' not in text:
+        raise SystemExit('telemetry markers not found')
+    text = text.replace('import re\n', 'import json\nimport re\n', 1)
+    marker = 'from pathlib import Path\n\n'
+    text = text.replace(marker, marker + "ROOT = Path(__file__).resolve().parents[2]\nSTATE = ROOT / 'evolution4' / 'state.json'\n\n", 1)
+    old = 'def suggested_chromosome(t:dict, archetype_scores:dict|None=None) -> str|None:\n'
+    helper = '''def _exploration_is_active() -> bool:\n    """Keep the whole exploration phase free of hand-directed mutation bias."""\n    try:\n        s=json.loads(STATE.read_text())\n        return s.get('phase') == 'exploration'\n    except Exception:\n        return True\n\n'''
+    new = helper + old + "    if _exploration_is_active():\n        return None\n"
+    if old not in text:
+        raise SystemExit('suggested_chromosome marker not found')
+    text = text.replace(old, new, 1)
+    TELEMETRY.write_text(text)
+    return True
 
 
 def patch_orchestrator() -> bool:
@@ -105,6 +125,7 @@ def backfill_state() -> bool:
 
 
 if __name__ == '__main__':
+    t = patch_telemetry()
     a = patch_orchestrator()
     b = backfill_state()
-    print(f'[evolution4 migration] dead-genome archive orchestrator_changed={a} state_changed={b}')
+    print(f'[evolution4 migration] random_exploration_changed={t} dead_archive_changed={a} state_changed={b}')
