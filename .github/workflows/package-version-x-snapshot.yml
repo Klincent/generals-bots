@@ -4,14 +4,16 @@ on:
   push:
     branches:
       - snapshot/version-x-20260822-0655
-    paths:
-      - '.github/workflows/package-version-x-snapshot.yml'
+  pull_request:
+    branches:
+      - master
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   package:
+    if: github.event_name == 'push' || github.head_ref == 'snapshot/version-x-20260822-0655'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -45,12 +47,12 @@ jobs:
           sha256sum snapshot_submission/version_x_snapshot_submission.zip > snapshot_submission/version_x_snapshot_submission.sha256
           unzip -l snapshot_submission/version_x_snapshot_submission.zip
 
-      - name: Commit packaged snapshot
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add snapshot_submission/version_x_snapshot_submission.zip snapshot_submission/version_x_snapshot_submission.sha256
-          git commit -m 'snapshot: package version-x submission [skip ci]'
-          git push origin HEAD:snapshot/version-x-20260822-0655
+      - name: Upload snapshot submission
+        uses: actions/upload-artifact@v4
+        with:
+          name: version-x-snapshot-submission
+          path: |
+            snapshot_submission/version_x_snapshot_submission.zip
+            snapshot_submission/version_x_snapshot_submission.sha256
+          if-no-files-found: error
+          retention-days: 30
