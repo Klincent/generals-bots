@@ -11,9 +11,9 @@ struct GenomeConfig {
  bool doomguard_enabled=true,picker_enabled=true;
  int edge_picker_threshold=16,muster_threshold=8,general_reserve_base=5,general_reserve_opp_divisor=12,adjacent_reserve_base=2;
  double picker_min_efficiency=2.0,production_recover_slope=.1;
- int production_recover_gap=10,production_severe_gap=18,production_soft_gap=8,castle1_target_turn=150,castle2_target_turn=250;
+ int production_recover_gap=9,production_severe_gap=18,production_soft_gap=8,castle1_target_turn=150,castle2_target_turn=250;
  double war_share_contact=.30,war_share_peace=.12,expansion_share_severe=.62,expansion_share_soft=.45,expansion_share_healthy=.35;
- int precontact_expansion_until=-1; double expansion_share_precontact=.35,search_share_unseen=.20,search_share_seen=.08,free_share_war=.22,free_share_peace=.15;
+ int precontact_expansion_until=250; double expansion_share_precontact=.40,search_share_unseen=.20,search_share_seen=.08,free_share_war=.22,free_share_peace=.15;
  int expansion_wait_limit=4,muster_start_turn=300,muster_army_margin=80,muster_ratio_num=5,muster_ratio_den=6,muster_launch_base=90;
  double muster_enemy_mult=3.0; int muster_enemy_bonus=20,muster_opp_divisor=2,late_finish_turn=900,late_finish_base=70;
  double late_finish_enemy_mult=2.0; int late_finish_enemy_bonus=15,picker_mature_turn=150,picker_mature_land_pct=35,picker_not_behind_num=5,picker_not_behind_den=4;
