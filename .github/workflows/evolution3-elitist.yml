@@ -2,10 +2,8 @@ name: evolution3-elitist
 
 on:
   workflow_dispatch:
-  push:
-    branches: [master]
-    paths:
-      - '.github/workflows/evolution3-elitist.yml'
+  issues:
+    types: [opened]
 
 permissions:
   contents: write
@@ -17,6 +15,7 @@ concurrency:
 
 jobs:
   transaction:
+    if: ${{ github.event_name != 'issues' || github.event.issue.title == 'START EVOLUTION3 ELITIST LOOP' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 180
     env:
@@ -155,5 +154,3 @@ jobs:
       - name: Fail visibly after durable recovery state
         if: steps.stop.outputs.stopped != 'true' && steps.evolve.outputs.rc != '0'
         run: exit 1
-
-# explicit launch trigger after workflow registration
