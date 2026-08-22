@@ -4,10 +4,17 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMA_PATH = ROOT / 'evolution4' / 'genome_schema.json'
+STRUCTURAL_PATH = ROOT / 'evolution4' / 'structural_genes.json'
 
 def load_schema(path: Path = SCHEMA_PATH):
     data = json.loads(path.read_text())
-    genes = data['genes']
+    genes = list(data['genes'])
+    if path == SCHEMA_PATH and STRUCTURAL_PATH.exists():
+        structural = json.loads(STRUCTURAL_PATH.read_text())
+        genes.extend(structural.get('genes', []))
+        data = dict(data)
+        data['version'] = max(int(data.get('version', 1)), int(structural.get('version', 2)))
+        data['genes'] = genes
     by_name = {g['name']: g for g in genes}
     if len(by_name) != len(genes):
         raise ValueError('duplicate gene names')
