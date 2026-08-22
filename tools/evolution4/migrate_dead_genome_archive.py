@@ -85,7 +85,6 @@ def backfill_state() -> bool:
     s = json.loads(STATE.read_text())
     archive = s.setdefault('tested_genomes', {})
     changed = False
-    # Backfill every completed generation report already persisted before this migration.
     for p in sorted(RESULTS.glob('g*/report.json')):
         try:
             rep = json.loads(p.read_text())
