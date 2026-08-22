@@ -94,7 +94,7 @@ jobs:
           git fetch --no-tags origin evolution4/control
           git show origin/evolution4/control:evolution4/state.json > /tmp/post-state.json
           python - <<'PY'
-          import json, os, sys
+          import json, os
           pre=json.load(open('/tmp/pre-state.json')); post=json.load(open('/tmp/post-state.json'))
           rc=int(os.environ.get('TX_RC','0'))
           bp, bg=pre['phase'], int(pre['generation']); ap, ag=post['phase'], int(post['generation'])
@@ -145,9 +145,10 @@ jobs:
           echo "phase=$phase retry=$retry rc=$TX_RC"
           if [ "$phase" = done ] || [ "$phase" = stopped ]; then exit 0; fi
           if [ "$retry" -ge 3 ]; then exit 0; fi
-          # Retry infrastructure failures as well as continue successful transactions.
           gh workflow run evolution4-genome.yml --repo "$GITHUB_REPOSITORY" --ref master
 
       - name: Fail visibly on transaction error
         if: steps.pre.outputs.stopped != 'true' && steps.tx.outputs.rc != '0'
         run: exit 1
+
+# bootstrap-trigger: 2026-08-22T15:28+02:00
