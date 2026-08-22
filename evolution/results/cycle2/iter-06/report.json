@@ -1,0 +1,1187 @@
+{
+  "cycle": 2,
+  "h2h": {
+    "D": 2,
+    "L": 3,
+    "W": 5,
+    "decision_roundtrip_ms": {
+      "max": 17.419297999992978,
+      "p50": 0.9722110000041084,
+      "p95": 1.218864999998459,
+      "p99": 1.218864999998459
+    },
+    "errors": 0,
+    "games": 10,
+    "illegal_actions": 0,
+    "maps": 5,
+    "paired_ci95": [
+      0.5,
+      0.7
+    ],
+    "paired_score": 0.6,
+    "returncode": 0,
+    "score": 0.6,
+    "seat_score": {
+      "0": 0.3,
+      "1": 0.9
+    },
+    "seed_end": 803441472,
+    "seed_start": 803441468,
+    "turns_mean": 816.2
+  },
+  "h2h_start": 803441468,
+  "iteration": 6,
+  "unavailable_opponents": [
+    {
+      "name": "champion",
+      "reason": "missing ref",
+      "ref": "v35-champion-70fresh"
+    }
+  ],
+  "x_diagnosis": [
+    "no single dominant signal; apply conservative concentration/tempo tuning"
+  ],
+  "x_mutation": {
+    "attempts": [
+      {
+        "accepted": true,
+        "description": "harvest one-unit-smaller backline stacks",
+        "key": "muster_threshold_lower",
+        "new": {
+          "D": 1,
+          "L": 1,
+          "W": 4,
+          "decision_roundtrip_ms": {
+            "max": 14.657673999863619,
+            "p50": 0.9366530000534112,
+            "p95": 1.08599400005005,
+            "p99": 1.08599400005005
+          },
+          "errors": 0,
+          "games": 6,
+          "illegal_actions": 0,
+          "maps": 3,
+          "paired_ci95": [
+            0.5,
+            1.0
+          ],
+          "paired_score": 0.75,
+          "returncode": 0,
+          "score": 0.75,
+          "seat_score": {
+            "0": 0.8333333333333334,
+            "1": 0.6666666666666666
+          },
+          "seed_end": 565314446,
+          "seed_start": 565314444,
+          "turns_mean": 1050.3333333333333
+        },
+        "old": {
+          "D": 1,
+          "L": 1,
+          "W": 4,
+          "decision_roundtrip_ms": {
+            "max": 14.929257000176221,
+            "p50": 0.9241600000677863,
+            "p95": 1.0874680001506931,
+            "p99": 1.0874680001506931
+          },
+          "errors": 0,
+          "games": 6,
+          "illegal_actions": 0,
+          "maps": 3,
+          "paired_ci95": [
+            0.5,
+            1.0
+          ],
+          "paired_score": 0.75,
+          "returncode": 0,
+          "score": 0.75,
+          "seat_score": {
+            "0": 0.8333333333333334,
+            "1": 0.6666666666666666
+          },
+          "seed_end": 565314446,
+          "seed_start": 565314444,
+          "turns_mean": 1050.3333333333333
+        }
+      }
+    ],
+    "description": "harvest one-unit-smaller backline stacks",
+    "key": "muster_threshold_lower",
+    "sha": "344ea332e2c5e72ecdfc6a4f5f8039dccbde637a"
+  },
+  "x_sha_after": "344ea332e2c5e72ecdfc6a4f5f8039dccbde637a",
+  "x_suite": [
+    {
+      "metrics": {
+        "c1_missing_rate": 0.0,
+        "c2_missing_rate": 0.5,
+        "contact_turn": 55.5,
+        "doom_moves": 0.5,
+        "doom_starts": 0.5,
+        "expansion_actions": 111.5,
+        "land200": 52,
+        "land250": 54.5,
+        "land400": 62,
+        "loss_samples": 2,
+        "muster_attack": 0.0,
+        "muster_harvest": 0.0,
+        "muster_windows": 0.0,
+        "no_strategic": 16.0,
+        "passes": 5.5,
+        "picker_aborts": 0.0,
+        "picker_blocked": 0.0,
+        "picker_completions": 1.0,
+        "picker_eff_rejects": 20.5,
+        "picker_mass_rejects": 718.5,
+        "picker_starts": 1.5,
+        "rear_actions": 27.0,
+        "search_actions": 9.0,
+        "threats": 35.5,
+        "turns": 742,
+        "war_actions": 229.5
+      },
+      "name": "defense",
+      "ref": "v35-defense-fresh",
+      "start": 440988196,
+      "summary": {
+        "D": 0,
+        "L": 2,
+        "W": 4,
+        "decision_roundtrip_ms": {
+          "max": 16.515997999988485,
+          "p50": 1.1002349999671424,
+          "p95": 1.1621240000181388,
+          "p99": 1.1621240000181388
+        },
+        "errors": 0,
+        "games": 6,
+        "illegal_actions": 0,
+        "maps": 3,
+        "paired_ci95": [
+          0.0,
+          1.0
+        ],
+        "paired_score": 0.6666666666666666,
+        "returncode": 0,
+        "score": 0.6666666666666666,
+        "seat_score": {
+          "0": 0.6666666666666666,
+          "1": 0.6666666666666666
+        },
+        "seed_end": 440988198,
+        "seed_start": 440988196,
+        "turns_mean": 836.5
+      }
+    },
+    {
+      "metrics": {
+        "c1_missing_rate": 0.0,
+        "c2_missing_rate": 0.0,
+        "contact_turn": 90.0,
+        "doom_moves": 0.0,
+        "doom_starts": 0.0,
+        "expansion_actions": 168.0,
+        "land200": 64,
+        "land250": 64,
+        "land400": 64,
+        "loss_samples": 1,
+        "muster_attack": 0.0,
+        "muster_harvest": 0.0,
+        "muster_windows": 0.0,
+        "no_strategic": 18.0,
+        "passes": 4.0,
+        "picker_aborts": 0.0,
+        "picker_blocked": 0.0,
+        "picker_completions": 0.0,
+        "picker_eff_rejects": 52.0,
+        "picker_mass_rejects": 88.0,
+        "picker_starts": 0.0,
+        "rear_actions": 14.0,
+        "search_actions": 27.0,
+        "threats": 16.0,
+        "turns": 891,
+        "war_actions": 112.0
+      },
+      "name": "heuristic",
+      "ref": "v35-heuristic-rebuild",
+      "start": 276685419,
+      "summary": {
+        "D": 1,
+        "L": 1,
+        "W": 4,
+        "decision_roundtrip_ms": {
+          "max": 17.520966999995835,
+          "p50": 1.1828480000417585,
+          "p95": 1.2473919999820282,
+          "p99": 1.2473919999820282
+        },
+        "errors": 0,
+        "games": 6,
+        "illegal_actions": 0,
+        "maps": 3,
+        "paired_ci95": [
+          0.5,
+          1.0
+        ],
+        "paired_score": 0.75,
+        "returncode": 0,
+        "score": 0.75,
+        "seat_score": {
+          "0": 1.0,
+          "1": 0.5
+        },
+        "seed_end": 276685421,
+        "seed_start": 276685419,
+        "turns_mean": 903
+      }
+    },
+    {
+      "metrics": {
+        "c1_missing_rate": 0.0,
+        "c2_missing_rate": 0.0,
+        "contact_turn": 126.5,
+        "doom_moves": 2.0,
+        "doom_starts": 1.5,
+        "expansion_actions": 152.0,
+        "land200": 91,
+        "land250": 109,
+        "land400": 162.5,
+        "loss_samples": 2,
+        "muster_attack": 0.0,
+        "muster_harvest": 0.0,
+        "muster_windows": 0.0,
+        "no_strategic": 16.5,
+        "passes": 4.0,
+        "picker_aborts": 0.5,
+        "picker_blocked": 0.0,
+        "picker_completions": 0.5,
+        "picker_eff_rejects": 67.5,
+        "picker_mass_rejects": 337.0,
+        "picker_starts": 1.0,
+        "rear_actions": 35.0,
+        "search_actions": 30.5,
+        "threats": 2.0,
+        "turns": 621,
+        "war_actions": 148.5
+      },
+      "name": "logistics",
+      "ref": "v35-logistics-recenter",
+      "start": 1599238077,
+      "summary": {
+        "D": 0,
+        "L": 2,
+        "W": 4,
+        "decision_roundtrip_ms": {
+          "max": 16.246617999968294,
+          "p50": 1.008931000001212,
+          "p95": 1.1144380000018828,
+          "p99": 1.1144380000018828
+        },
+        "errors": 0,
+        "games": 6,
+        "illegal_actions": 0,
+        "maps": 3,
+        "paired_ci95": [
+          0.0,
+          1.0
+        ],
+        "paired_score": 0.6666666666666666,
+        "returncode": 0,
+        "score": 0.6666666666666666,
+        "seat_score": {
+          "0": 0.6666666666666666,
+          "1": 0.6666666666666666
+        },
+        "seed_end": 1599238079,
+        "seed_start": 1599238077,
+        "turns_mean": 653.6666666666666
+      }
+    },
+    {
+      "metrics": {
+        "c1_missing_rate": 0.0,
+        "c2_missing_rate": 0.0,
+        "contact_turn": 134.0,
+        "doom_moves": 11.0,
+        "doom_starts": 3.0,
+        "expansion_actions": 133.0,
+        "land200": 68,
+        "land250": 85,
+        "land400": 131,
+        "loss_samples": 1,
+        "muster_attack": 0.0,
+        "muster_harvest": 0.0,
+        "muster_windows": 0.0,
+        "no_strategic": 23.0,
+        "passes": 23.0,
+        "picker_aborts": 0.0,
+        "picker_blocked": 0.0,
+        "picker_completions": 0.0,
+        "picker_eff_rejects": 0.0,
+        "picker_mass_rejects": 308.0,
+        "picker_starts": 0.0,
+        "rear_actions": 22.0,
+        "search_actions": 30.0,
+        "threats": 5.0,
+        "turns": 615,
+        "war_actions": 149.0
+      },
+      "name": "attack-pass",
+      "ref": "juraj-v3.6-iter1-attack-pass",
+      "start": 1025442964,
+      "summary": {
+        "D": 0,
+        "L": 1,
+        "W": 5,
+        "decision_roundtrip_ms": {
+          "max": 17.69680100005644,
+          "p50": 1.1276399999360365,
+          "p95": 1.1983849999523954,
+          "p99": 1.1983849999523954
+        },
+        "errors": 0,
+        "games": 6,
+        "illegal_actions": 0,
+        "maps": 3,
+        "paired_ci95": [
+          0.5,
+          1.0
+        ],
+        "paired_score": 0.8333333333333334,
+        "returncode": 0,
+        "score": 0.8333333333333334,
+        "seat_score": {
+          "0": 1.0,
+          "1": 0.6666666666666666
+        },
+        "seed_end": 1025442966,
+        "seed_start": 1025442964,
+        "turns_mean": 845.5
+      }
+    },
+    {
+      "metrics": {
+        "c1_missing_rate": 0.0,
+        "c2_missing_rate": 0.5,
+        "contact_turn": 129.0,
+        "doom_moves": 4.0,
+        "doom_starts": 2.5,
+        "expansion_actions": 97.5,
+        "land200": 72,
+        "land250": 73.5,
+        "land400": 103,
+        "loss_samples": 2,
+        "muster_attack": 0.0,
+        "muster_harvest": 0.0,
+        "muster_windows": 0.0,
+        "no_strategic": 21.0,
+        "passes": 5.0,
+        "picker_aborts": 0.5,
+        "picker_blocked": 0.0,
+        "picker_completions": 1.0,
+        "picker_eff_rejects": 79.0,
+        "picker_mass_rejects": 336.0,
+        "picker_starts": 1.5,
+        "rear_actions": 52.5,
+        "search_actions": 31.0,
+        "threats": 9.5,
+        "turns": 551,
+        "war_actions": 102.5
+      },
+      "name": "search",
+      "ref": "juraj-v3.6-search-refactor",
+      "start": 1072523211,
+      "summary": {
+        "D": 0,
+        "L": 2,
+        "W": 4,
+        "decision_roundtrip_ms": {
+          "max": 16.924893000009433,
+          "p50": 1.082365000002028,
+          "p95": 1.1593370001037329,
+          "p99": 1.1593370001037329
+        },
+        "errors": 0,
+        "games": 6,
+        "illegal_actions": 0,
+        "maps": 3,
+        "paired_ci95": [
+          0.5,
+          1.0
+        ],
+        "paired_score": 0.6666666666666666,
+        "returncode": 0,
+        "score": 0.6666666666666666,
+        "seat_score": {
+          "0": 1.0,
+          "1": 0.3333333333333333
+        },
+        "seed_end": 1072523213,
+        "seed_start": 1072523211,
+        "turns_mean": 760.5
+      }
+    },
+    {
+      "metrics": {
+        "c1_missing_rate": 0,
+        "c2_missing_rate": 0,
+        "contact_turn": -1,
+        "doom_moves": 0.0,
+        "doom_starts": 0.0,
+        "expansion_actions": 0.0,
+        "land200": 0.0,
+        "land250": 0.0,
+        "land400": 0.0,
+        "loss_samples": 0,
+        "muster_attack": 0.0,
+        "muster_harvest": 0.0,
+        "muster_windows": 0.0,
+        "no_strategic": 0.0,
+        "passes": 0.0,
+        "picker_aborts": 0.0,
+        "picker_blocked": 0.0,
+        "picker_completions": 0.0,
+        "picker_eff_rejects": 0.0,
+        "picker_mass_rejects": 0.0,
+        "picker_starts": 0.0,
+        "rear_actions": 0.0,
+        "search_actions": 0.0,
+        "threats": 0.0,
+        "turns": 0,
+        "war_actions": 0.0
+      },
+      "name": "expander",
+      "ref": "juraj-v3.6-expansion-cycle-hardening",
+      "start": 1444027369,
+      "summary": {
+        "D": 0,
+        "L": 0,
+        "W": 6,
+        "decision_roundtrip_ms": {
+          "max": 15.056892999950833,
+          "p50": 0.9769030000370549,
+          "p95": 1.0190240000156336,
+          "p99": 1.0190240000156336
+        },
+        "errors": 0,
+        "games": 6,
+        "illegal_actions": 0,
+        "maps": 3,
+        "paired_ci95": [
+          1.0,
+          1.0
+        ],
+        "paired_score": 1.0,
+        "returncode": 0,
+        "score": 1.0,
+        "seat_score": {
+          "0": 1.0,
+          "1": 1.0
+        },
+        "seed_end": 1444027371,
+        "seed_start": 1444027369,
+        "turns_mean": 562
+      }
+    },
+    {
+      "metrics": {
+        "c1_missing_rate": 0.0,
+        "c2_missing_rate": 1.0,
+        "contact_turn": 80.0,
+        "doom_moves": 3.0,
+        "doom_starts": 2.0,
+        "expansion_actions": 99.0,
+        "land200": 63.5,
+        "land250": 82,
+        "land400": 98,
+        "loss_samples": 2,
+        "muster_attack": 0.0,
+        "muster_harvest": 0.0,
+        "muster_windows": 0.0,
+        "no_strategic": 17.0,
+        "passes": 5.5,
+        "picker_aborts": 0.5,
+        "picker_blocked": 0.0,
+        "picker_completions": 1.0,
+        "picker_eff_rejects": 64.0,
+        "picker_mass_rejects": 571.5,
+        "picker_starts": 1.5,
+        "rear_actions": 29.5,
+        "search_actions": 20.0,
+        "threats": 14.5,
+        "turns": 524.5,
+        "war_actions": 80.5
+      },
+      "name": "doomer",
+      "ref": "chatgpt/picker9-doomguard-rusher",
+      "start": 1384676734,
+      "summary": {
+        "D": 0,
+        "L": 2,
+        "W": 4,
+        "decision_roundtrip_ms": {
+          "max": 18.42508800007181,
+          "p50": 1.0215060000291487,
+          "p95": 1.2089109999351422,
+          "p99": 1.2089109999351422
+        },
+        "errors": 0,
+        "games": 6,
+        "illegal_actions": 0,
+        "maps": 3,
+        "paired_ci95": [
+          0.5,
+          1.0
+        ],
+        "paired_score": 0.6666666666666666,
+        "returncode": 0,
+        "score": 0.6666666666666666,
+        "seat_score": {
+          "0": 1.0,
+          "1": 0.3333333333333333
+        },
+        "seed_end": 1384676736,
+        "seed_start": 1384676734,
+        "turns_mean": 653.6666666666666
+      }
+    },
+    {
+      "metrics": {
+        "c1_missing_rate": 0.0,
+        "c2_missing_rate": 0.5,
+        "contact_turn": 88.0,
+        "doom_moves": 1.0,
+        "doom_starts": 2.0,
+        "expansion_actions": 97.5,
+        "land200": 65.5,
+        "land250": 77,
+        "land400": 112,
+        "loss_samples": 2,
+        "muster_attack": 0.0,
+        "muster_harvest": 0.0,
+        "muster_windows": 0.0,
+        "no_strategic": 16.0,
+        "passes": 4.5,
+        "picker_aborts": 0.0,
+        "picker_blocked": 0.0,
+        "picker_completions": 2.5,
+        "picker_eff_rejects": 40.0,
+        "picker_mass_rejects": 954.0,
+        "picker_starts": 2.5,
+        "rear_actions": 37.0,
+        "search_actions": 22.5,
+        "threats": 14.0,
+        "turns": 724,
+        "war_actions": 194.0
+      },
+      "name": "picker",
+      "ref": "chatgpt/picker-v9-muster-castle",
+      "start": 1555195792,
+      "summary": {
+        "D": 3,
+        "L": 2,
+        "W": 1,
+        "decision_roundtrip_ms": {
+          "max": 16.062766000004558,
+          "p50": 0.9942850000470571,
+          "p95": 1.096858999972028,
+          "p99": 1.096858999972028
+        },
+        "errors": 0,
+        "games": 6,
+        "illegal_actions": 0,
+        "maps": 3,
+        "paired_ci95": [
+          0.25,
+          0.5
+        ],
+        "paired_score": 0.4166666666666667,
+        "returncode": 0,
+        "score": 0.4166666666666667,
+        "seat_score": {
+          "0": 0.16666666666666666,
+          "1": 0.6666666666666666
+        },
+        "seed_end": 1555195794,
+        "seed_start": 1555195792,
+        "turns_mean": 902.6666666666666
+      }
+    }
+  ],
+  "x_worst": "picker",
+  "y_diagnosis": [
+    "too many pass actions"
+  ],
+  "y_mutation": {
+    "attempts": [
+      {
+        "accepted": true,
+        "description": "lower picker minimum efficiency by 0.10",
+        "key": "picker_eff_lower",
+        "new": {
+          "D": 0,
+          "L": 1,
+          "W": 5,
+          "decision_roundtrip_ms": {
+            "max": 15.249827000161531,
+            "p50": 1.0145100000045204,
+            "p95": 1.123777999964659,
+            "p99": 1.123777999964659
+          },
+          "errors": 0,
+          "games": 6,
+          "illegal_actions": 0,
+          "maps": 3,
+          "paired_ci95": [
+            0.5,
+            1.0
+          ],
+          "paired_score": 0.8333333333333334,
+          "returncode": 0,
+          "score": 0.8333333333333334,
+          "seat_score": {
+            "0": 1.0,
+            "1": 0.6666666666666666
+          },
+          "seed_end": 1111841151,
+          "seed_start": 1111841149,
+          "turns_mean": 668
+        },
+        "old": {
+          "D": 0,
+          "L": 1,
+          "W": 5,
+          "decision_roundtrip_ms": {
+            "max": 15.154498000129024,
+            "p50": 1.0013580001668743,
+            "p95": 1.1303450000923476,
+            "p99": 1.1303450000923476
+          },
+          "errors": 0,
+          "games": 6,
+          "illegal_actions": 0,
+          "maps": 3,
+          "paired_ci95": [
+            0.5,
+            1.0
+          ],
+          "paired_score": 0.8333333333333334,
+          "returncode": 0,
+          "score": 0.8333333333333334,
+          "seat_score": {
+            "0": 1.0,
+            "1": 0.6666666666666666
+          },
+          "seed_end": 1111841151,
+          "seed_start": 1111841149,
+          "turns_mean": 668
+        }
+      }
+    ],
+    "description": "lower picker minimum efficiency by 0.10",
+    "key": "picker_eff_lower",
+    "sha": "62734e7a88c341533f9d131a542760ce4ef16ebe"
+  },
+  "y_sha_after": "62734e7a88c341533f9d131a542760ce4ef16ebe",
+  "y_suite": [
+    {
+      "metrics": {
+        "c1_missing_rate": 1.0,
+        "c2_missing_rate": 1.0,
+        "contact_turn": 145.0,
+        "doom_moves": 0.0,
+        "doom_starts": 1.0,
+        "expansion_actions": 58.0,
+        "land200": 0.0,
+        "land250": 0.0,
+        "land400": 0.0,
+        "loss_samples": 1,
+        "muster_attack": 0.0,
+        "muster_harvest": 0.0,
+        "muster_windows": 0.0,
+        "no_strategic": 16.0,
+        "passes": 4.0,
+        "picker_aborts": 0.0,
+        "picker_blocked": 0.0,
+        "picker_completions": 0.0,
+        "picker_eff_rejects": 1.0,
+        "picker_mass_rejects": 29.0,
+        "picker_starts": 0.0,
+        "rear_actions": 38.0,
+        "search_actions": 44.0,
+        "threats": 4.0,
+        "turns": 149,
+        "war_actions": 0.0
+      },
+      "name": "defense",
+      "ref": "v35-defense-fresh",
+      "start": 1804923205,
+      "summary": {
+        "D": 2,
+        "L": 1,
+        "W": 3,
+        "decision_roundtrip_ms": {
+          "max": 15.446065999981329,
+          "p50": 0.9813699999767778,
+          "p95": 1.0027609999951892,
+          "p99": 1.0027609999951892
+        },
+        "errors": 0,
+        "games": 6,
+        "illegal_actions": 0,
+        "maps": 3,
+        "paired_ci95": [
+          0.25,
+          1.0
+        ],
+        "paired_score": 0.6666666666666666,
+        "returncode": 0,
+        "score": 0.6666666666666666,
+        "seat_score": {
+          "0": 0.6666666666666666,
+          "1": 0.6666666666666666
+        },
+        "seed_end": 1804923207,
+        "seed_start": 1804923205,
+        "turns_mean": 783.6666666666666
+      }
+    },
+    {
+      "metrics": {
+        "c1_missing_rate": 0.0,
+        "c2_missing_rate": 0.0,
+        "contact_turn": 172.0,
+        "doom_moves": 3.0,
+        "doom_starts": 0.6666666666666666,
+        "expansion_actions": 139.66666666666666,
+        "land200": 81,
+        "land250": 98.33333333333333,
+        "land400": 124.66666666666667,
+        "loss_samples": 3,
+        "muster_attack": 0.0,
+        "muster_harvest": 0.0,
+        "muster_windows": 0.0,
+        "no_strategic": 28.666666666666668,
+        "passes": 19.333333333333332,
+        "picker_aborts": 0.0,
+        "picker_blocked": 0.0,
+        "picker_completions": 0.0,
+        "picker_eff_rejects": 51.333333333333336,
+        "picker_mass_rejects": 463.3333333333333,
+        "picker_starts": 0.0,
+        "rear_actions": 41.333333333333336,
+        "search_actions": 39.333333333333336,
+        "threats": 10.666666666666666,
+        "turns": 829.3333333333334,
+        "war_actions": 179.66666666666666
+      },
+      "name": "heuristic",
+      "ref": "v35-heuristic-rebuild",
+      "start": 791509054,
+      "summary": {
+        "D": 1,
+        "L": 3,
+        "W": 2,
+        "decision_roundtrip_ms": {
+          "max": 18.093294999971476,
+          "p50": 1.0210630000528909,
+          "p95": 1.2162890000126936,
+          "p99": 1.2162890000126936
+        },
+        "errors": 0,
+        "games": 6,
+        "illegal_actions": 0,
+        "maps": 3,
+        "paired_ci95": [
+          0.25,
+          0.5
+        ],
+        "paired_score": 0.4166666666666667,
+        "returncode": 0,
+        "score": 0.4166666666666667,
+        "seat_score": {
+          "0": 0.8333333333333334,
+          "1": 0.0
+        },
+        "seed_end": 791509056,
+        "seed_start": 791509054,
+        "turns_mean": 843.6666666666666
+      }
+    },
+    {
+      "metrics": {
+        "c1_missing_rate": 0,
+        "c2_missing_rate": 0,
+        "contact_turn": -1,
+        "doom_moves": 0.0,
+        "doom_starts": 0.0,
+        "expansion_actions": 0.0,
+        "land200": 0.0,
+        "land250": 0.0,
+        "land400": 0.0,
+        "loss_samples": 0,
+        "muster_attack": 0.0,
+        "muster_harvest": 0.0,
+        "muster_windows": 0.0,
+        "no_strategic": 0.0,
+        "passes": 0.0,
+        "picker_aborts": 0.0,
+        "picker_blocked": 0.0,
+        "picker_completions": 0.0,
+        "picker_eff_rejects": 0.0,
+        "picker_mass_rejects": 0.0,
+        "picker_starts": 0.0,
+        "rear_actions": 0.0,
+        "search_actions": 0.0,
+        "threats": 0.0,
+        "turns": 0,
+        "war_actions": 0.0
+      },
+      "name": "logistics",
+      "ref": "v35-logistics-recenter",
+      "start": 1640603926,
+      "summary": {
+        "D": 0,
+        "L": 0,
+        "W": 6,
+        "decision_roundtrip_ms": {
+          "max": 18.555056000082004,
+          "p50": 1.076318000059473,
+          "p95": 1.1955819999229789,
+          "p99": 1.1955819999229789
+        },
+        "errors": 0,
+        "games": 6,
+        "illegal_actions": 0,
+        "maps": 3,
+        "paired_ci95": [
+          1.0,
+          1.0
+        ],
+        "paired_score": 1.0,
+        "returncode": 0,
+        "score": 1.0,
+        "seat_score": {
+          "0": 1.0,
+          "1": 1.0
+        },
+        "seed_end": 1640603928,
+        "seed_start": 1640603926,
+        "turns_mean": 907
+      }
+    },
+    {
+      "metrics": {
+        "c1_missing_rate": 0.0,
+        "c2_missing_rate": 0.0,
+        "contact_turn": 171.5,
+        "doom_moves": 4.5,
+        "doom_starts": 2.0,
+        "expansion_actions": 154.0,
+        "land200": 92,
+        "land250": 112.5,
+        "land400": 154.5,
+        "loss_samples": 2,
+        "muster_attack": 25.5,
+        "muster_harvest": 263.5,
+        "muster_windows": 293.5,
+        "no_strategic": 18.5,
+        "passes": 3.5,
+        "picker_aborts": 0.0,
+        "picker_blocked": 0.0,
+        "picker_completions": 0.0,
+        "picker_eff_rejects": 108.5,
+        "picker_mass_rejects": 316.5,
+        "picker_starts": 0.0,
+        "rear_actions": 326.5,
+        "search_actions": 41.0,
+        "threats": 5.0,
+        "turns": 796,
+        "war_actions": 91.5
+      },
+      "name": "attack-pass",
+      "ref": "juraj-v3.6-iter1-attack-pass",
+      "start": 413097129,
+      "summary": {
+        "D": 1,
+        "L": 2,
+        "W": 3,
+        "decision_roundtrip_ms": {
+          "max": 17.546787000014774,
+          "p50": 1.0786110000253757,
+          "p95": 1.1651450000726982,
+          "p99": 1.1651450000726982
+        },
+        "errors": 0,
+        "games": 6,
+        "illegal_actions": 0,
+        "maps": 3,
+        "paired_ci95": [
+          0.25,
+          1.0
+        ],
+        "paired_score": 0.5833333333333334,
+        "returncode": 0,
+        "score": 0.5833333333333334,
+        "seat_score": {
+          "0": 0.3333333333333333,
+          "1": 0.8333333333333334
+        },
+        "seed_end": 413097131,
+        "seed_start": 413097129,
+        "turns_mean": 819
+      }
+    },
+    {
+      "metrics": {
+        "c1_missing_rate": 0.0,
+        "c2_missing_rate": 0.0,
+        "contact_turn": 99.0,
+        "doom_moves": 15.0,
+        "doom_starts": 2.0,
+        "expansion_actions": 121.0,
+        "land200": 89,
+        "land250": 98,
+        "land400": 95,
+        "loss_samples": 1,
+        "muster_attack": 0.0,
+        "muster_harvest": 0.0,
+        "muster_windows": 0.0,
+        "no_strategic": 19.0,
+        "passes": 5.0,
+        "picker_aborts": 0.0,
+        "picker_blocked": 0.0,
+        "picker_completions": 0.0,
+        "picker_eff_rejects": 241.0,
+        "picker_mass_rejects": 441.0,
+        "picker_starts": 0.0,
+        "rear_actions": 26.0,
+        "search_actions": 29.0,
+        "threats": 28.0,
+        "turns": 522,
+        "war_actions": 116.0
+      },
+      "name": "search",
+      "ref": "juraj-v3.6-search-refactor",
+      "start": 1403440564,
+      "summary": {
+        "D": 0,
+        "L": 1,
+        "W": 5,
+        "decision_roundtrip_ms": {
+          "max": 15.865313999938735,
+          "p50": 0.9820700001910154,
+          "p95": 1.0600159999967218,
+          "p99": 1.0600159999967218
+        },
+        "errors": 0,
+        "games": 6,
+        "illegal_actions": 0,
+        "maps": 3,
+        "paired_ci95": [
+          0.5,
+          1.0
+        ],
+        "paired_score": 0.8333333333333334,
+        "returncode": 0,
+        "score": 0.8333333333333334,
+        "seat_score": {
+          "0": 0.6666666666666666,
+          "1": 1.0
+        },
+        "seed_end": 1403440566,
+        "seed_start": 1403440564,
+        "turns_mean": 723
+      }
+    },
+    {
+      "metrics": {
+        "c1_missing_rate": 0,
+        "c2_missing_rate": 0,
+        "contact_turn": -1,
+        "doom_moves": 0.0,
+        "doom_starts": 0.0,
+        "expansion_actions": 0.0,
+        "land200": 0.0,
+        "land250": 0.0,
+        "land400": 0.0,
+        "loss_samples": 0,
+        "muster_attack": 0.0,
+        "muster_harvest": 0.0,
+        "muster_windows": 0.0,
+        "no_strategic": 0.0,
+        "passes": 0.0,
+        "picker_aborts": 0.0,
+        "picker_blocked": 0.0,
+        "picker_completions": 0.0,
+        "picker_eff_rejects": 0.0,
+        "picker_mass_rejects": 0.0,
+        "picker_starts": 0.0,
+        "rear_actions": 0.0,
+        "search_actions": 0.0,
+        "threats": 0.0,
+        "turns": 0,
+        "war_actions": 0.0
+      },
+      "name": "expander",
+      "ref": "juraj-v3.6-expansion-cycle-hardening",
+      "start": 985174340,
+      "summary": {
+        "D": 0,
+        "L": 0,
+        "W": 6,
+        "decision_roundtrip_ms": {
+          "max": 18.179378000013457,
+          "p50": 1.1080770000262419,
+          "p95": 1.1799219998920307,
+          "p99": 1.1799219998920307
+        },
+        "errors": 0,
+        "games": 6,
+        "illegal_actions": 0,
+        "maps": 3,
+        "paired_ci95": [
+          1.0,
+          1.0
+        ],
+        "paired_score": 1.0,
+        "returncode": 0,
+        "score": 1.0,
+        "seat_score": {
+          "0": 1.0,
+          "1": 1.0
+        },
+        "seed_end": 985174342,
+        "seed_start": 985174340,
+        "turns_mean": 373.5
+      }
+    },
+    {
+      "metrics": {
+        "c1_missing_rate": 0.0,
+        "c2_missing_rate": 0.0,
+        "contact_turn": 99.33333333333333,
+        "doom_moves": 3.6666666666666665,
+        "doom_starts": 2.6666666666666665,
+        "expansion_actions": 128.0,
+        "land200": 76.33333333333333,
+        "land250": 83,
+        "land400": 112.33333333333333,
+        "loss_samples": 3,
+        "muster_attack": 0.0,
+        "muster_harvest": 0.0,
+        "muster_windows": 0.0,
+        "no_strategic": 16.333333333333332,
+        "passes": 4.333333333333333,
+        "picker_aborts": 0.0,
+        "picker_blocked": 0.0,
+        "picker_completions": 3.3333333333333335,
+        "picker_eff_rejects": 71.66666666666667,
+        "picker_mass_rejects": 669.0,
+        "picker_starts": 3.3333333333333335,
+        "rear_actions": 52.0,
+        "search_actions": 19.0,
+        "threats": 18.0,
+        "turns": 892,
+        "war_actions": 187.33333333333334
+      },
+      "name": "doomer",
+      "ref": "chatgpt/picker9-doomguard-rusher",
+      "start": 1561620097,
+      "summary": {
+        "D": 1,
+        "L": 3,
+        "W": 2,
+        "decision_roundtrip_ms": {
+          "max": 14.98075999984394,
+          "p50": 0.982509000095888,
+          "p95": 1.0068560000036086,
+          "p99": 1.0068560000036086
+        },
+        "errors": 0,
+        "games": 6,
+        "illegal_actions": 0,
+        "maps": 3,
+        "paired_ci95": [
+          0.0,
+          0.75
+        ],
+        "paired_score": 0.4166666666666667,
+        "returncode": 0,
+        "score": 0.4166666666666667,
+        "seat_score": {
+          "0": 0.5,
+          "1": 0.3333333333333333
+        },
+        "seed_end": 1561620099,
+        "seed_start": 1561620097,
+        "turns_mean": 929.3333333333334
+      }
+    },
+    {
+      "metrics": {
+        "c1_missing_rate": 0.0,
+        "c2_missing_rate": 0.0,
+        "contact_turn": 142.0,
+        "doom_moves": 2.0,
+        "doom_starts": 3.5,
+        "expansion_actions": 131.5,
+        "land200": 63.5,
+        "land250": 85,
+        "land400": 122.5,
+        "loss_samples": 2,
+        "muster_attack": 0.0,
+        "muster_harvest": 0.0,
+        "muster_windows": 0.0,
+        "no_strategic": 18.0,
+        "passes": 5.5,
+        "picker_aborts": 0.0,
+        "picker_blocked": 0.0,
+        "picker_completions": 1.0,
+        "picker_eff_rejects": 160.0,
+        "picker_mass_rejects": 605.0,
+        "picker_starts": 1.5,
+        "rear_actions": 45.0,
+        "search_actions": 41.0,
+        "threats": 8.0,
+        "turns": 639.5,
+        "war_actions": 151.0
+      },
+      "name": "picker",
+      "ref": "chatgpt/picker-v9-muster-castle",
+      "start": 1428301964,
+      "summary": {
+        "D": 2,
+        "L": 2,
+        "W": 2,
+        "decision_roundtrip_ms": {
+          "max": 15.238063999959195,
+          "p50": 1.0478639999291772,
+          "p95": 1.070937000122285,
+          "p99": 1.070937000122285
+        },
+        "errors": 0,
+        "games": 6,
+        "illegal_actions": 0,
+        "maps": 3,
+        "paired_ci95": [
+          0.5,
+          0.5
+        ],
+        "paired_score": 0.5,
+        "returncode": 0,
+        "score": 0.5,
+        "seat_score": {
+          "0": 0.8333333333333334,
+          "1": 0.16666666666666666
+        },
+        "seed_end": 1428301966,
+        "seed_start": 1428301964,
+        "turns_mean": 872.5
+      }
+    }
+  ],
+  "y_worst": "heuristic"
+}
