@@ -73,3 +73,5 @@ jobs:
       - name: Fail if structural phenotype did not build
         if: steps.build.outputs.rc != '0'
         run: exit 1
+
+# retrigger after workflow creation
