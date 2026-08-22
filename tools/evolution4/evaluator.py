@@ -42,7 +42,9 @@ def plain_wrapper(run_sh:Path,out:Path)->Path:
     out.parent.mkdir(parents=True,exist_ok=True); out.write_text('#!/usr/bin/env bash\nset -euo pipefail\nexec '+json.dumps(str(run_sh))+'\n'); out.chmod(0o755); return out
 
 def resolve_opponents()->list[dict]:
-    run(['git','fetch','--no-tags','origin']+[r for _,rs in OPPONENT_SPECS for r in rs],check=False)
+    # Fetch all branch heads in one operation. This avoids one missing optional
+    # substitute making a multi-ref fetch fail before valid refs are available.
+    run(['git','fetch','--no-tags','origin','+refs/heads/*:refs/remotes/origin/*'])
     used=set(); ready=[]
     for i,(cat,refs) in enumerate(OPPONENT_SPECS):
         chosen=None
@@ -75,7 +77,6 @@ def combine(summaries:list[dict])->dict:
     return {'W':W,'D':D,'L':L,'games':games,'score':(W+.5*D)/games if games else 0.0,'raw_win_rate':W/games if games else 0.0,'errors':sum(int(x.get('errors',0)) for x in summaries),'illegal_actions':sum(int(x.get('illegal_actions',0)) for x in summaries)}
 
 def color_imbalance(summary:dict)->float:
-    # paired_benchmark schema differs across revisions; gracefully use known seat/color fields when present.
     vals=[]
     for k in ('candidate_as_p1_score','candidate_as_p2_score','seat1_score','seat2_score','color1_score','color2_score'):
         if k in summary:
