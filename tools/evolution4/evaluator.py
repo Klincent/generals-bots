@@ -5,6 +5,9 @@ from .genome import env_for
 
 ROOT=Path(__file__).resolve().parents[2]
 AGENT=Path('competition/agents/juraj_v35_cpp')
+EVAL_SHA='2260b6f19d51a14d7c68770677f22d04dfd88022'
+PINNED_MATCHUP=ROOT/'competition'/'evolution4_matchup_pinned.py'
+PINNED_PAIRED=ROOT/'competition'/'evolution4_paired_benchmark_pinned.py'
 OPPONENT_SPECS=[
  ('normal-expansion',['juraj-v3.6-expansion-cycle-hardening']),
  ('aggressive-expansion',['juraj-v3.6-short-cycle-only','juraj-v3.6-cycle-per-packet']),
@@ -22,6 +25,27 @@ def run(cmd,cwd=ROOT,check=True,capture=False,env=None):
     if check and p.returncode:
         raise RuntimeError(f'command failed {p.returncode}: {cmd}\n{p.stdout if capture else ""}\n{p.stderr if capture else ""}')
     return p
+
+def _git_show(spec:str)->str:
+    p=run(['git','show',spec],capture=True)
+    return p.stdout
+
+def ensure_pinned_evaluator():
+    """Materialize immutable X0 evaluator scripts in repo-local paths.
+
+    The X0 paired harness hardcodes competition/matchup.py. We rewrite only that
+    script path to our pinned copy; game logic and evaluator scoring remain byte-
+    for-byte from X0. Files are working-tree infrastructure and are never added to
+    champion/submission commits.
+    """
+    matchup=_git_show(f'{EVAL_SHA}:competition/matchup.py')
+    paired_src=_git_show(f'{EVAL_SHA}:competition/agents/juraj_v35_cpp/paired_benchmark.py')
+    paired_src=paired_src.replace("'competition/matchup.py'", "'competition/evolution4_matchup_pinned.py'")
+    if "competition/evolution4_matchup_pinned.py" not in paired_src:
+        raise RuntimeError('failed to pin paired benchmark matchup path')
+    PINNED_MATCHUP.parent.mkdir(parents=True,exist_ok=True)
+    PINNED_MATCHUP.write_text(matchup)
+    PINNED_PAIRED.write_text(paired_src)
 
 def worktree(ref:str,dest:Path)->Path:
     run(['git','worktree','remove','--force',str(dest)],check=False)
@@ -42,8 +66,6 @@ def plain_wrapper(run_sh:Path,out:Path)->Path:
     out.parent.mkdir(parents=True,exist_ok=True); out.write_text('#!/usr/bin/env bash\nset -euo pipefail\nexec '+json.dumps(str(run_sh))+'\n'); out.chmod(0o755); return out
 
 def resolve_opponents()->list[dict]:
-    # Fetch all branch heads in one operation. This avoids one missing optional
-    # substitute making a multi-ref fetch fail before valid refs are available.
     run(['git','fetch','--no-tags','origin','+refs/heads/*:refs/remotes/origin/*'])
     used=set(); ready=[]
     for i,(cat,refs) in enumerate(OPPONENT_SPECS):
@@ -63,11 +85,13 @@ def resolve_opponents()->list[dict]:
     return ready
 
 def paired(candidate:Path,baseline:Path,start:int,seeds:int,out:Path)->dict:
+    ensure_pinned_evaluator()
     shutil.rmtree(out,ignore_errors=True); out.mkdir(parents=True,exist_ok=True)
-    cmd=['python','competition/agents/juraj_v35_cpp/paired_benchmark.py','--candidate',str(candidate),'--baseline',str(baseline),'--start',str(start),'--seeds',str(seeds),'--output',str(out)]
+    cmd=['python',str(PINNED_PAIRED.relative_to(ROOT)),'--candidate',str(candidate),'--baseline',str(baseline),'--start',str(start),'--seeds',str(seeds),'--output',str(out)]
     p=run(cmd,check=False,capture=True)
     (out/'driver.stdout').write_text(p.stdout); (out/'driver.stderr').write_text(p.stderr)
     if p.returncode: raise RuntimeError(f'paired benchmark failed {p.returncode}: {p.stderr[-3000:]}')
+    if not (out/'summary.json').exists(): raise RuntimeError('paired benchmark produced no summary.json')
     s=json.loads((out/'summary.json').read_text())
     if s.get('errors',0) or s.get('illegal_actions',0): raise RuntimeError(f'benchmark protocol failure {s}')
     return s
@@ -78,6 +102,10 @@ def combine(summaries:list[dict])->dict:
 
 def color_imbalance(summary:dict)->float:
     vals=[]
+    seat=summary.get('seat_score')
+    if isinstance(seat,dict) and '0' in seat and '1' in seat:
+        try: return abs(float(seat['0'])-float(seat['1']))
+        except Exception: pass
     for k in ('candidate_as_p1_score','candidate_as_p2_score','seat1_score','seat2_score','color1_score','color2_score'):
         if k in summary:
             try: vals.append(float(summary[k]))
