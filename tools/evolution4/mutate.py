@@ -3,8 +3,13 @@ import random
 from .schema import load_schema
 from .genome import canonical_values
 
+# picker_neutrals_max is currently retained in the schema for observability/backward
+# compatibility only. X0 computes this value for telemetry but does not use it in
+# the actual picker allow decision, so mutating it would create a fake gene.
+NON_EVOLVABLE={'picker_neutrals_max'}
+
 def mutate(values: dict, rng: random.Random, exploratory: bool=False, bias_chromosome: str|None=None) -> dict:
-    data, _ = load_schema(); genes = data['genes']
+    data, _ = load_schema(); genes = [g for g in data['genes'] if g['name'] not in NON_EVOLVABLE]
     pool = genes
     if bias_chromosome and rng.random() < 0.70:
         q = [g for g in genes if g['chromosome'] == bias_chromosome]
