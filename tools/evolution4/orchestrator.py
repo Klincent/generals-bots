@@ -157,16 +157,35 @@ def bootstrap(s,txid):
     verify_remote('exploration',0,txid)
 
 def stage_population(s,t,opps,ids,generation):
+    from concurrent.futures import ThreadPoolExecutor, as_completed
     template_run=t/AGENT/'run.sh'; rep_names=['aggressive-expansion','defense-turtle','doomer-rusher','recent-reference']; rep=[o for o in opps if o['archetype'] in rep_names]
     starts1={o['archetype']:allocate(s,3,f'g{generation:02d}-stage1-{o["archetype"]}') for o in rep}
-    rows=[]
-    for gid in ids:
-        out=RESULTS/f'g{generation:02d}'/'stage1'/gid[:12]; ev=eval_genome(genome_values(gid),template_run,rep,starts1,3,out); rows.append({'genome_id':gid,'fitness':ev['fitness'],'stage1':ev})
+    print(f'[evolution4] STAGE1 start generation={generation} genomes={len(ids)} workers={min(4,len(ids))}',flush=True)
+    def one1(gid):
+        print(f'[evolution4] STAGE1 GENOME START {gid[:12]}',flush=True)
+        out=RESULTS/f'g{generation:02d}'/'stage1'/gid[:12]; ev=eval_genome(genome_values(gid),template_run,rep,starts1,3,out)
+        print(f'[evolution4] STAGE1 GENOME DONE {gid[:12]} score={ev["fitness"]["aggregate"]:.4f}',flush=True)
+        return {'genome_id':gid,'fitness':ev['fitness'],'stage1':ev}
+    got={}
+    with ThreadPoolExecutor(max_workers=min(4,len(ids))) as ex:
+        futs={ex.submit(one1,gid):gid for gid in ids}
+        for f in as_completed(futs): got[futs[f]]=f.result()
+    rows=[got[gid] for gid in ids]
     top8=select(rows,8)
     starts2={o['archetype']:allocate(s,5,f'g{generation:02d}-stage2-{o["archetype"]}') for o in opps}
-    rows2=[]
-    for r in top8:
-        gid=r['genome_id']; out=RESULTS/f'g{generation:02d}'/'stage2'/gid[:12]; ev=eval_genome(genome_values(gid),template_run,opps,starts2,5,out); rows2.append({'genome_id':gid,'fitness':ev['fitness'],'stage1':r['stage1'],'stage2':ev})
+    print(f'[evolution4] STAGE2 start generation={generation} genomes={len(top8)} workers={min(4,len(top8))}',flush=True)
+    stage1_by={r['genome_id']:r['stage1'] for r in top8}
+    top8_ids=[r['genome_id'] for r in top8]
+    def one2(gid):
+        print(f'[evolution4] STAGE2 GENOME START {gid[:12]}',flush=True)
+        out=RESULTS/f'g{generation:02d}'/'stage2'/gid[:12]; ev=eval_genome(genome_values(gid),template_run,opps,starts2,5,out)
+        print(f'[evolution4] STAGE2 GENOME DONE {gid[:12]} score={ev["fitness"]["aggregate"]:.4f}',flush=True)
+        return {'genome_id':gid,'fitness':ev['fitness'],'stage1':stage1_by[gid],'stage2':ev}
+    got2={}
+    with ThreadPoolExecutor(max_workers=min(4,len(top8_ids))) as ex:
+        futs={ex.submit(one2,gid):gid for gid in top8_ids}
+        for f in as_completed(futs): got2[futs[f]]=f.result()
+    rows2=[got2[gid] for gid in top8_ids]
     top4=select(rows2,4); return rows,rows2,top4
 
 def gate_a(s,candidate:Path,champion:Path,g,label):
