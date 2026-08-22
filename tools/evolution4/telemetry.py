@@ -1,6 +1,10 @@
 from __future__ import annotations
+import json
 import re
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+STATE = ROOT / 'evolution4' / 'state.json'
 
 def _nums(line:str):
     out={}
@@ -21,7 +25,16 @@ def aggregate(path:Path) -> dict:
             for k,v in _nums(line).items(): sums[k]=sums.get(k,0.0)+v; counts[k]=counts.get(k,0)+1
     return {'means':{k:sums[k]/counts[k] for k in sums},'tags':tags}
 
+def _exploration_is_active() -> bool:
+    try:
+        s=json.loads(STATE.read_text())
+        return s.get('phase') == 'exploration'
+    except Exception:
+        return True
+
 def suggested_chromosome(t:dict, archetype_scores:dict|None=None) -> str|None:
+    if _exploration_is_active():
+        return None
     scores=archetype_scores or {}
     if scores:
         worst=min(scores,key=scores.get)

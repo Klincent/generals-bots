@@ -314,6 +314,7 @@
     "f5ad1821205bcc4cd187e111ab418c9336a740688e4560b97734e4d587cf7656",
     "58b207491dde80c820fb4cba08a0fab5e10f2df2e2070ab1a20f67ae2fac1b66"
   ],
+  "dead_genome_count": 0,
   "experiment_version": 4,
   "founder_x0": {
     "branch": "evolution4/founder-x0",
@@ -339,6 +340,12 @@
   },
   "generation": 0,
   "generation_history": [],
+  "genome_archive_policy": {
+    "exact_dead_genome_retest": "forbidden",
+    "near_neighbor_retest": "allowed",
+    "reason": "avoid exact dead-end repeats without over-pruning epistatic neighborhoods",
+    "surviving_elite_retest": "allowed_on_fresh_seeds"
+  },
   "hall_of_fame": [
     {
       "commit_sha": "2260b6f19d51a14d7c68770677f22d04dfd88022",
@@ -461,5 +468,8 @@
         "start": 400082
       }
     ]
-  }
+  },
+  "state_schema_version": 2,
+  "tested_genome_count": 0,
+  "tested_genomes": {}
 }

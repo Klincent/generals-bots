@@ -56,6 +56,23 @@ def allocate(s,count,label):
 
 def genome_path(gid): return GENOMES/f'{gid}.json'
 def genome_values(gid): return load_genome(genome_path(gid))['values']
+def dead_genome_ids(s):
+    return {gid for gid,rec in s.get('tested_genomes',{}).items() if rec.get('status')=='dead'}
+
+def archive_generation_results(s,g,rows1,rows2,top4):
+    archive=s.setdefault('tested_genomes',{})
+    stage2={r['genome_id']:r for r in rows2}
+    survivors={r['genome_id'] for r in top4}
+    for r in rows1:
+        gid=r['genome_id']; rec=archive.setdefault(gid,{'first_tested_generation':g,'times_tested':0})
+        rec['last_tested_generation']=g; rec['times_tested']=int(rec.get('times_tested',0))+1
+        rec['stage1_score']=float(r.get('fitness',{}).get('aggregate',0.0))
+        if gid in stage2: rec['stage2_score']=float(stage2[gid].get('fitness',{}).get('aggregate',0.0))
+        rec['status']='survivor' if gid in survivors else 'dead'
+    s['dead_genome_count']=sum(1 for x in archive.values() if x.get('status')=='dead')
+    s['tested_genome_count']=len(archive)
+    return dead_genome_ids(s)
+
 def save_unique(values,meta,known:set[str]):
     for _ in range(30):
         gid=genome_id(values)
@@ -249,8 +266,8 @@ def promote(s,gid,t,evidence,g,txid):
     s.setdefault('champion_promotion_history',[]).append({'generation':g,'genome_id':gid,'parent_commit_sha':old,'commit_sha':newsha,'runtime_hashes':h,'evidence':evidence}); s.setdefault('hall_of_fame',[]).append({'label':f'g{g:02d}','genome_id':gid,'commit_sha':newsha,'runtime_hashes':h})
     return newsha
 
-def next_population(top4,g):
-    rng=random.Random(880000+g); elites=[x['genome_id'] for x in top4]; known=set(elites); out=list(elites); vals=[genome_values(x) for x in elites]
+def next_population(top4,g,dead_ids=None):
+    rng=random.Random(880000+g); elites=[x['genome_id'] for x in top4]; known=set(elites)|set(dead_ids or ()); out=list(elites); vals=[genome_values(x) for x in elites]
     worst=top4[0]['stage2']['archetypes']; bias=suggested_chromosome({},worst)
     def add(v,meta):
         gid=save_unique(v,meta,known); out.append(gid)
@@ -307,7 +324,8 @@ def generation(s,txid):
     proposal=top4[0]; accepted,evidence=promotion_screen(s,proposal,t,opps,g); prom=None
     if accepted: prom=promote(s,proposal['genome_id'],t,evidence,g,txid)
     else: s.setdefault('rejected_promotions',[]).append({'generation':g,**evidence})
-    nxt,elites,bias=next_population(top4,g); s['current_population']=nxt; s['breeding_elites']=elites; s['generation']=g
+    dead_ids=archive_generation_results(s,g,rows1,rows2,top4)
+    nxt,elites,bias=next_population(top4,g,dead_ids); s['current_population']=nxt; s['breeding_elites']=elites; s['generation']=g
     if g>=30: s['phase']='final'
     elif g>=12: s['phase']='exploitation'
     else: s['phase']='exploration'

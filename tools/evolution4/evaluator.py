@@ -1,5 +1,5 @@
 from __future__ import annotations
-import json, os, shutil, subprocess, time
+import json, os, shutil, subprocess, time, threading
 from pathlib import Path
 from .genome import env_for
 
@@ -8,6 +8,7 @@ AGENT=Path('competition/agents/juraj_v35_cpp')
 EVAL_SHA='2260b6f19d51a14d7c68770677f22d04dfd88022'
 PINNED_MATCHUP=ROOT/'competition'/'evolution4_matchup_pinned.py'
 PINNED_PAIRED=ROOT/'competition'/'evolution4_paired_benchmark_pinned.py'
+_PIN_LOCK=threading.Lock()
 OPPONENT_SPECS=[
  ('normal-expansion',['juraj-v3.6-expansion-cycle-hardening']),
  ('aggressive-expansion',['juraj-v3.6-short-cycle-only','juraj-v3.6-cycle-per-packet']),
@@ -34,17 +35,18 @@ def _git_show(spec:str)->str:
     return p.stdout
 
 def ensure_pinned_evaluator():
-    # Deterministic idempotent writes; safe when several evaluation threads call it.
-    matchup=_git_show(f'{EVAL_SHA}:competition/matchup.py')
-    paired_src=_git_show(f'{EVAL_SHA}:competition/agents/juraj_v35_cpp/paired_benchmark.py')
-    paired_src=paired_src.replace("'competition/matchup.py'", "'competition/evolution4_matchup_pinned.py'")
-    if "competition/evolution4_matchup_pinned.py" not in paired_src:
-        raise RuntimeError('failed to pin paired benchmark matchup path')
-    PINNED_MATCHUP.parent.mkdir(parents=True,exist_ok=True)
-    if not PINNED_MATCHUP.exists() or PINNED_MATCHUP.read_text()!=matchup:
-        PINNED_MATCHUP.write_text(matchup)
-    if not PINNED_PAIRED.exists() or PINNED_PAIRED.read_text()!=paired_src:
-        PINNED_PAIRED.write_text(paired_src)
+    # Four genome workers share these files: serialize materialization to avoid races.
+    with _PIN_LOCK:
+        matchup=_git_show(f'{EVAL_SHA}:competition/matchup.py')
+        paired_src=_git_show(f'{EVAL_SHA}:competition/agents/juraj_v35_cpp/paired_benchmark.py')
+        paired_src=paired_src.replace("'competition/matchup.py'", "'competition/evolution4_matchup_pinned.py'")
+        if "competition/evolution4_matchup_pinned.py" not in paired_src:
+            raise RuntimeError('failed to pin paired benchmark matchup path')
+        PINNED_MATCHUP.parent.mkdir(parents=True,exist_ok=True)
+        if not PINNED_MATCHUP.exists() or PINNED_MATCHUP.read_text()!=matchup:
+            PINNED_MATCHUP.write_text(matchup)
+        if not PINNED_PAIRED.exists() or PINNED_PAIRED.read_text()!=paired_src:
+            PINNED_PAIRED.write_text(paired_src)
 
 def worktree(ref:str,dest:Path)->Path:
     listed=run(['git','worktree','list','--porcelain'],capture=True,timeout=30).stdout
@@ -98,24 +100,45 @@ def resolve_opponents()->list[dict]:
 
 def paired(candidate:Path,baseline:Path,start:int,seeds:int,out:Path)->dict:
     ensure_pinned_evaluator()
-    shutil.rmtree(out,ignore_errors=True); out.mkdir(parents=True,exist_ok=True)
     cmd=['python',str(PINNED_PAIRED.relative_to(ROOT)),'--candidate',str(candidate),'--baseline',str(baseline),'--start',str(start),'--seeds',str(seeds),'--output',str(out)]
     tag=str(out.relative_to(ROOT)) if out.is_relative_to(ROOT) else str(out)
-    timeout=max(120, int(seeds)*2*45+60)
-    print(f'[evolution4] BENCH START {tag} seeds={seeds} games={seeds*2} seed_start={start} timeout={timeout}s',flush=True)
-    t0=time.monotonic()
-    try:
-        p=run(cmd,check=False,capture=True,timeout=timeout)
-    except Exception as e:
-        print(f'[evolution4] BENCH TIMEOUT/ERROR {tag} elapsed={time.monotonic()-t0:.1f}s: {e}',flush=True)
-        raise
-    (out/'driver.stdout').write_text(p.stdout); (out/'driver.stderr').write_text(p.stderr)
-    if p.returncode: raise RuntimeError(f'paired benchmark failed {p.returncode}: {p.stderr[-3000:]}')
-    if not (out/'summary.json').exists(): raise RuntimeError('paired benchmark produced no summary.json')
-    s=json.loads((out/'summary.json').read_text())
-    if s.get('errors',0) or s.get('illegal_actions',0): raise RuntimeError(f'benchmark protocol failure {s}')
-    print(f'[evolution4] BENCH DONE {tag} elapsed={time.monotonic()-t0:.1f}s W/D/L={s.get("W")}/{s.get("D")}/{s.get("L")} score={s.get("score",s.get("paired_score"))}',flush=True)
-    return s
+    timeout=max(420, int(seeds)*2*70+120)
+    for attempt in (1,2):
+        shutil.rmtree(out,ignore_errors=True); out.mkdir(parents=True,exist_ok=True)
+        print(f'[evolution4] BENCH START {tag} attempt={attempt} seeds={seeds} games={seeds*2} seed_start={start} timeout={timeout}s',flush=True)
+        t0=time.monotonic()
+        try:
+            p=run(cmd,check=False,capture=True,timeout=timeout)
+        except Exception as e:
+            print(f'[evolution4] BENCH TIMEOUT/ERROR {tag} attempt={attempt} elapsed={time.monotonic()-t0:.1f}s: {e}',flush=True)
+            if attempt==1:
+                print(f'[evolution4] BENCH RETRY {tag} reason=driver_exception',flush=True); continue
+            raise
+        (out/'driver.stdout').write_text(p.stdout); (out/'driver.stderr').write_text(p.stderr)
+        s=None
+        if (out/'summary.json').exists():
+            try: s=json.loads((out/'summary.json').read_text())
+            except Exception: s=None
+        illegal=int((s or {}).get('illegal_actions',0))
+        errors=int((s or {}).get('errors',0))
+        if p.returncode==0 and s is not None and not errors and not illegal:
+            print(f'[evolution4] BENCH DONE {tag} elapsed={time.monotonic()-t0:.1f}s W/D/L={s.get("W")}/{s.get("D")}/{s.get("L")} score={s.get("score",s.get("paired_score"))}',flush=True)
+            return s
+        games_tail=''
+        gp=out/'games.jsonl'
+        if gp.exists(): games_tail=gp.read_text(errors='ignore')[-4000:]
+        diagnostic=f'rc={p.returncode} errors={errors} illegal={illegal} stdout={p.stdout[-1500:]} stderr={p.stderr[-1500:]} games={games_tail}'
+        print(f'[evolution4] BENCH FAILED {tag} attempt={attempt} {diagnostic}',flush=True)
+        if illegal:
+            raise RuntimeError(f'benchmark illegal action: {diagnostic}')
+        if attempt==1:
+            evidence=out.with_name(out.name+'.attempt1')
+            shutil.rmtree(evidence,ignore_errors=True)
+            out.rename(evidence)
+            print(f'[evolution4] BENCH RETRY {tag} reason=infra_or_protocol_error',flush=True)
+            continue
+        raise RuntimeError(f'paired benchmark failed after retry: {diagnostic}')
+    raise RuntimeError('unreachable paired benchmark retry state')
 
 def combine(summaries:list[dict])->dict:
     W=sum(int(x.get('W',0)) for x in summaries); D=sum(int(x.get('D',0)) for x in summaries); L=sum(int(x.get('L',0)) for x in summaries); games=W+D+L
