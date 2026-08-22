@@ -1,0 +1,1 @@
+Recovery in progress for hung generation-0 transaction #14. Temporary STOP is intentional. No champion promotion is allowed until recovery run starts with repaired evaluator timeouts/progress and parallel stage evaluation.
