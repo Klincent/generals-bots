@@ -13,7 +13,7 @@ permissions:
 
 concurrency:
   group: evolution4-genome
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   evolve:
@@ -34,7 +34,7 @@ jobs:
           git config user.name ChatGPT
           git config user.email actions@users.noreply.github.com
 
-      - name: Repair known bootstrap infrastructure failures
+      - name: Repair evolution4 infrastructure
         shell: bash
         run: |
           set -euo pipefail
@@ -42,8 +42,7 @@ jobs:
           import json
           from pathlib import Path
 
-          # Repair 1: preserve the historical V35_* test/debug overrides after
-          # loading the new EVO4_* genome defaults.
+          # Preserve historical V35_* test/debug overrides after loading EVO4 defaults.
           p=Path('tools/evolution4/template_transform.py')
           s=p.read_text()
           old_line="    new='cfg_.load();doomguard_enabled_=cfg_.doomguard_enabled;picker_enabled_=cfg_.picker_enabled;edge_picker_threshold_=cfg_.edge_picker_threshold;edge_picker_min_efficiency_=cfg_.picker_min_efficiency;muster_threshold_=cfg_.muster_threshold;'"
@@ -53,34 +52,34 @@ jobs:
           elif fixed_line not in s:
               raise SystemExit('unexpected template_transform legacy-env marker')
 
-          # Repair 2: the current repository matchup.py has an old path-label bug
-          # for /tmp worktrees. Use the pinned X0 matchup implementation for the
-          # bootstrap smoke instead of modifying evaluator/game semantics.
           op=Path('tools/evolution4/orchestrator.py')
           o=op.read_text()
+
+          # Keep pinned X0 smoke runner repair if an older control checkout still needs it.
           old_smoke="""    # Fresh game-level smoke with actual engine.\n    run(['python','competition/matchup.py',str(t/AGENT/'run.sh'),str(x/AGENT/'run.sh'),'--mode','competition','--seed','399901'])\n    yw=wrapper(t/AGENT/'run.sh',founder_y0(),Path('/tmp/e4-y-smoke.sh')); run(['python','competition/matchup.py',str(yw),str(y/AGENT/'run.sh'),'--mode','competition','--seed','399902'])\n"""
           new_smoke="""    # Fresh game-level smoke with the pinned X0 runner. The current control\n    # branch's older matchup.py has a path-label-only bug for /tmp worktrees;\n    # pinning the known X0 runner avoids changing game/evaluator semantics.\n    pinned_matchup=ROOT/'competition'/'evolution4_matchup_pinned.py'\n    pinned_matchup.write_text(git('show',f'{X0}:competition/matchup.py',capture=True).stdout)\n    try:\n        run(['python',str(pinned_matchup),str(t/AGENT/'run.sh'),str(x/AGENT/'run.sh'),'--mode','competition','--seed','399901'])\n        yw=wrapper(t/AGENT/'run.sh',founder_y0(),Path('/tmp/e4-y-smoke.sh'))\n        run(['python',str(pinned_matchup),str(yw),str(y/AGENT/'run.sh'),'--mode','competition','--seed','399902'])\n    finally:\n        pinned_matchup.unlink(missing_ok=True)\n"""
           if old_smoke in o:
-              op.write_text(o.replace(old_smoke,new_smoke,1))
-          elif new_smoke not in o:
-              raise SystemExit('unexpected orchestrator smoke marker')
+              o=o.replace(old_smoke,new_smoke,1)
 
-          # A known, now-repaired bootstrap failure starts a new consecutive
-          # infrastructure-failure sequence. No gameplay result is changed.
-          sp=Path('evolution4/state.json')
-          state=json.loads(sp.read_text())
-          err=str(state.get('last_error') or '')
-          known=('test.sh' in err) or ('competition/matchup.py' in err and '399901' in err)
-          if state.get('phase') in ('bootstrap','stopped') and known:
-              state['phase']='bootstrap'
-              state['retry_count']=0
-              state['last_error']=None
-              sp.write_text(json.dumps(state,indent=2,sort_keys=True)+'\n')
-              Path('evolution4/STOP').unlink(missing_ok=True)
+          # Generation evaluation used to be completely sequential and silent.
+          # Replace it with deterministic max-4 parallel genome evaluation.
+          old_stage='''def stage_population(s,t,opps,ids,generation):\n    template_run=t/AGENT/'run.sh'; rep_names=['aggressive-expansion','defense-turtle','doomer-rusher','recent-reference']; rep=[o for o in opps if o['archetype'] in rep_names]\n    starts1={o['archetype']:allocate(s,3,f'g{generation:02d}-stage1-{o["archetype"]}') for o in rep}\n    rows=[]\n    for gid in ids:\n        out=RESULTS/f'g{generation:02d}'/'stage1'/gid[:12]; ev=eval_genome(genome_values(gid),template_run,rep,starts1,3,out); rows.append({'genome_id':gid,'fitness':ev['fitness'],'stage1':ev})\n    top8=select(rows,8)\n    starts2={o['archetype']:allocate(s,5,f'g{generation:02d}-stage2-{o["archetype"]}') for o in opps}\n    rows2=[]\n    for r in top8:\n        gid=r['genome_id']; out=RESULTS/f'g{generation:02d}'/'stage2'/gid[:12]; ev=eval_genome(genome_values(gid),template_run,opps,starts2,5,out); rows2.append({'genome_id':gid,'fitness':ev['fitness'],'stage1':r['stage1'],'stage2':ev})\n    top4=select(rows2,4); return rows,rows2,top4\n'''
+          new_stage='''def stage_population(s,t,opps,ids,generation):\n    from concurrent.futures import ThreadPoolExecutor, as_completed\n    template_run=t/AGENT/'run.sh'; rep_names=['aggressive-expansion','defense-turtle','doomer-rusher','recent-reference']; rep=[o for o in opps if o['archetype'] in rep_names]\n    starts1={o['archetype']:allocate(s,3,f'g{generation:02d}-stage1-{o["archetype"]}') for o in rep}\n    print(f'[evolution4] STAGE1 start generation={generation} genomes={len(ids)} workers={min(4,len(ids))}',flush=True)\n    def one1(gid):\n        print(f'[evolution4] STAGE1 GENOME START {gid[:12]}',flush=True)\n        out=RESULTS/f'g{generation:02d}'/'stage1'/gid[:12]; ev=eval_genome(genome_values(gid),template_run,rep,starts1,3,out)\n        print(f'[evolution4] STAGE1 GENOME DONE {gid[:12]} score={ev["fitness"]["aggregate"]:.4f}',flush=True)\n        return {'genome_id':gid,'fitness':ev['fitness'],'stage1':ev}\n    got={}\n    with ThreadPoolExecutor(max_workers=min(4,len(ids))) as ex:\n        futs={ex.submit(one1,gid):gid for gid in ids}\n        for f in as_completed(futs): got[futs[f]]=f.result()\n    rows=[got[gid] for gid in ids]\n    top8=select(rows,8)\n    starts2={o['archetype']:allocate(s,5,f'g{generation:02d}-stage2-{o["archetype"]}') for o in opps}\n    print(f'[evolution4] STAGE2 start generation={generation} genomes={len(top8)} workers={min(4,len(top8))}',flush=True)\n    stage1_by={r['genome_id']:r['stage1'] for r in top8}\n    top8_ids=[r['genome_id'] for r in top8]\n    def one2(gid):\n        print(f'[evolution4] STAGE2 GENOME START {gid[:12]}',flush=True)\n        out=RESULTS/f'g{generation:02d}'/'stage2'/gid[:12]; ev=eval_genome(genome_values(gid),template_run,opps,starts2,5,out)\n        print(f'[evolution4] STAGE2 GENOME DONE {gid[:12]} score={ev["fitness"]["aggregate"]:.4f}',flush=True)\n        return {'genome_id':gid,'fitness':ev['fitness'],'stage1':stage1_by[gid],'stage2':ev}\n    got2={}\n    with ThreadPoolExecutor(max_workers=min(4,len(top8_ids))) as ex:\n        futs={ex.submit(one2,gid):gid for gid in top8_ids}\n        for f in as_completed(futs): got2[futs[f]]=f.result()\n    rows2=[got2[gid] for gid in top8_ids]\n    top4=select(rows2,4); return rows,rows2,top4\n'''
+          if old_stage in o:
+              o=o.replace(old_stage,new_stage,1)
+          elif new_stage not in o:
+              raise SystemExit('unexpected stage_population marker')
+          op.write_text(o)
+
+          # Remove recovery-note clutter, but deliberately keep evolution4/STOP
+          # until the hung run has been cancelled and a clean restart is requested.
+          for q in Path('evolution4').glob('recovery*'):
+              if q.is_file(): q.unlink()
+          Path('evolution4/.recovery_lock').unlink(missing_ok=True)
           PY
-          git add tools/evolution4/template_transform.py tools/evolution4/orchestrator.py evolution4/state.json evolution4/STOP 2>/dev/null || true
+          git add -A tools/evolution4 evolution4
           if ! git diff --cached --quiet; then
-            git commit -m 'evolution4: repair pinned bootstrap smoke infrastructure'
+            git commit -m 'evolution4: repair hung-generation evaluator infrastructure'
             git push origin HEAD:evolution4/control
           fi
 
@@ -201,4 +200,4 @@ jobs:
         if: steps.pre.outputs.stopped != 'true' && steps.tx.outputs.rc != '0'
         run: exit 1
 
-# bootstrap-smoke-repair-trigger: 2026-08-22T15:49+02:00
+# recovery-trigger: 2026-08-22T17:39+02:00
