@@ -20,12 +20,15 @@ Usage:
 Defaults to two copies of `competition/agents/expander_python/run.sh`.
 """
 import argparse
+import json
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 import jax.numpy as jnp
 import jax.random as jrandom
+import numpy as np
 
 from generals import GeneralsEnv
 from generals.core import game
@@ -49,7 +52,11 @@ def build_agent(run_sh: Path) -> None:
     build = run_sh.parent / "build.sh"
     if not build.exists():
         return
-    print(f"[matchup] building {build.relative_to(REPO_ROOT)}", file=sys.stderr)
+    try:
+        label = build.relative_to(REPO_ROOT)
+    except ValueError:
+        label = build
+    print(f"[matchup] building {label}", file=sys.stderr)
     result = subprocess.run(["bash", str(build)], cwd=str(build.parent))
     if result.returncode != 0:
         sys.exit(f"[matchup] build failed: {build}")
@@ -186,7 +193,11 @@ def main():
                         help="disable fog of war; agents see the whole board")
     parser.add_argument("--mode", type=str, default=None,
                         help="named ruleset preset (e.g. competition); pins the full "
-                             "ruleset and overrides --grid-size/--truncation/--perfect-info")
+                        "ruleset and overrides --grid-size/--truncation/--perfect-info")
+    parser.add_argument("--audit-json", type=Path,
+                        help="write protocol, legality, outcome, and round-trip timing audit")
+    parser.add_argument("--diagnostic-json", type=Path,
+                        help="write full-state/action turns for deterministic used-seed forensics")
     args = parser.parse_args()
 
     a0_path = Path(args.agent0).resolve()
@@ -234,16 +245,60 @@ def main():
 
     transition = make_transition(env)
     built = [0, 0]
+    illegal = [0, 0]
+    decision_ms = [[], []]
     prev_castles = state.castles
     winner = -1
     turn = 0
+    diagnostic_turns = []
     try:
         while turn < env.truncation:
             obs_0 = get_obs(state, 0)
             obs_1 = get_obs(state, 1)
 
+            started = time.perf_counter()
             a_0 = ask_agent(agents[0], obs_0)
+            decision_ms[0].append((time.perf_counter() - started) * 1000)
+            started = time.perf_counter()
             a_1 = ask_agent(agents[1], obs_1)
+            decision_ms[1].append((time.perf_counter() - started) * 1000)
+
+            if args.diagnostic_json:
+                diagnostic_turns.append({
+                    "turn": turn,
+                    "armies": np.asarray(state.armies).tolist(),
+                    "ownership": np.asarray(state.ownership).astype(np.int8).tolist(),
+                    "generals": np.asarray(state.generals).astype(np.int8).tolist(),
+                    "castles": np.asarray(state.castles).astype(np.int8).tolist(),
+                    "actions": [np.asarray(a_0, dtype=np.int64).tolist(),
+                                np.asarray(a_1, dtype=np.int64).tolist()],
+                })
+
+            def valid_action(action, obs, pid):
+                values = np.asarray(action, dtype=np.int64)
+                if values.shape != (5,) or values[0] not in (0, 1, 2):
+                    return False
+                if values[0] == 1:
+                    return True
+                r, c = int(values[1]), int(values[2])
+                if not (0 <= r < H and 0 <= c < W):
+                    return False
+                if values[0] == 2:
+                    if not env.build_castles:
+                        return False
+                    costs = np.asarray(_bc.build_cost_grid(state, pid))
+                    return bool(state.ownership[pid, r, c] and not state.generals[r, c]
+                                and not state.castles[r, c] and state.armies[r, c] >= costs[r, c])
+                direction = int(values[3])
+                if direction not in range(4) or values[4] not in (0, 1):
+                    return False
+                dr, dc = ((-1, 0), (1, 0), (0, -1), (0, 1))[direction]
+                rr, cc = r + dr, c + dc
+                return bool(0 <= rr < H and 0 <= cc < W and state.ownership[pid, r, c]
+                            and state.armies[r, c] > 1 and not state.mountains[rr, cc])
+
+            illegal[0] += not valid_action(a_0, obs_0, 0)
+            illegal[1] += not valid_action(a_1, obs_1, 1)
 
             actions = jnp.stack([a_0, a_1])
             state, info = transition(state, actions)
@@ -281,6 +336,27 @@ def main():
     if env.build_castles:
         print(f"[matchup] castles built: {built[0]} ({labels[0]}) "
               f"vs {built[1]} ({labels[1]})")
+
+    if args.audit_json:
+        def timing(values):
+            ordered = sorted(values)
+            def percentile(q):
+                return ordered[min(len(ordered) - 1, max(0, int(np.ceil(q * len(ordered))) - 1))]
+            return {"p50": percentile(.50), "p95": percentile(.95),
+                    "p99": percentile(.99), "max": max(ordered)}
+        args.audit_json.parent.mkdir(parents=True, exist_ok=True)
+        args.audit_json.write_text(json.dumps({
+            "seed": args.seed, "winner": winner, "turns": turn,
+            "labels": labels, "illegal_actions": illegal, "castles_built": built,
+            "decision_ms": [timing(x) for x in decision_ms],
+        }, sort_keys=True) + "\n")
+
+    if args.diagnostic_json:
+        args.diagnostic_json.parent.mkdir(parents=True, exist_ok=True)
+        args.diagnostic_json.write_text(json.dumps({
+            "schema": 1, "seed": args.seed, "winner": winner, "turns": turn,
+            "labels": labels, "frames": diagnostic_turns,
+        }, separators=(",", ":")) + "\n")
 
     if record:
         replay(states_log, infos_log, agent_ids=labels, fps=args.fps)
