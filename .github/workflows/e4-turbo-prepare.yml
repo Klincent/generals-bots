@@ -27,8 +27,8 @@ jobs:
           set -euo pipefail
           git config user.name ChatGPT
           git config user.email actions@users.noreply.github.com
-          python tools/evolution4/apply_turbo_orchestrator.py
-          python tools/evolution4/migrate_turbo_structural.py
+          python -m tools.evolution4.apply_turbo_orchestrator
+          python -m tools.evolution4.migrate_turbo_structural
           python -m py_compile tools/evolution4/*.py
           python -m pip install -q pytest
           pytest -q tests/test_evolution4.py
