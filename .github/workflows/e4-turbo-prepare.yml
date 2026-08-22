@@ -1,0 +1,51 @@
+name: evolution4-turbo-prepare
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/e4-turbo-prepare.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: evolution4/turbo-structural
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Prepare isolated Turbo Evolution control
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name ChatGPT
+          git config user.email actions@users.noreply.github.com
+          python tools/evolution4/apply_turbo_orchestrator.py
+          python tools/evolution4/migrate_turbo_structural.py
+          python -m py_compile tools/evolution4/*.py
+          python -m pip install -q pytest
+          pytest -q tests/test_evolution4.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from tools.evolution4.schema import load_schema
+          s=json.loads(Path('evolution4/state.json').read_text())
+          data,_=load_schema(); enums=[g for g in data['genes'] if g['type']=='enum']
+          assert s['mode']=='turbo_structural' and s['genome_schema_version']==2
+          assert s['phase']=='exploration' and s['generation']==0
+          assert len(s['current_population'])==16 and len(set(s['current_population']))==16
+          assert len(enums)>=7
+          print('TURBO_READY population=',len(s['current_population']),'genes=',len(data['genes']),'structural=',len(enums),'dead=',s.get('dead_genome_count'))
+          PY
+          git add tools/evolution4 evolution4/state.json evolution4/turbo_migration.json evolution4/genomes evolution4/legacy_genomes_v1 tests/test_evolution4.py
+          if ! git diff --cached --quiet; then
+            git commit -m 'evolution4 turbo: migrate state and seed structural population'
+            git push origin HEAD:evolution4/turbo-structural
+          fi
