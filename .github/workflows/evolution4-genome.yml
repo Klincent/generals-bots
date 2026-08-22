@@ -30,6 +30,22 @@ jobs:
           git config user.name ChatGPT
           git config user.email actions@users.noreply.github.com
 
+      - name: Apply safe evolution4 state migration
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin master evolution4/control
+          if git cat-file -e origin/master:tools/evolution4/migrate_dead_genome_archive.py 2>/dev/null; then
+            git show origin/master:tools/evolution4/migrate_dead_genome_archive.py > /tmp/e4-migrate.py
+            python /tmp/e4-migrate.py
+            python -m py_compile tools/evolution4/orchestrator.py tools/evolution4/telemetry.py
+            git add tools/evolution4/orchestrator.py tools/evolution4/telemetry.py evolution4/state.json
+            if ! git diff --cached --quiet; then
+              git commit -m 'evolution4: migrate random exploration and dead-genome archive'
+              git push origin HEAD:evolution4/control
+            fi
+          fi
+
       - name: Capture remote pre-state and STOP
         id: pre
         shell: bash
@@ -40,7 +56,7 @@ jobs:
           python - <<'PY'
           import json
           s=json.load(open('/tmp/pre-state.json'))
-          print('PRE phase=',s['phase'],'generation=',s['generation'],'retry=',s.get('retry_count',0),'champion=',s.get('official_champion_genome_id'))
+          print('PRE phase=',s['phase'],'generation=',s['generation'],'retry=',s.get('retry_count',0),'champion=',s.get('official_champion_genome_id'),'tested=',s.get('tested_genome_count',0),'dead=',s.get('dead_genome_count',0))
           PY
           if git cat-file -e origin/evolution4/control:evolution4/STOP 2>/dev/null; then
             echo stopped=true >> "$GITHUB_OUTPUT"
@@ -95,7 +111,7 @@ jobs:
           pre=json.load(open('/tmp/pre-state.json')); post=json.load(open('/tmp/post-state.json'))
           rc=int(os.environ.get('TX_RC','0'))
           bp,bg=pre['phase'],int(pre['generation']); ap,ag=post['phase'],int(post['generation'])
-          print('POST phase=',ap,'generation=',ag,'retry=',post.get('retry_count',0),'last_error=',post.get('last_error'))
+          print('POST phase=',ap,'generation=',ag,'retry=',post.get('retry_count',0),'last_error=',post.get('last_error'),'tested=',post.get('tested_genome_count',0),'dead=',post.get('dead_genome_count',0))
           if rc==0:
               if bp=='bootstrap' and not (ap=='exploration' and ag==0):
                   raise SystemExit(f'FALSE GREEN bootstrap {ap}/{ag}')
