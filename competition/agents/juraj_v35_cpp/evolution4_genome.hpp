@@ -2,10 +2,12 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
+#include <string>
 
 static inline int evo4_int(const char* n,int d,int lo,int hi){const char*e=std::getenv(n);if(!e)return d;long v=std::strtol(e,nullptr,10);return std::max(lo,std::min(hi,(int)v));}
 static inline double evo4_double(const char* n,double d,double lo,double hi){const char*e=std::getenv(n);if(!e)return d;double v=std::strtod(e,nullptr);return std::max(lo,std::min(hi,v));}
 static inline bool evo4_bool(const char* n,bool d){const char*e=std::getenv(n);if(!e)return d;return std::strcmp(e,"0")!=0&&std::strcmp(e,"false")!=0&&std::strcmp(e,"FALSE")!=0;}
+static inline std::string evo4_string(const char* n,const char* d){const char*e=std::getenv(n);return e?std::string(e):std::string(d);}
 
 struct GenomeConfig {
  bool doomguard_enabled=true,picker_enabled=true;
@@ -18,6 +20,8 @@ struct GenomeConfig {
  double muster_enemy_mult=3.0; int muster_enemy_bonus=20,muster_opp_divisor=2,late_finish_turn=900,late_finish_base=70;
  double late_finish_enemy_mult=2.0; int late_finish_enemy_bonus=15,picker_mature_turn=150,picker_mature_land_pct=35,picker_not_behind_num=5,picker_not_behind_den=4;
  double picker_growth25=.08,picker_growth50=.06; int picker_growth_land_pct=45; double picker_top3_share_max=.55; int late_castle_army_margin=30;
+ std::string muster_topology="single",muster_anchor_policy="largest",chunk_transfer_policy="full";
+ std::string logistics_route_policy="interior",defense_policy="block_first",fallback_policy="balanced",picker_start_policy="margin";
  void load(){
   doomguard_enabled=evo4_bool("EVO4_DOOMGUARD_ENABLED",doomguard_enabled); picker_enabled=evo4_bool("EVO4_PICKER_ENABLED",picker_enabled);
   edge_picker_threshold=evo4_int("EVO4_EDGE_PICKER_THRESHOLD",edge_picker_threshold,0,60); picker_min_efficiency=evo4_double("EVO4_PICKER_MIN_EFFICIENCY",picker_min_efficiency,.5,8.0); muster_threshold=evo4_int("EVO4_MUSTER_THRESHOLD",muster_threshold,4,30);
@@ -33,5 +37,7 @@ struct GenomeConfig {
   late_finish_turn=evo4_int("EVO4_LATE_FINISH_TURN",late_finish_turn,650,1100); late_finish_base=evo4_int("EVO4_LATE_FINISH_BASE",late_finish_base,35,140); late_finish_enemy_mult=evo4_double("EVO4_LATE_FINISH_ENEMY_MULT",late_finish_enemy_mult,1,4); late_finish_enemy_bonus=evo4_int("EVO4_LATE_FINISH_ENEMY_BONUS",late_finish_enemy_bonus,0,50);
   picker_mature_turn=evo4_int("EVO4_PICKER_MATURE_TURN",picker_mature_turn,80,350); picker_mature_land_pct=evo4_int("EVO4_PICKER_MATURE_LAND_PCT",picker_mature_land_pct,20,60); picker_not_behind_num=evo4_int("EVO4_PICKER_NOT_BEHIND_NUM",picker_not_behind_num,2,10); picker_not_behind_den=evo4_int("EVO4_PICKER_NOT_BEHIND_DEN",picker_not_behind_den,2,10);
   picker_growth25=evo4_double("EVO4_PICKER_GROWTH25",picker_growth25,0,.25); picker_growth50=evo4_double("EVO4_PICKER_GROWTH50",picker_growth50,0,.20); picker_growth_land_pct=evo4_int("EVO4_PICKER_GROWTH_LAND_PCT",picker_growth_land_pct,25,70); picker_top3_share_max=evo4_double("EVO4_PICKER_TOP3_SHARE_MAX",picker_top3_share_max,.30,.85); late_castle_army_margin=evo4_int("EVO4_LATE_CASTLE_ARMY_MARGIN",late_castle_army_margin,10,90);
+  muster_topology=evo4_string("EVO4_MUSTER_TOPOLOGY",muster_topology.c_str()); muster_anchor_policy=evo4_string("EVO4_MUSTER_ANCHOR_POLICY",muster_anchor_policy.c_str()); chunk_transfer_policy=evo4_string("EVO4_CHUNK_TRANSFER_POLICY",chunk_transfer_policy.c_str());
+  logistics_route_policy=evo4_string("EVO4_LOGISTICS_ROUTE_POLICY",logistics_route_policy.c_str()); defense_policy=evo4_string("EVO4_DEFENSE_POLICY",defense_policy.c_str()); fallback_policy=evo4_string("EVO4_FALLBACK_POLICY",fallback_policy.c_str()); picker_start_policy=evo4_string("EVO4_PICKER_START_POLICY",picker_start_policy.c_str());
  }
 };
