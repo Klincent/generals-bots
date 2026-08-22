@@ -5,7 +5,7 @@ on:
     branches: [master]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   package:
@@ -38,17 +38,27 @@ jobs:
           cp competition/agents/juraj_v35_cpp/run.sh /tmp/version-x-submission/juraj_v35/
           chmod +x /tmp/version-x-submission/juraj_v35/build.sh /tmp/version-x-submission/juraj_v35/run.sh
           cd /tmp/version-x-submission
-          zip -qr "$GITHUB_WORKSPACE/version_x_snapshot_submission.zip" juraj_v35
+          zip -qr "$GITHUB_WORKSPACE/snapshot_submission/version_x_snapshot_submission.zip" juraj_v35
           cd "$GITHUB_WORKSPACE"
-          sha256sum version_x_snapshot_submission.zip > version_x_snapshot_submission.sha256
-          unzip -l version_x_snapshot_submission.zip
+          sha256sum snapshot_submission/version_x_snapshot_submission.zip > snapshot_submission/version_x_snapshot_submission.sha256
+          unzip -l snapshot_submission/version_x_snapshot_submission.zip
+
+      - name: Commit packaged files to snapshot branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add snapshot_submission/version_x_snapshot_submission.zip snapshot_submission/version_x_snapshot_submission.sha256
+          git commit -m 'snapshot: package version-x submission [skip ci]'
+          git push origin HEAD:snapshot/version-x-20260822-0655
 
       - name: Upload snapshot submission
         uses: actions/upload-artifact@v4
         with:
           name: version-x-snapshot-submission
           path: |
-            version_x_snapshot_submission.zip
-            version_x_snapshot_submission.sha256
+            snapshot_submission/version_x_snapshot_submission.zip
+            snapshot_submission/version_x_snapshot_submission.sha256
           if-no-files-found: error
           retention-days: 30
