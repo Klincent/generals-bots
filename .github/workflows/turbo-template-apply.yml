@@ -1,0 +1,38 @@
+name: turbo-template-apply
+
+on:
+  push:
+    branches:
+      - evolution4/turbo-template
+    paths:
+      - '.turbo-apply-kick'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: evolution4/turbo-template
+          fetch-depth: 0
+      - name: Apply, build and commit structural phenotype
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name ChatGPT
+          git config user.email actions@users.noreply.github.com
+          git fetch --no-tags origin evolution4/turbo-structural
+          git show origin/evolution4/turbo-structural:tools/evolution4/apply_turbo_structural_cpp.py > /tmp/apply_turbo.py
+          python /tmp/apply_turbo.py competition/agents/juraj_v35_cpp/main.cpp
+          (cd competition/agents/juraj_v35_cpp && ./build.sh)
+          grep -q 'cfg_.muster_topology' competition/agents/juraj_v35_cpp/main.cpp
+          grep -q 'cfg_.picker_start_policy' competition/agents/juraj_v35_cpp/main.cpp
+          grep -q 'cfg_.defense_policy' competition/agents/juraj_v35_cpp/main.cpp
+          git add competition/agents/juraj_v35_cpp/main.cpp competition/agents/juraj_v35_cpp/evolution4_genome.hpp
+          if ! git diff --cached --quiet; then
+            git commit -m 'evolution4 turbo: activate structural C++ phenotype'
+            git push origin HEAD:evolution4/turbo-template
+          fi
