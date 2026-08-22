@@ -2,10 +2,6 @@ name: evolution4-genome
 
 on:
   workflow_dispatch:
-  push:
-    branches: [master]
-    paths:
-      - '.github/workflows/evolution4-genome.yml'
 
 permissions:
   contents: write
@@ -13,7 +9,7 @@ permissions:
 
 concurrency:
   group: evolution4-genome
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   evolve:
@@ -149,5 +145,3 @@ jobs:
       - name: Fail visibly on transaction error
         if: steps.pre.outputs.stopped != 'true' && steps.tx.outputs.rc != '0'
         run: exit 1
-
-# recovery-restart-trigger: 2026-08-22T17:39+02:00
