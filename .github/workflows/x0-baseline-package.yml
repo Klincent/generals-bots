@@ -1,0 +1,53 @@
+name: X0 baseline submission package
+
+on:
+  push:
+    branches:
+      - tmp/x0-submission-pack-20260822
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact X0
+        uses: actions/checkout@v4
+        with:
+          ref: 2260b6f19d51a14d7c68770677f22d04dfd88022
+
+      - name: Assemble exact submission payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p package/juraj_v35
+          cp competition/agents/juraj_v35_cpp/main.cpp package/juraj_v35/main.cpp
+          cp competition/agents/juraj_v35_cpp/core.hpp package/juraj_v35/core.hpp
+          cp competition/agents/juraj_v35_cpp/build.sh package/juraj_v35/build.sh
+          cp competition/agents/juraj_v35_cpp/run.sh package/juraj_v35/run.sh
+          chmod +x package/juraj_v35/build.sh package/juraj_v35/run.sh
+          (cd package && zip -r ../juraj_x0_baseline_submission.zip juraj_v35)
+
+      - name: Verify clean extracted build
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/x0-verify
+          mkdir -p /tmp/x0-verify
+          unzip -q juraj_x0_baseline_submission.zip -d /tmp/x0-verify
+          cd /tmp/x0-verify/juraj_v35
+          ./build.sh
+
+      - name: Hash package
+        shell: bash
+        run: sha256sum juraj_x0_baseline_submission.zip | tee juraj_x0_baseline_submission.zip.sha256
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: juraj-x0-baseline-submission
+          path: |
+            juraj_x0_baseline_submission.zip
+            juraj_x0_baseline_submission.zip.sha256
+          if-no-files-found: error
