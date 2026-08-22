@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - tmp/x0-submission-pack-20260822
+  pull_request:
+    branches:
+      - master
 
 permissions:
   contents: read
