@@ -40,6 +40,7 @@ def validate_genome(v: dict) -> None:
         if t == 'bool' and not isinstance(x, bool): raise ValueError(name)
         if t == 'int' and (not isinstance(x, int) or isinstance(x, bool)): raise ValueError(name)
         if t == 'float' and not isinstance(x, (int,float)): raise ValueError(name)
+        if t == 'enum' and x not in spec['allowed']: raise ValueError(name)
         if t in ('int','float') and not (spec['minimum'] <= x <= spec['maximum']): raise ValueError(name)
     if v['production_soft_gap'] >= v['production_severe_gap']: raise ValueError('production gaps')
     if v['castle1_target_turn'] >= v['castle2_target_turn']: raise ValueError('castle turns')
