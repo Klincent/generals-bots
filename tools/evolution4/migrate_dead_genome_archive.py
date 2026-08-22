@@ -33,7 +33,6 @@ def patch_orchestrator() -> bool:
     text = ORCH.read_text()
     if 'def dead_genome_ids(s):' in text and 'archive_generation_results(s,g,rows1,rows2,top4)' in text:
         return False
-
     marker = "def genome_values(gid): return load_genome(genome_path(gid))['values']\n"
     helper = r'''def dead_genome_ids(s):
     return {gid for gid,rec in s.get('tested_genomes',{}).items() if rec.get('status')=='dead'}
@@ -59,24 +58,20 @@ def archive_generation_results(s,g,rows1,rows2,top4):
     if marker not in text:
         raise SystemExit('orchestrator genome_values marker not found')
     text = text.replace(marker, marker + helper, 1)
-
     old = "def next_population(top4,g):\n    rng=random.Random(880000+g); elites=[x['genome_id'] for x in top4]; known=set(elites); out=list(elites); vals=[genome_values(x) for x in elites]\n"
     new = "def next_population(top4,g,dead_ids=None):\n    rng=random.Random(880000+g); elites=[x['genome_id'] for x in top4]; known=set(elites)|set(dead_ids or ()); out=list(elites); vals=[genome_values(x) for x in elites]\n"
     if old not in text:
         raise SystemExit('next_population marker not found')
     text = text.replace(old, new, 1)
-
     old2 = "    nxt,elites,bias=next_population(top4,g); s['current_population']=nxt; s['breeding_elites']=elites; s['generation']=g\n"
     new2 = "    dead_ids=archive_generation_results(s,g,rows1,rows2,top4)\n    nxt,elites,bias=next_population(top4,g,dead_ids); s['current_population']=nxt; s['breeding_elites']=elites; s['generation']=g\n"
     if old2 not in text:
         raise SystemExit('generation next_population marker not found')
     text = text.replace(old2, new2, 1)
-
     old3 = "    report={'generation':g,'phase':s['phase'],'stage1':rows1,'stage2':rows2,'top4':[x['genome_id'] for x in top4],'mutation_bias':bias,'promotion':evidence,'promoted_commit':prom};"
     new3 = "    report={'generation':g,'phase':s['phase'],'stage1':rows1,'stage2':rows2,'top4':[x['genome_id'] for x in top4],'mutation_bias':bias,'tested_genome_count':s.get('tested_genome_count',0),'dead_genome_count':s.get('dead_genome_count',0),'promotion':evidence,'promoted_commit':prom};"
     if old3 in text:
         text = text.replace(old3, new3, 1)
-
     ORCH.write_text(text)
     return True
 
