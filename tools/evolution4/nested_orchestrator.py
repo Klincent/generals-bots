@@ -1,5 +1,6 @@
 from __future__ import annotations
 import os, uuid
+from pathlib import Path
 from . import orchestrator as b
 from .nested import build_adversaries, stage_population, evolution_policy, next_population
 
@@ -7,6 +8,20 @@ from .nested import build_adversaries, stage_population, evolution_policy, next_
 def generation(s:dict,txid:str):
     pre=int(s['generation']); g=pre+1; b.stop_check(f'nested generation {g}')
     t=b.ensure_template(); fixed=b.resolve_opponents()
+    # The pinned competition matchup automatically invokes build.sh when a
+    # runner lives next to one. Stage1/Stage2 evaluate genomes in parallel, so
+    # handing every worker the same opponent worktree run.sh caused concurrent
+    # g++ processes to replace the same `agent` binary. That produced transient
+    # `Permission denied` / BrokenPipe protocol errors and could abort an
+    # otherwise healthy generation. resolve_opponents() has already built each
+    # opponent once, so expose read-only wrapper runners from /tmp instead.
+    # The wrapper has no adjacent build.sh; gameplay, executable, seeds and
+    # evaluator semantics are unchanged, while parallel benchmark builds can no
+    # longer race with one another.
+    for i,o in enumerate(fixed):
+        src=Path(o['run']).resolve()
+        safe=b.plain_wrapper(src,Path(f'/tmp/e4-fixed-opponent-{i}.sh'))
+        o['run']=str(safe)
     coevo,coevo_report,adv_paths=build_adversaries(s,t,g); opps=fixed+coevo
     ids=list(s['current_population']); rows1,rows2,top4=stage_population(s,t,opps,ids,g)
 
