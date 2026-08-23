@@ -44,10 +44,12 @@ jobs:
           python - <<'PY'
           import json
           s=json.load(open('/tmp/pre-state.json'))
-          print('TURBO PRE mode=',s.get('mode'),'schema=',s.get('genome_schema_version'),'phase=',s['phase'],'generation=',s['generation'],'retry=',s.get('retry_count',0),'champion=',s.get('official_champion_genome_id'),'tested=',s.get('tested_genome_count',0),'dead=',s.get('dead_genome_count',0))
+          print('TURBO PRE mode=',s.get('mode'),'schema=',s.get('genome_schema_version'),'phase=',s['phase'],'generation=',s['generation'],'retry=',s.get('retry_count',0),'champion=',s.get('official_champion_genome_id'),'tested=',s.get('tested_genome_count',0),'dead=',s.get('dead_genome_count',0),'memory=',s.get('genome_memory_version',1),'selection=',s.get('selection_policy_version',1))
           assert s.get('mode') in ('turbo_structural','turbo_nested_v2')
           assert int(s.get('genome_schema_version',0))>=2
           assert len(s.get('current_population',[]))==16
+          dead={gid for gid,r in s.get('tested_genomes',{}).items() if r.get('status')=='dead'}
+          assert not (dead & set(s.get('current_population',[]))), 'dead genome present before evaluation'
           PY
           if git cat-file -e origin/evolution4/turbo-structural:evolution4/STOP 2>/dev/null; then
             echo stopped=true >> "$GITHUB_OUTPUT"
@@ -69,7 +71,7 @@ jobs:
           python -m pip install pytest numpy jax jaxlib
           python -m pip install -e . --no-deps
 
-      - name: Nested genetic engine and structural schema tests
+      - name: Nested genetic engine, X0 pressure and memory tests
         if: steps.pre.outputs.stopped != 'true'
         shell: bash
         run: |
@@ -78,12 +80,14 @@ jobs:
           pytest -q tests/test_evolution4.py
           python - <<'PY'
           from tools.evolution4.schema import load_schema
+          from tools.evolution4.selection_memory import x0_stage1_slots,x0_game_share
           data,_=load_schema(); enums={g['name']:g for g in data['genes'] if g['type']=='enum'}
           assert len(data['genes'])>=55 and len(enums)==7
           assert {'single','dual','triple'} <= set(enums['muster_topology']['allowed'])
           assert {'full','split'} <= set(enums['chunk_transfer_policy']['allowed'])
           assert {'balanced','aggressive','consolidate'} <= set(enums['fallback_policy']['allowed'])
-          print('TURBO NESTED genes=',len(data['genes']),'structural=',len(enums))
+          assert x0_stage1_slots(7)==3 and abs(x0_game_share(7,3)-.30)<1e-12
+          print('TURBO NESTED genes=',len(data['genes']),'structural=',len(enums),'x0_policy=30%')
           PY
 
       - name: Structural C++ preflight and backward-equivalence
@@ -98,13 +102,9 @@ jobs:
           (cd /tmp/e4-old-template/competition/agents/juraj_v35_cpp && ./build.sh)
           (cd /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp && ./build.sh)
           grep -q '\[e4_structural\]' /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/main.cpp
-          grep -q 'cfg_.muster_topology' /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/main.cpp
-          grep -q 'cfg_.muster_anchor_policy' /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/main.cpp
-          grep -q 'cfg_.chunk_transfer_policy' /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/main.cpp
-          grep -q 'cfg_.logistics_route_policy' /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/main.cpp
-          grep -q 'cfg_.defense_policy' /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/main.cpp
-          grep -q 'cfg_.fallback_policy' /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/main.cpp
-          grep -q 'cfg_.picker_start_policy' /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/main.cpp
+          for gene in muster_topology muster_anchor_policy chunk_transfer_policy logistics_route_policy defense_policy fallback_policy picker_start_policy; do
+            grep -q "cfg_.$gene" /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/main.cpp
+          done
           python -m tools.evolution4.equivalence_check \
             --original /tmp/e4-old-template/competition/agents/juraj_v35_cpp/run.sh \
             --template /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/run.sh \
@@ -136,9 +136,17 @@ jobs:
           pre=json.load(open('/tmp/pre-state.json')); post=json.load(open('/tmp/post-state.json'))
           rc=int(os.environ.get('TX_RC','99')); bg=int(pre['generation']); ag=int(post['generation'])
           print('TURBO POST mode=',post.get('mode'),'phase=',post['phase'],'generation=',ag,'retry=',post.get('retry_count',0),'last_error=',post.get('last_error'),'tested=',post.get('tested_genome_count',0),'dead=',post.get('dead_genome_count',0),'arch_epoch=',post.get('architecture_epoch',0),'adversaries=',len(post.get('adversary_hof',[])))
-          if rc==0 and pre['phase'] in ('exploration','exploitation') and ag != bg+1:
-              raise SystemExit(f'FALSE GREEN turbo generation {bg}->{ag}')
-          if rc==0 and post.get('mode')!='turbo_nested_v2': raise SystemExit('Nested Turbo mode not committed')
+          if rc==0 and pre['phase'] in ('exploration','exploitation'):
+              if ag != bg+1: raise SystemExit(f'FALSE GREEN turbo generation {bg}->{ag}')
+              if post.get('mode')!='turbo_nested_v2': raise SystemExit('Nested Turbo mode not committed')
+              if int(post.get('genome_memory_version',0))<2 or int(post.get('selection_policy_version',0))<2: raise SystemExit('X0/memory policy version not committed')
+              h=post.get('generation_history',[])[-1]
+              share=float(h.get('stage1_x0_game_share',-1))
+              if abs(share-.30)>.05: raise SystemExit(f'Stage1 X0 share outside tolerance: {share}')
+              dead={gid for gid,r in post.get('tested_genomes',{}).items() if r.get('status')=='dead'}
+              overlap=dead & set(post.get('current_population',[]))
+              if overlap: raise SystemExit('dead genome entered next population: '+','.join(sorted(overlap)))
+              print('X0/MEMORY POST OK share=',share,'x0_median=',h.get('stage1_x0_median'),'duplicates=',h.get('duplicate_generation_rate'))
           PY
 
       - name: Upload Turbo transaction evidence
