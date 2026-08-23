@@ -1,0 +1,91 @@
+{
+  "genome_id": "f3e5390b162fe91c6a7645fae6d777106daf417daab01e3a1c5279d8d592f882",
+  "meta": {
+    "changes": {
+      "late_castle_army_margin": [
+        30,
+        40
+      ],
+      "muster_anchor_policy": [
+        "largest",
+        "forward"
+      ],
+      "muster_army_margin": [
+        80,
+        100
+      ],
+      "muster_opp_divisor": [
+        2,
+        4
+      ],
+      "picker_mature_land_pct": [
+        35,
+        25
+      ],
+      "picker_min_efficiency": [
+        2.0,
+        2.3892190127910045
+      ]
+    },
+    "generation": 3,
+    "kind": "coevolved-adversary",
+    "parent": "a0cae1d0bf2cf32340dbde005dd99c9af9cac3e1f38d497e11e75ea5a433a762"
+  },
+  "values": {
+    "adjacent_reserve_base": 2,
+    "castle1_target_turn": 150,
+    "castle2_target_turn": 250,
+    "chunk_transfer_policy": "full",
+    "defense_policy": "block_first",
+    "doomguard_enabled": true,
+    "edge_picker_threshold": 16,
+    "expansion_share_healthy": 0.31595447566942214,
+    "expansion_share_precontact": 0.4,
+    "expansion_share_severe": 0.62,
+    "expansion_share_soft": 0.45,
+    "expansion_wait_limit": 5,
+    "fallback_policy": "balanced",
+    "free_share_peace": 0.15,
+    "free_share_war": 0.2405279471907849,
+    "general_reserve_base": 7,
+    "general_reserve_opp_divisor": 12,
+    "late_castle_army_margin": 40,
+    "late_finish_base": 70,
+    "late_finish_enemy_bonus": 10,
+    "late_finish_enemy_mult": 2.29695148044134,
+    "late_finish_turn": 900,
+    "logistics_route_policy": "interior",
+    "muster_anchor_policy": "forward",
+    "muster_army_margin": 100,
+    "muster_enemy_bonus": 20,
+    "muster_enemy_mult": 3.0,
+    "muster_launch_base": 90,
+    "muster_opp_divisor": 4,
+    "muster_ratio_den": 8,
+    "muster_ratio_num": 7,
+    "muster_start_turn": 300,
+    "muster_threshold": 8,
+    "muster_topology": "single",
+    "picker_enabled": true,
+    "picker_growth25": 0.08,
+    "picker_growth50": 0.06,
+    "picker_growth_land_pct": 50,
+    "picker_mature_land_pct": 25,
+    "picker_mature_turn": 190,
+    "picker_min_efficiency": 2.3892190127910045,
+    "picker_neutrals_max": 3,
+    "picker_not_behind_den": 4,
+    "picker_not_behind_num": 5,
+    "picker_start_policy": "efficiency",
+    "picker_top3_share_max": 0.55,
+    "precontact_expansion_until": 250,
+    "production_recover_gap": 10,
+    "production_recover_slope": 0.1,
+    "production_severe_gap": 18,
+    "production_soft_gap": 8,
+    "search_share_seen": 0.08,
+    "search_share_unseen": 0.24283165668186543,
+    "war_share_contact": 0.3,
+    "war_share_peace": 0.12
+  }
+}
