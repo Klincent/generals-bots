@@ -1,0 +1,96 @@
+name: evolution4-turbo-x0-memory-preflight
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'evolution4/turbo-x0-memory-preflight-kick.txt'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: evolution4/turbo-structural
+          fetch-depth: 0
+      - name: Verify paused durable checkpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f evolution4/STOP
+          python - <<'PY'
+          import json
+          s=json.load(open('evolution4/state.json'))
+          assert s['generation']==4, s['generation']
+          assert s['seed_ledger']['next_seed']==402505, s['seed_ledger']['next_seed']
+          assert s['last_successful_transaction_id']=='54ebfbd0-b3cb-4b86-a684-997c7efbd0ba'
+          print('PAUSED CHECKPOINT OK generation=4 next_seed=402505')
+          PY
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest numpy jax jaxlib
+          python -m pip install -e . --no-deps
+      - name: Validate Python engine and selection-memory invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/evolution4/*.py
+          pytest -q tests/test_evolution4.py
+          python - <<'PY'
+          from tools.evolution4.selection_memory import x0_stage1_slots,x0_game_share
+          assert x0_stage1_slots(7)==3
+          assert abs(x0_game_share(7,3)-.30)<1e-12
+          print('X0 STAGE1 POLICY OK 7 specialized + 3 frozen-X0 = 30%')
+          PY
+      - name: Clean-build and backward-equivalence
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin evolution4/template evolution4/turbo-template
+          rm -rf /tmp/e4-old-template /tmp/e4-turbo-template
+          git worktree prune
+          git worktree add --detach /tmp/e4-old-template origin/evolution4/template
+          git worktree add --detach /tmp/e4-turbo-template origin/evolution4/turbo-template
+          (cd /tmp/e4-old-template/competition/agents/juraj_v35_cpp && ./build.sh)
+          (cd /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp && ./build.sh)
+          for gene in muster_topology muster_anchor_policy chunk_transfer_policy logistics_route_policy defense_policy fallback_policy picker_start_policy; do
+            grep -q "cfg_.$gene" /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/main.cpp
+          done
+          python -m tools.evolution4.equivalence_check \
+            --original /tmp/e4-old-template/competition/agents/juraj_v35_cpp/run.sh \
+            --template /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/run.sh \
+            --env-json '{}' --seeds 12
+      - name: Record successful preflight without advancing state
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,os
+          from datetime import datetime,timezone
+          s=json.load(open('evolution4/state.json'))
+          assert s['generation']==4 and s['seed_ledger']['next_seed']==402505
+          q={
+            'ok':True,
+            'validated_at':datetime.now(timezone.utc).isoformat(),
+            'workflow_run_id':os.getenv('GITHUB_RUN_ID'),
+            'generation':s['generation'],
+            'next_seed':s['seed_ledger']['next_seed'],
+            'checks':['STOP-and-durable-checkpoint','py_compile','pytest-x0-weighting','pytest-dead-tombstone','pytest-infra-not-dead','pytest-elite-retest','pytest-memory-idempotency','55-gene-7-real-structural','clean-cpp-build','12-seed-backward-equivalence']
+          }
+          open('evolution4/SELECTION_MEMORY_PREFLIGHT.json','w').write(json.dumps(q,indent=2,sort_keys=True)+'\n')
+          PY
+          git config user.name ChatGPT
+          git config user.email actions@users.noreply.github.com
+          git add evolution4/SELECTION_MEMORY_PREFLIGHT.json
+          git commit -m 'evolution4 turbo: validate X0 pressure and exact-genome memory'
+          git push origin HEAD:evolution4/turbo-structural
