@@ -1,5 +1,5 @@
 from __future__ import annotations
-import random
+import copy, random
 from pathlib import Path
 from tools.evolution4.genome import founder_x0, founder_y0, genome_id, canonical_json, validate_genome
 from tools.evolution4.mutate import mutate, structural_jump
@@ -9,6 +9,8 @@ from tools.evolution4.selection import non_dominated_sort, select
 from tools.evolution4.state import validate_transition
 from tools.evolution4.freeze import freeze_header
 from tools.evolution4.schema import load_schema
+from tools.evolution4.selection_memory import x0_stage1_slots, x0_game_share
+from tools.evolution4.genome_memory import candidate_allowed, may_retest_existing, reserved_newborn_ids, mark_infra_unresolved, migrate_state
 
 
 def test_canonical_hash_stable():
@@ -48,6 +50,53 @@ def test_pareto_selection_and_novelty():
       {'genome_id':'c','fitness':{'aggregate':.60,'minimum':.30,'novelty':.9,'hof':.3,'color_imbalance':.10}},]
     fronts=non_dominated_sort(items); assert len(fronts)>=1; assert len(select(items,2))==2
     n=cohort_novelty([founder_x0(),founder_y0()]); assert len(n)==2
+
+
+def test_x0_slot_weight_is_dynamic_and_near_30_percent():
+    assert x0_stage1_slots(7)==3
+    for specialized in range(4,11):
+        slots=x0_stage1_slots(specialized); share=x0_game_share(specialized,slots)
+        assert abs(share-.30)<=.04
+
+
+def test_x0_matchup_result_affects_stage1_selection():
+    items=[
+      {'genome_id':'weak-x0','fitness':{'aggregate':.70,'minimum':.50,'x0_score':.40,'novelty':.2,'hof':0.0,'color_imbalance':.05}},
+      {'genome_id':'strong-x0','fitness':{'aggregate':.70,'minimum':.50,'x0_score':.75,'novelty':.2,'hof':0.0,'color_imbalance':.05}},]
+    assert select(items,1)[0]['genome_id']=='strong-x0'
+
+
+def test_catastrophic_x0_cannot_be_rescued_by_novelty_when_safe_choice_exists():
+    items=[
+      {'genome_id':'novel-but-crushed','fitness':{'aggregate':.90,'minimum':.10,'x0_score':.125,'novelty':1.0,'hof':0.0,'color_imbalance':.01}},
+      {'genome_id':'safe','fitness':{'aggregate':.68,'minimum':.45,'x0_score':.50,'novelty':.0,'hof':0.0,'color_imbalance':.08}},]
+    assert select(items,1)[0]['genome_id']=='safe'
+
+
+def test_exact_dead_hash_is_permanent_breeding_tombstone_but_elite_may_retest():
+    s={'tested_genomes':{'dead-hash':{'status':'dead'},'elite-hash':{'status':'elite'}},'current_population':[],'breeding_elites':['elite-hash'],'hall_of_fame':[],'official_champion_genome_id':None}
+    assert not may_retest_existing(s,'dead-hash')
+    assert may_retest_existing(s,'elite-hash')
+    assert not candidate_allowed(s,'dead-hash',set())
+    assert 'dead-hash' in reserved_newborn_ids(s)
+    assert 'elite-hash' in reserved_newborn_ids(s)
+
+
+def test_infra_unresolved_is_not_evolutionary_death():
+    s={'tested_genomes':{},'current_population':[],'breeding_elites':[],'hall_of_fame':[],'official_champion_genome_id':None}
+    mark_infra_unresolved(s,'infra-hash',5,'driver crash')
+    assert s['tested_genomes']['infra-hash']['status']=='infra_unresolved'
+    assert may_retest_existing(s,'infra-hash')
+    assert 'infra-hash' not in reserved_newborn_ids(s)
+
+
+def test_memory_migration_is_idempotent():
+    s={'tested_genomes':{'elite-hash':{'status':'survivor'},'dead-hash':{'status':'dead','last_tested_generation':3},'champ-hash':{'status':'survivor'}},'current_population':['elite-hash'],'breeding_elites':['elite-hash'],'hall_of_fame':[{'genome_id':'champ-hash'}],'official_champion_genome_id':'champ-hash'}
+    migrate_state(s); once=copy.deepcopy(s); migrate_state(s)
+    assert s==once
+    assert s['tested_genomes']['elite-hash']['status']=='elite'
+    assert s['tested_genomes']['dead-hash']['status']=='dead'
+    assert s['tested_genomes']['champ-hash']['status']=='champion'
 
 
 def test_state_transition_validation():
