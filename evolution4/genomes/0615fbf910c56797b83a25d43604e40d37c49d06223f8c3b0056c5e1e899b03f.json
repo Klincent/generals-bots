@@ -1,0 +1,79 @@
+{
+  "genome_id": "0615fbf910c56797b83a25d43604e40d37c49d06223f8c3b0056c5e1e899b03f",
+  "meta": {
+    "bias": null,
+    "generation": 11,
+    "kind": "crossover",
+    "parents": [
+      "a18436f2417a0aed80e05ab3659ecac426a29cbce2ec31a7c89ecb6e5d9ef541",
+      "af2556c146c1489c53e2509da2e90e38e7b31e23f43df714190ffe680f150c9d"
+    ],
+    "post_crossover_changes": {
+      "edge_picker_threshold": [
+        14,
+        12
+      ],
+      "muster_enemy_bonus": [
+        20,
+        25
+      ]
+    }
+  },
+  "values": {
+    "adjacent_reserve_base": 1,
+    "castle1_target_turn": 140,
+    "castle2_target_turn": 250,
+    "chunk_transfer_policy": "split",
+    "defense_policy": "block_first",
+    "doomguard_enabled": true,
+    "edge_picker_threshold": 12,
+    "expansion_share_healthy": 0.26485788541718275,
+    "expansion_share_precontact": 0.4,
+    "expansion_share_severe": 0.6302765829308214,
+    "expansion_share_soft": 0.45,
+    "expansion_wait_limit": 5,
+    "fallback_policy": "balanced",
+    "free_share_peace": 0.15,
+    "free_share_war": 0.2405279471907849,
+    "general_reserve_base": 7,
+    "general_reserve_opp_divisor": 12,
+    "late_castle_army_margin": 30,
+    "late_finish_base": 70,
+    "late_finish_enemy_bonus": 10,
+    "late_finish_enemy_mult": 2.29695148044134,
+    "late_finish_turn": 900,
+    "logistics_route_policy": "shortest",
+    "muster_anchor_policy": "largest",
+    "muster_army_margin": 80,
+    "muster_enemy_bonus": 25,
+    "muster_enemy_mult": 3.0,
+    "muster_launch_base": 100,
+    "muster_opp_divisor": 2,
+    "muster_ratio_den": 6,
+    "muster_ratio_num": 10,
+    "muster_start_turn": 350,
+    "muster_threshold": 9,
+    "muster_topology": "triple",
+    "picker_enabled": true,
+    "picker_growth25": 0.08,
+    "picker_growth50": 0.06,
+    "picker_growth_land_pct": 50,
+    "picker_mature_land_pct": 45,
+    "picker_mature_turn": 190,
+    "picker_min_efficiency": 2.0,
+    "picker_neutrals_max": 3,
+    "picker_not_behind_den": 4,
+    "picker_not_behind_num": 5,
+    "picker_start_policy": "speed",
+    "picker_top3_share_max": 0.55,
+    "precontact_expansion_until": 225,
+    "production_recover_gap": 10,
+    "production_recover_slope": 0.04614531844322137,
+    "production_severe_gap": 18,
+    "production_soft_gap": 9,
+    "search_share_seen": 0.09947576237631199,
+    "search_share_unseen": 0.24067012354957157,
+    "war_share_contact": 0.3,
+    "war_share_peace": 0.12
+  }
+}
