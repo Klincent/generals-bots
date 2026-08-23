@@ -1,0 +1,155 @@
+name: evolution4-g09-submission
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - 'evolution4/submission-g09-kick.txt'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: evolution4-g09-submission
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      GENOME_ID: b6b150fd3c799f3431d681de74b476394be1eb78b103a2cbd1325a4c85960d60
+      SNAP_BRANCH: submission/evolution4-g09-b6b150-experimental-20260823
+      ZIP_NAME: juraj_evolution4_g09_b6b150_experimental.zip
+    steps:
+      - name: Checkout durable Turbo control
+        uses: actions/checkout@v4
+        with:
+          ref: evolution4/turbo-structural
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name ChatGPT
+          git config user.email actions@users.noreply.github.com
+
+      - name: Verify G9 source elite and create isolated worktrees
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          gid=os.environ['GENOME_ID']
+          r=json.load(open('evolution4/results/g09/report.json'))
+          assert r['generation']==9
+          assert r['top4'][0]==gid, (r['top4'][0],gid)
+          assert open(f'evolution4/genomes/{gid}.json').read()
+          print('SOURCE G9 TOP ELITE OK',gid)
+          PY
+          git fetch --no-tags origin evolution4/turbo-template "$SNAP_BRANCH"
+          rm -rf /tmp/e4-g09-dynamic /tmp/e4-g09-submission
+          git worktree prune
+          git worktree add --detach /tmp/e4-g09-dynamic origin/evolution4/turbo-template
+          git worktree add --detach /tmp/e4-g09-submission "origin/$SNAP_BRANCH"
+          (cd /tmp/e4-g09-dynamic/competition/agents/juraj_v35_cpp && ./build.sh)
+
+      - name: Freeze genome into standalone C++ phenotype
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os, shutil
+          from pathlib import Path
+          from tools.evolution4.freeze import freeze_header, inline_for_submission
+          from tools.evolution4.genome import load_genome
+          from tools.evolution4.evaluator import wrapper
+          gid=os.environ['GENOME_ID']
+          vals=load_genome(Path('evolution4/genomes')/f'{gid}.json')['values']
+          dyn=Path('/tmp/e4-g09-dynamic/competition/agents/juraj_v35_cpp')
+          sub=Path('/tmp/e4-g09-submission/competition/agents/juraj_v35_cpp')
+          frozen=Path('/tmp/e4-g09-frozen-genome.hpp')
+          frozen_main=Path('/tmp/e4-g09-main.cpp')
+          freeze_header(sub/'evolution4_genome.hpp',vals,frozen)
+          inline_for_submission(sub/'main.cpp',frozen,frozen_main)
+          shutil.copy2(frozen_main,sub/'main.cpp')
+          wrapper(dyn/'run.sh',vals,Path('/tmp/e4-g09-dynamic-wrapper.sh'))
+          PY
+          ! grep -q '#include "evolution4_genome.hpp"' /tmp/e4-g09-submission/competition/agents/juraj_v35_cpp/main.cpp
+          (cd /tmp/e4-g09-submission/competition/agents/juraj_v35_cpp && rm -f agent && ./build.sh)
+
+      - name: Verify frozen snapshot is behavior-equivalent
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m tools.evolution4.equivalence_check \
+            --original /tmp/e4-g09-dynamic-wrapper.sh \
+            --template /tmp/e4-g09-submission/competition/agents/juraj_v35_cpp/run.sh \
+            --env-json '{}' --seeds 12
+          echo 'G9 FROZEN 12-SEED EQUIVALENCE OK'
+
+      - name: Create exact four-file submission ZIP and metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/e4-g09-submission/evolution4/submissions
+          python - <<'PY'
+          import hashlib, json, os, zipfile
+          from pathlib import Path
+          gid=os.environ['GENOME_ID']; zipname=os.environ['ZIP_NAME']
+          root=Path('/tmp/e4-g09-submission')
+          agent=root/'competition/agents/juraj_v35_cpp'
+          out=root/'evolution4/submissions'/zipname
+          files=['main.cpp','core.hpp','build.sh','run.sh']
+          with zipfile.ZipFile(out,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=9) as z:
+              for f in files:
+                  data=(agent/f).read_bytes()
+                  info=zipfile.ZipInfo(f'juraj_v35/{f}',date_time=(2026,8,23,0,0,0))
+                  info.external_attr=(0o755 if f.endswith('.sh') else 0o644)<<16
+                  info.compress_type=zipfile.ZIP_DEFLATED
+                  z.writestr(info,data)
+          names=zipfile.ZipFile(out).namelist()
+          expected=[f'juraj_v35/{f}' for f in files]
+          assert names==expected,(names,expected)
+          sha=hashlib.sha256(out.read_bytes()).hexdigest()
+          state=json.load(open('evolution4/state.json'))
+          report=json.load(open('evolution4/results/g09/report.json'))
+          meta={
+            'source_generation':9,
+            'genome_id':gid,
+            'source_rank':'G9 top breeding elite',
+            'experimental_not_official_champion':True,
+            'official_champion_at_snapshot':state.get('official_champion_genome_id'),
+            'g09_best_stage2':report['evolution_policy']['best_stage2'],
+            'g09_promotion_decision':report['promotion']['decision'],
+            'freeze_equivalence_seeds':12,
+            'zip_sha256':sha,
+            'zip_entries':names,
+          }
+          (root/'evolution4/submissions/juraj_evolution4_g09_b6b150_experimental.json').write_text(json.dumps(meta,indent=2,sort_keys=True)+'\n')
+          (root/'evolution4/submissions/juraj_evolution4_g09_b6b150_experimental.sha256').write_text(f'{sha}  {zipname}\n')
+          print('ZIP',out)
+          print('SHA256',sha)
+          print('ENTRIES',names)
+          PY
+
+      - name: Commit frozen snapshot branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd /tmp/e4-g09-submission
+          git add competition/agents/juraj_v35_cpp/main.cpp evolution4/submissions/
+          if ! git diff --cached --quiet; then
+            git commit -m "submission: freeze Evolution4 G9 top elite ${GENOME_ID:0:12}"
+            git push origin "HEAD:$SNAP_BRANCH"
+          fi
+          git rev-parse HEAD > /tmp/submission-commit.txt
+          cat evolution4/submissions/juraj_evolution4_g09_b6b150_experimental.sha256
+
+      - name: Upload submission ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: juraj-evolution4-g09-b6b150-experimental
+          path: /tmp/e4-g09-submission/evolution4/submissions/juraj_evolution4_g09_b6b150_experimental.zip
+          if-no-files-found: error
+          retention-days: 30
