@@ -1,0 +1,34 @@
+name: evolution4-turbo-pause-barrier
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'evolution4/turbo-pause-kick.txt'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: evolution4-turbo
+  cancel-in-progress: true
+
+jobs:
+  pause:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Verify explicit Turbo STOP
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init -q /tmp/check
+          cd /tmp/check
+          git remote add origin https://github.com/${GITHUB_REPOSITORY}.git
+          git fetch -q --depth=1 origin evolution4/turbo-structural
+          if ! git cat-file -e FETCH_HEAD:evolution4/STOP 2>/dev/null; then
+            echo 'Refusing pause barrier: Turbo STOP is absent.' >&2
+            exit 1
+          fi
+          echo 'Turbo STOP confirmed; concurrency barrier acquired.'
