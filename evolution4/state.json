@@ -9,9 +9,9 @@
     },
     {
       "best_strength": 0.875,
-      "champion_score": 0.5,
+      "champion_score": 0.25,
       "genome_id": "be31a380722aca6c30a49620f2e24a9814dd31c39ff119e0e00df98c36a63eb1",
-      "last_generation": 10,
+      "last_generation": 15,
       "parent": "bcdb5a5a84d45d802152c5f664c4b6708fee1956d0c14cfe6b0efbc5de6080ad"
     },
     {
@@ -58,7 +58,7 @@
     }
   ],
   "architecture_epoch": 3,
-  "audit_count": 2,
+  "audit_count": 3,
   "baseline": {
     "opponents": [
       {
@@ -350,32 +350,32 @@
     }
   },
   "breeding_elites": [
-    "daa0333ebe02bcf5bb4d1032c07e050d3263d50b3f42f444ceb635d681730dd2",
-    "876069d03eb744dc9407adbbfe5602226e62d65a5b2421497e6f4362c5ec994d",
-    "ad341bb91806a58638b32f50d9846a2311211b2a543d14cbb8325c5d75d5c35b",
-    "9a1f49cf6a3a5e20cf1dd4412fe5bd610bc71f95775fdc551e45c93e0aaff6b1"
+    "5e3fdc2347cf61826210a93edc2ce70b631fa2591e7ee6d869ed1d31f42b7a9d",
+    "34c10af174b5d9434e9245d046cc51ffd1c76a25fd7971bb2ab93c7c82a6090d",
+    "88e1cf0a5e48ef82017a0c0e0abd2b12360c44fa80a3783a74b5ef17c233aabc",
+    "0f0453fd935aef6cf06af8479ad80562fd9543d99edabc8d019c2f9bdacbc375"
   ],
   "champion_promotion_history": [],
   "champion_promotions_since_checkpoint": 0,
   "current_population": [
-    "daa0333ebe02bcf5bb4d1032c07e050d3263d50b3f42f444ceb635d681730dd2",
-    "876069d03eb744dc9407adbbfe5602226e62d65a5b2421497e6f4362c5ec994d",
-    "ad341bb91806a58638b32f50d9846a2311211b2a543d14cbb8325c5d75d5c35b",
-    "9a1f49cf6a3a5e20cf1dd4412fe5bd610bc71f95775fdc551e45c93e0aaff6b1",
-    "1d352ddbecea7ac6039e1329b849a6ac3208bcffce8f6b3d5fe5fd597e8e999d",
-    "c16fb84dac3da3ce9ecd1b9c3b2eeb1ebfbd5d298398d8fbb65384dc9d34c88b",
-    "b3999cd67cc6f35787a03c19d6a0f3e7851339289c7a236bfa31f676bf29984a",
     "5e3fdc2347cf61826210a93edc2ce70b631fa2591e7ee6d869ed1d31f42b7a9d",
-    "69c9ace4c6e28246da0e9716c88b4a8baa8491489fb7ca9c97729f7785fa0d20",
-    "fee250d995e310e7e5c4fa99ddffab6710774d05741b13f66f1444080c20e92b",
     "34c10af174b5d9434e9245d046cc51ffd1c76a25fd7971bb2ab93c7c82a6090d",
-    "af0f27498d71ca55bf6b7d4b369641d1e65247074fa65b57ea48cd655cde76ec",
-    "cf1fe7d49d02e960197c1a9b8e4a76cb8a1b2da87f32f430e886dff904985981",
     "88e1cf0a5e48ef82017a0c0e0abd2b12360c44fa80a3783a74b5ef17c233aabc",
     "0f0453fd935aef6cf06af8479ad80562fd9543d99edabc8d019c2f9bdacbc375",
-    "c2ddc4078a8aa9669af9ddc7ec48dfe97bd8131699ba9f014ec790e4e870bc64"
+    "2a46d6ae3060ca5d5519c73ab5529fb562254c0caeae4eea548a7932f867559a",
+    "6c2d26a38929d0f49dab635ed79d5cac18eb514f24dc4a2bd0f9126ee0d2434b",
+    "ec8192d4addfba93937827ad46dc1672f0d151ed51c6a468d777e3dc2a2142b5",
+    "2624963d98805a3b4237a3ad912a4566287fd790d57f5dab3d81578d170c5b22",
+    "418b6fd38ae4d2be00c7b3656c7c2b963a4c59f403d3dd42764ea6652d43c96f",
+    "6287a32d9f50a9887e4e80d77608b105f725109648d73c13f97d480ea1d76908",
+    "731d891b3faae404e69756ce0477ac935fd84ab83e440ce2ea28b584129a734a",
+    "eeaa443ff2dd952791486d704d24488ba357c63d332dce72b4e4e66b496a0a43",
+    "539c71bbbd9d157eab6cc0ddbac5568f9fa38025f04897120d20e255a75e14a7",
+    "fa20efc4742acf6233a1ae05dbc98ef38084725becb5875e544eea77deda3bf0",
+    "ed5c9b9c3c81d1795edda3dfe4d3ca34daebc7f4bba53efede3c2935861446a3",
+    "c3fb67a121b4d79563443cd4db352106ecf82aa36dd5bf66643f7bab38f057c5"
   ],
-  "dead_genome_count": 178,
+  "dead_genome_count": 190,
   "experiment_version": 5,
   "founder_x0": {
     "branch": "evolution4/founder-x0",
@@ -399,7 +399,7 @@
       "run.sh": "ac272996e744283df3042ad61cb0de34de945fcb2bf40fcee14d87afa7e1e0ae"
     }
   },
-  "generation": 14,
+  "generation": 15,
   "generation_history": [
     {
       "architecture_epoch": 0,
@@ -736,6 +736,32 @@
         "ad341bb91806a58638b32f50d9846a2311211b2a543d14cbb8325c5d75d5c35b",
         "9a1f49cf6a3a5e20cf1dd4412fe5bd610bc71f95775fdc551e45c93e0aaff6b1"
       ]
+    },
+    {
+      "architecture_epoch": 3,
+      "best_stage2": 0.7291666666666666,
+      "coevolved_opponents": [
+        "be31a380722aca6c30a49620f2e24a9814dd31c39ff119e0e00df98c36a63eb1",
+        "8f4b6824b6860f444eed333eece678ecbe479eee368dd7e91b2c1301d10d7a4c"
+      ],
+      "dead_genome_count": 190,
+      "duplicate_generation_rate": 0.0,
+      "generation": 15,
+      "median_stage2": 0.6458333333333334,
+      "official_champion_genome_id": "289d3e1a071b29f205282cf495f92e8bd22c1e8151fac6aae373a4ff2f2cf546",
+      "promotion_decision": "REJECTED",
+      "stage1_x0_best": 0.7083333333333334,
+      "stage1_x0_game_share": 0.3333333333333333,
+      "stage1_x0_mean": 0.4140625,
+      "stage1_x0_median": 0.4166666666666667,
+      "stage1_x0_slots": 3,
+      "structural_diversity": 0.4761904761904761,
+      "top4": [
+        "5e3fdc2347cf61826210a93edc2ce70b631fa2591e7ee6d869ed1d31f42b7a9d",
+        "34c10af174b5d9434e9245d046cc51ffd1c76a25fd7971bb2ab93c7c82a6090d",
+        "88e1cf0a5e48ef82017a0c0e0abd2b12360c44fa80a3783a74b5ef17c233aabc",
+        "0f0453fd935aef6cf06af8479ad80562fd9543d99edabc8d019c2f9bdacbc375"
+      ]
     }
   ],
   "genome_archive_policy": {
@@ -771,10 +797,10 @@
     }
   ],
   "last_architecture_epoch_generation": 13,
-  "last_checkpoint_generation": 10,
+  "last_checkpoint_generation": 15,
   "last_error": null,
-  "last_successful_state_hash": "9832720e1bfd1e639703e94fa0344a8bf3268d90ccca99afe39ac17d38fd324e",
-  "last_successful_transaction_id": "1da3275b-be33-4e95-b592-bc217b0ecd3b",
+  "last_successful_state_hash": "89215e059ab385fa0fcbc310f6b5b1bd2355b6ebedade2eac1364645c6230323",
+  "last_successful_transaction_id": "2393162a-984f-400f-a31e-8c0f004ba6cc",
   "legacy_generation_history": [
     {
       "generation": 1,
@@ -4217,12 +4243,61 @@
       "generation": 14,
       "genome_id": "daa0333ebe02bcf5bb4d1032c07e050d3263d50b3f42f444ceb635d681730dd2",
       "reason": "Gate A"
+    },
+    {
+      "decision": "REJECTED",
+      "gateA": {
+        "cumulative": {
+          "D": 3,
+          "L": 9,
+          "W": 8,
+          "errors": 0,
+          "games": 20,
+          "illegal_actions": 0,
+          "raw_win_rate": 0.4,
+          "score": 0.475
+        },
+        "decision": "reject",
+        "rounds": [
+          {
+            "D": 3,
+            "L": 9,
+            "W": 8,
+            "decision_roundtrip_ms": {
+              "max": 16.6259319994424,
+              "p50": 0.7579800003441051,
+              "p95": 0.8870909996403498,
+              "p99": 0.9332119998362032
+            },
+            "errors": 0,
+            "games": 20,
+            "illegal_actions": 0,
+            "maps": 10,
+            "paired_ci95": [
+              0.325,
+              0.625
+            ],
+            "paired_score": 0.475,
+            "score": 0.475,
+            "seat_score": {
+              "0": 0.45,
+              "1": 0.5
+            },
+            "seed_end": 409818,
+            "seed_start": 409809,
+            "turns_mean": 681.35
+          }
+        ]
+      },
+      "generation": 15,
+      "genome_id": "5e3fdc2347cf61826210a93edc2ce70b631fa2591e7ee6d869ed1d31f42b7a9d",
+      "reason": "Gate A"
     }
   ],
   "retry_count": 0,
   "rollback_history": [],
   "seed_ledger": {
-    "next_seed": 409284,
+    "next_seed": 410100,
     "ranges": [
       {
         "label": "bootstrap-x0-y0",
@@ -6523,12 +6598,212 @@
         "label": "g14-daa0333e-gateA-r1",
         "maps": 10,
         "start": 409257
+      },
+      {
+        "label": "g15-coevo-0",
+        "maps": 2,
+        "start": 409284
+      },
+      {
+        "label": "g15-coevo-1",
+        "maps": 2,
+        "start": 409303
+      },
+      {
+        "label": "g15-coevo-2",
+        "maps": 2,
+        "start": 409322
+      },
+      {
+        "label": "g15-coevo-3",
+        "maps": 2,
+        "start": 409341
+      },
+      {
+        "label": "g15-coevo-4",
+        "maps": 2,
+        "start": 409360
+      },
+      {
+        "label": "g15-coevo-5",
+        "maps": 2,
+        "start": 409379
+      },
+      {
+        "label": "g15-stage1-aggressive-expansion",
+        "maps": 2,
+        "start": 409398
+      },
+      {
+        "label": "g15-stage1-defense-turtle",
+        "maps": 2,
+        "start": 409417
+      },
+      {
+        "label": "g15-stage1-doomer-rusher",
+        "maps": 2,
+        "start": 409436
+      },
+      {
+        "label": "g15-stage1-recent-reference",
+        "maps": 2,
+        "start": 409455
+      },
+      {
+        "label": "g15-stage1-coevo-be31a380",
+        "maps": 2,
+        "start": 409474
+      },
+      {
+        "label": "g15-stage1-coevo-8f4b6824",
+        "maps": 2,
+        "start": 409493
+      },
+      {
+        "label": "g15-stage1-x0-01",
+        "maps": 2,
+        "start": 409512
+      },
+      {
+        "label": "g15-stage1-x0-02",
+        "maps": 2,
+        "start": 409531
+      },
+      {
+        "label": "g15-stage1-x0-03",
+        "maps": 2,
+        "start": 409550
+      },
+      {
+        "label": "g15-stage2-normal-expansion",
+        "maps": 3,
+        "start": 409569
+      },
+      {
+        "label": "g15-stage2-aggressive-expansion",
+        "maps": 3,
+        "start": 409589
+      },
+      {
+        "label": "g15-stage2-defense-turtle",
+        "maps": 3,
+        "start": 409609
+      },
+      {
+        "label": "g15-stage2-logistics-recenter",
+        "maps": 3,
+        "start": 409629
+      },
+      {
+        "label": "g15-stage2-attack-pass",
+        "maps": 3,
+        "start": 409649
+      },
+      {
+        "label": "g15-stage2-search-hunter",
+        "maps": 3,
+        "start": 409669
+      },
+      {
+        "label": "g15-stage2-doomer-rusher",
+        "maps": 3,
+        "start": 409689
+      },
+      {
+        "label": "g15-stage2-picker-muster",
+        "maps": 3,
+        "start": 409709
+      },
+      {
+        "label": "g15-stage2-gatherer-economy",
+        "maps": 3,
+        "start": 409729
+      },
+      {
+        "label": "g15-stage2-recent-reference",
+        "maps": 3,
+        "start": 409749
+      },
+      {
+        "label": "g15-stage2-coevo-be31a380",
+        "maps": 3,
+        "start": 409769
+      },
+      {
+        "label": "g15-stage2-coevo-8f4b6824",
+        "maps": 3,
+        "start": 409789
+      },
+      {
+        "label": "g15-5e3fdc23-gateA-r1",
+        "maps": 10,
+        "start": 409809
+      },
+      {
+        "label": "g15-audit-normal-expansion",
+        "maps": 5,
+        "start": 409836
+      },
+      {
+        "label": "g15-audit-aggressive-expansion",
+        "maps": 5,
+        "start": 409858
+      },
+      {
+        "label": "g15-audit-defense-turtle",
+        "maps": 5,
+        "start": 409880
+      },
+      {
+        "label": "g15-audit-logistics-recenter",
+        "maps": 5,
+        "start": 409902
+      },
+      {
+        "label": "g15-audit-attack-pass",
+        "maps": 5,
+        "start": 409924
+      },
+      {
+        "label": "g15-audit-search-hunter",
+        "maps": 5,
+        "start": 409946
+      },
+      {
+        "label": "g15-audit-doomer-rusher",
+        "maps": 5,
+        "start": 409968
+      },
+      {
+        "label": "g15-audit-picker-muster",
+        "maps": 5,
+        "start": 409990
+      },
+      {
+        "label": "g15-audit-gatherer-economy",
+        "maps": 5,
+        "start": 410012
+      },
+      {
+        "label": "g15-audit-recent-reference",
+        "maps": 5,
+        "start": 410034
+      },
+      {
+        "label": "g15-audit-coevo-be31a380",
+        "maps": 5,
+        "start": 410056
+      },
+      {
+        "label": "g15-audit-coevo-8f4b6824",
+        "maps": 5,
+        "start": 410078
       }
     ]
   },
   "selection_policy_version": 2,
   "state_schema_version": 2,
-  "tested_genome_count": 184,
+  "tested_genome_count": 196,
   "tested_genomes": {
     "00f64492176c019a9d52abfa832b9de99560bef7dba8d129132448295c641695": {
       "birth_generation": 11,
@@ -7308,6 +7583,88 @@
       },
       "times_tested": 1
     },
+    "0f0453fd935aef6cf06af8479ad80562fd9543d99edabc8d019c2f9bdacbc375": {
+      "birth_generation": 15,
+      "first_tested_generation": 15,
+      "fitness_history": [
+        {
+          "generation": 15,
+          "stage1_minimum": 0.0,
+          "stage1_novelty": 0.3333333333333333,
+          "stage1_score": 0.4722222222222222,
+          "stage1_x0_score": 0.4166666666666667,
+          "stage2_score": 0.6597222222222222
+        }
+      ],
+      "last_tested_generation": 15,
+      "mutation_lineage": {
+        "bias": null,
+        "changes": {
+          "defense_policy": [
+            "reinforce_first",
+            "block_first"
+          ],
+          "doomguard_enabled": [
+            false,
+            true
+          ],
+          "fallback_policy": [
+            "consolidate",
+            "balanced"
+          ],
+          "late_finish_enemy_mult": [
+            2.29695148044134,
+            2.044469046219
+          ],
+          "logistics_route_policy": [
+            "interior",
+            "shortest"
+          ],
+          "muster_enemy_mult": [
+            3.0,
+            2.995400441018647
+          ],
+          "muster_ratio_num": [
+            10,
+            8
+          ],
+          "muster_topology": [
+            "single",
+            "triple"
+          ],
+          "picker_growth50": [
+            0.07794659090307077,
+            0.05329284361727481
+          ],
+          "picker_min_efficiency": [
+            2.0,
+            2.278264917372294
+          ],
+          "picker_start_policy": [
+            "margin",
+            "speed"
+          ]
+        },
+        "kind": "macro-jump"
+      },
+      "parentage": [
+        "9a1f49cf6a3a5e20cf1dd4412fe5bd610bc71f95775fdc551e45c93e0aaff6b1"
+      ],
+      "stage1_score": 0.4722222222222222,
+      "stage1_x0_score": 0.4166666666666667,
+      "stage2_score": 0.6597222222222222,
+      "status": "elite",
+      "structural_lineage": {
+        "chunk_transfer_policy": "split",
+        "defense_policy": "block_first",
+        "fallback_policy": "balanced",
+        "logistics_route_policy": "shortest",
+        "muster_anchor_policy": "largest",
+        "muster_topology": "triple",
+        "picker_start_policy": "speed"
+      },
+      "times_tested": 1
+    },
     "0f88688a68fb81c36c7ecb427876269d64bd283cdac82d80bf2b7596a9c90810": {
       "birth_generation": null,
       "death_generation": 1,
@@ -7601,6 +7958,54 @@
         "muster_anchor_policy": "largest",
         "muster_topology": "single",
         "picker_start_policy": "margin"
+      },
+      "times_tested": 1
+    },
+    "1d352ddbecea7ac6039e1329b849a6ac3208bcffce8f6b3d5fe5fd597e8e999d": {
+      "birth_generation": 15,
+      "death_generation": 15,
+      "death_reason": "selection_eliminated",
+      "first_tested_generation": 15,
+      "fitness_history": [
+        {
+          "generation": 15,
+          "stage1_minimum": 0.25,
+          "stage1_novelty": 0.23809523809523805,
+          "stage1_score": 0.4444444444444444,
+          "stage1_x0_score": 0.4166666666666667,
+          "stage2_score": null
+        }
+      ],
+      "last_tested_generation": 15,
+      "mutation_lineage": {
+        "bias": null,
+        "changes": {
+          "fallback_policy": [
+            "consolidate",
+            "balanced"
+          ],
+          "picker_not_behind_den": [
+            4,
+            5
+          ]
+        },
+        "kind": "crossover"
+      },
+      "parentage": [
+        "876069d03eb744dc9407adbbfe5602226e62d65a5b2421497e6f4362c5ec994d",
+        "daa0333ebe02bcf5bb4d1032c07e050d3263d50b3f42f444ceb635d681730dd2"
+      ],
+      "stage1_score": 0.4444444444444444,
+      "stage1_x0_score": 0.4166666666666667,
+      "status": "dead",
+      "structural_lineage": {
+        "chunk_transfer_policy": "full",
+        "defense_policy": "reinforce_first",
+        "fallback_policy": "balanced",
+        "logistics_route_policy": "interior",
+        "muster_anchor_policy": "central",
+        "muster_topology": "dual",
+        "picker_start_policy": "efficiency"
       },
       "times_tested": 1
     },
@@ -8129,6 +8534,56 @@
         "muster_anchor_policy": "largest",
         "muster_topology": "dual",
         "picker_start_policy": "margin"
+      },
+      "times_tested": 1
+    },
+    "34c10af174b5d9434e9245d046cc51ffd1c76a25fd7971bb2ab93c7c82a6090d": {
+      "birth_generation": 15,
+      "first_tested_generation": 15,
+      "fitness_history": [
+        {
+          "generation": 15,
+          "stage1_minimum": 0.125,
+          "stage1_novelty": 0.19047619047619047,
+          "stage1_score": 0.5972222222222222,
+          "stage1_x0_score": 0.7083333333333334,
+          "stage2_score": 0.7013888888888888
+        }
+      ],
+      "last_tested_generation": 15,
+      "mutation_lineage": {
+        "bias": null,
+        "changes": {
+          "castle2_target_turn": [
+            270,
+            250
+          ],
+          "muster_ratio_den": [
+            10,
+            11
+          ],
+          "war_share_peace": [
+            0.13196616857779778,
+            0.1116910573090159
+          ]
+        },
+        "kind": "local"
+      },
+      "parentage": [
+        "876069d03eb744dc9407adbbfe5602226e62d65a5b2421497e6f4362c5ec994d"
+      ],
+      "stage1_score": 0.5972222222222222,
+      "stage1_x0_score": 0.7083333333333334,
+      "stage2_score": 0.7013888888888888,
+      "status": "elite",
+      "structural_lineage": {
+        "chunk_transfer_policy": "full",
+        "defense_policy": "block_first",
+        "fallback_policy": "consolidate",
+        "logistics_route_policy": "interior",
+        "muster_anchor_policy": "largest",
+        "muster_topology": "single",
+        "picker_start_policy": "speed"
       },
       "times_tested": 1
     },
@@ -10128,6 +10583,57 @@
       },
       "times_tested": 2
     },
+    "5e3fdc2347cf61826210a93edc2ce70b631fa2591e7ee6d869ed1d31f42b7a9d": {
+      "birth_generation": 15,
+      "first_tested_generation": 15,
+      "fitness_history": [
+        {
+          "generation": 15,
+          "stage1_minimum": 0.4166666666666667,
+          "stage1_novelty": 0.23809523809523805,
+          "stage1_score": 0.5833333333333334,
+          "stage1_x0_score": 0.4166666666666667,
+          "stage2_score": 0.6458333333333334
+        }
+      ],
+      "last_tested_generation": 15,
+      "mutation_lineage": {
+        "bias": null,
+        "changes": {
+          "free_share_war": [
+            0.2405279471907849,
+            0.22329534872923773
+          ],
+          "picker_growth50": [
+            0.07650039544065075,
+            0.08594993765052744
+          ],
+          "picker_min_efficiency": [
+            2.0,
+            1.478407268321975
+          ]
+        },
+        "kind": "crossover"
+      },
+      "parentage": [
+        "876069d03eb744dc9407adbbfe5602226e62d65a5b2421497e6f4362c5ec994d",
+        "ad341bb91806a58638b32f50d9846a2311211b2a543d14cbb8325c5d75d5c35b"
+      ],
+      "stage1_score": 0.5833333333333334,
+      "stage1_x0_score": 0.4166666666666667,
+      "stage2_score": 0.6458333333333334,
+      "status": "elite",
+      "structural_lineage": {
+        "chunk_transfer_policy": "split",
+        "defense_policy": "block_first",
+        "fallback_policy": "consolidate",
+        "logistics_route_policy": "interior",
+        "muster_anchor_policy": "largest",
+        "muster_topology": "triple",
+        "picker_start_policy": "efficiency"
+      },
+      "times_tested": 1
+    },
     "5ec46556f8177a708403d610327ead8d6eae3f257e2395d49ef26db710c2910a": {
       "birth_generation": 13,
       "death_generation": 13,
@@ -10280,6 +10786,53 @@
         "picker_start_policy": "efficiency"
       },
       "times_tested": 2
+    },
+    "69c9ace4c6e28246da0e9716c88b4a8baa8491489fb7ca9c97729f7785fa0d20": {
+      "birth_generation": 15,
+      "death_generation": 15,
+      "death_reason": "selection_eliminated",
+      "first_tested_generation": 15,
+      "fitness_history": [
+        {
+          "generation": 15,
+          "stage1_minimum": 0.25,
+          "stage1_novelty": 0.19047619047619047,
+          "stage1_score": 0.4444444444444444,
+          "stage1_x0_score": 0.3333333333333333,
+          "stage2_score": null
+        }
+      ],
+      "last_tested_generation": 15,
+      "mutation_lineage": {
+        "bias": null,
+        "changes": {
+          "chunk_transfer_policy": [
+            "split",
+            "full"
+          ],
+          "production_recover_slope": [
+            0.1,
+            0.07204665424861138
+          ]
+        },
+        "kind": "local"
+      },
+      "parentage": [
+        "ad341bb91806a58638b32f50d9846a2311211b2a543d14cbb8325c5d75d5c35b"
+      ],
+      "stage1_score": 0.4444444444444444,
+      "stage1_x0_score": 0.3333333333333333,
+      "status": "dead",
+      "structural_lineage": {
+        "chunk_transfer_policy": "full",
+        "defense_policy": "block_first",
+        "fallback_policy": "consolidate",
+        "logistics_route_policy": "shortest",
+        "muster_anchor_policy": "largest",
+        "muster_topology": "triple",
+        "picker_start_policy": "efficiency"
+      },
+      "times_tested": 1
     },
     "6a71b6750d4a6f72a367f3aa234b3aec361c623a751578d2be1a361701b52175": {
       "birth_generation": 11,
@@ -11532,6 +12085,8 @@
     },
     "876069d03eb744dc9407adbbfe5602226e62d65a5b2421497e6f4362c5ec994d": {
       "birth_generation": 14,
+      "death_generation": 15,
+      "death_reason": "selection_eliminated",
       "first_tested_generation": 14,
       "fitness_history": [
         {
@@ -11541,9 +12096,17 @@
           "stage1_score": 0.5555555555555556,
           "stage1_x0_score": 0.4583333333333333,
           "stage2_score": 0.7569444444444444
+        },
+        {
+          "generation": 15,
+          "stage1_minimum": 0.0,
+          "stage1_novelty": 0.19047619047619047,
+          "stage1_score": 0.5138888888888888,
+          "stage1_x0_score": 0.5416666666666666,
+          "stage2_score": 0.7291666666666666
         }
       ],
-      "last_tested_generation": 14,
+      "last_tested_generation": 15,
       "mutation_lineage": {
         "bias": null,
         "changes": {
@@ -11565,10 +12128,10 @@
       "parentage": [
         "50b8ca8c45d574fcb5a73742960162e2f3ab0e6d5f6fd3d776cf9276f42897d8"
       ],
-      "stage1_score": 0.5555555555555556,
-      "stage1_x0_score": 0.4583333333333333,
-      "stage2_score": 0.7569444444444444,
-      "status": "elite",
+      "stage1_score": 0.5138888888888888,
+      "stage1_x0_score": 0.5416666666666666,
+      "stage2_score": 0.7291666666666666,
+      "status": "dead",
       "structural_lineage": {
         "chunk_transfer_policy": "full",
         "defense_policy": "block_first",
@@ -11577,6 +12140,88 @@
         "muster_anchor_policy": "largest",
         "muster_topology": "single",
         "picker_start_policy": "speed"
+      },
+      "times_tested": 2
+    },
+    "88e1cf0a5e48ef82017a0c0e0abd2b12360c44fa80a3783a74b5ef17c233aabc": {
+      "birth_generation": 15,
+      "first_tested_generation": 15,
+      "fitness_history": [
+        {
+          "generation": 15,
+          "stage1_minimum": 0.25,
+          "stage1_novelty": 0.2857142857142857,
+          "stage1_score": 0.4027777777777778,
+          "stage1_x0_score": 0.4166666666666667,
+          "stage2_score": 0.6041666666666666
+        }
+      ],
+      "last_tested_generation": 15,
+      "mutation_lineage": {
+        "bias": null,
+        "changes": {
+          "expansion_share_healthy": [
+            0.23725362433868075,
+            0.23715116147452128
+          ],
+          "fallback_policy": [
+            "consolidate",
+            "aggressive"
+          ],
+          "late_finish_enemy_bonus": [
+            10,
+            0
+          ],
+          "logistics_route_policy": [
+            "interior",
+            "shortest"
+          ],
+          "muster_start_turn": [
+            300,
+            250
+          ],
+          "muster_threshold": [
+            7,
+            8
+          ],
+          "muster_topology": [
+            "single",
+            "triple"
+          ],
+          "picker_growth50": [
+            0.06,
+            0.030010291842568336
+          ],
+          "picker_mature_land_pct": [
+            45,
+            55
+          ],
+          "picker_start_policy": [
+            "speed",
+            "efficiency"
+          ],
+          "production_recover_slope": [
+            0.1,
+            0.1037143291684475
+          ]
+        },
+        "kind": "macro-jump"
+      },
+      "parentage": [
+        "876069d03eb744dc9407adbbfe5602226e62d65a5b2421497e6f4362c5ec994d"
+      ],
+      "stage1_score": 0.4027777777777778,
+      "stage1_x0_score": 0.4166666666666667,
+      "stage2_score": 0.6041666666666666,
+      "status": "elite",
+      "structural_lineage": {
+        "chunk_transfer_policy": "full",
+        "defense_policy": "block_first",
+        "fallback_policy": "aggressive",
+        "logistics_route_policy": "shortest",
+        "muster_anchor_policy": "largest",
+        "muster_topology": "triple",
+        "picker_start_policy": "efficiency"
       },
       "times_tested": 1
     },
@@ -12100,6 +12745,8 @@
     },
     "9a1f49cf6a3a5e20cf1dd4412fe5bd610bc71f95775fdc551e45c93e0aaff6b1": {
       "birth_generation": 12,
+      "death_generation": 15,
+      "death_reason": "selection_eliminated",
       "first_tested_generation": 12,
       "fitness_history": [
         {
@@ -12125,9 +12772,17 @@
           "stage1_score": 0.5555555555555556,
           "stage1_x0_score": 0.3333333333333333,
           "stage2_score": 0.7083333333333334
+        },
+        {
+          "generation": 15,
+          "stage1_minimum": 0.375,
+          "stage1_novelty": 0.2857142857142857,
+          "stage1_score": 0.5277777777777778,
+          "stage1_x0_score": 0.5,
+          "stage2_score": 0.6388888888888888
         }
       ],
-      "last_tested_generation": 14,
+      "last_tested_generation": 15,
       "mutation_lineage": {
         "bias": null,
         "changes": {
@@ -12146,10 +12801,10 @@
         "cc497189cfb760571e81226c147ef215b3b03308fe0cea2c410ab66d4ef6c6d2",
         "0dde410f8e70385889bdbc33727cd9438e35eb8fb5290ccc184de4629a4e85a3"
       ],
-      "stage1_score": 0.5555555555555556,
-      "stage1_x0_score": 0.3333333333333333,
-      "stage2_score": 0.7083333333333334,
-      "status": "elite",
+      "stage1_score": 0.5277777777777778,
+      "stage1_x0_score": 0.5,
+      "stage2_score": 0.6388888888888888,
+      "status": "dead",
       "structural_lineage": {
         "chunk_transfer_policy": "split",
         "defense_policy": "reinforce_first",
@@ -12159,7 +12814,7 @@
         "muster_topology": "single",
         "picker_start_policy": "margin"
       },
-      "times_tested": 3
+      "times_tested": 4
     },
     "9a6d1d843f677c7b24e43fb9d0b0f72a3186d5315423a3f7248bb9a303b5bde6": {
       "birth_generation": 8,
@@ -12779,6 +13434,8 @@
     },
     "ad341bb91806a58638b32f50d9846a2311211b2a543d14cbb8325c5d75d5c35b": {
       "birth_generation": 14,
+      "death_generation": 15,
+      "death_reason": "selection_eliminated",
       "first_tested_generation": 14,
       "fitness_history": [
         {
@@ -12788,9 +13445,17 @@
           "stage1_score": 0.5138888888888888,
           "stage1_x0_score": 0.4583333333333333,
           "stage2_score": 0.7013888888888888
+        },
+        {
+          "generation": 15,
+          "stage1_minimum": 0.25,
+          "stage1_novelty": 0.14285714285714285,
+          "stage1_score": 0.4444444444444444,
+          "stage1_x0_score": 0.3333333333333333,
+          "stage2_score": null
         }
       ],
-      "last_tested_generation": 14,
+      "last_tested_generation": 15,
       "mutation_lineage": {
         "bias": null,
         "changes": {
@@ -12840,10 +13505,10 @@
       "parentage": [
         "50b8ca8c45d574fcb5a73742960162e2f3ab0e6d5f6fd3d776cf9276f42897d8"
       ],
-      "stage1_score": 0.5138888888888888,
-      "stage1_x0_score": 0.4583333333333333,
+      "stage1_score": 0.4444444444444444,
+      "stage1_x0_score": 0.3333333333333333,
       "stage2_score": 0.7013888888888888,
-      "status": "elite",
+      "status": "dead",
       "structural_lineage": {
         "chunk_transfer_policy": "split",
         "defense_policy": "block_first",
@@ -12853,7 +13518,7 @@
         "muster_topology": "triple",
         "picker_start_policy": "efficiency"
       },
-      "times_tested": 1
+      "times_tested": 2
     },
     "aded84e220c355aaffef7bc5ccc935042aea70664a867e7fc107a57e287f3525": {
       "birth_generation": 9,
@@ -12934,6 +13599,70 @@
         "picker_start_policy": "speed"
       },
       "times_tested": 2
+    },
+    "af0f27498d71ca55bf6b7d4b369641d1e65247074fa65b57ea48cd655cde76ec": {
+      "birth_generation": 15,
+      "death_generation": 15,
+      "death_reason": "selection_eliminated",
+      "first_tested_generation": 15,
+      "fitness_history": [
+        {
+          "generation": 15,
+          "stage1_minimum": 0.25,
+          "stage1_novelty": 0.38095238095238093,
+          "stage1_score": 0.4305555555555556,
+          "stage1_x0_score": 0.2916666666666667,
+          "stage2_score": 0.5416666666666666
+        }
+      ],
+      "last_tested_generation": 15,
+      "mutation_lineage": {
+        "bias": null,
+        "changes": {
+          "chunk_transfer_policy": [
+            "full",
+            "split"
+          ],
+          "fallback_policy": [
+            "consolidate",
+            "balanced"
+          ],
+          "late_finish_enemy_bonus": [
+            10,
+            0
+          ],
+          "muster_anchor_policy": [
+            "largest",
+            "central"
+          ],
+          "production_recover_gap": [
+            10,
+            9
+          ],
+          "production_recover_slope": [
+            0.1,
+            0.1268194945555035
+          ]
+        },
+        "kind": "macro-jump"
+      },
+      "parentage": [
+        "876069d03eb744dc9407adbbfe5602226e62d65a5b2421497e6f4362c5ec994d"
+      ],
+      "stage1_score": 0.4305555555555556,
+      "stage1_x0_score": 0.2916666666666667,
+      "stage2_score": 0.5416666666666666,
+      "status": "dead",
+      "structural_lineage": {
+        "chunk_transfer_policy": "split",
+        "defense_policy": "block_first",
+        "fallback_policy": "balanced",
+        "logistics_route_policy": "interior",
+        "muster_anchor_policy": "central",
+        "muster_topology": "single",
+        "picker_start_policy": "speed"
+      },
+      "times_tested": 1
     },
     "af2556c146c1489c53e2509da2e90e38e7b31e23f43df714190ffe680f150c9d": {
       "birth_generation": 10,
@@ -13444,6 +14173,54 @@
         "muster_anchor_policy": "central",
         "muster_topology": "dual",
         "picker_start_policy": "speed"
+      },
+      "times_tested": 1
+    },
+    "b3999cd67cc6f35787a03c19d6a0f3e7851339289c7a236bfa31f676bf29984a": {
+      "birth_generation": 15,
+      "death_generation": 15,
+      "death_reason": "selection_eliminated",
+      "first_tested_generation": 15,
+      "fitness_history": [
+        {
+          "generation": 15,
+          "stage1_minimum": 0.375,
+          "stage1_novelty": 0.23809523809523805,
+          "stage1_score": 0.5277777777777778,
+          "stage1_x0_score": 0.5,
+          "stage2_score": null
+        }
+      ],
+      "last_tested_generation": 15,
+      "mutation_lineage": {
+        "bias": null,
+        "changes": {
+          "muster_opp_divisor": [
+            3,
+            4
+          ],
+          "precontact_expansion_until": [
+            225,
+            250
+          ]
+        },
+        "kind": "crossover"
+      },
+      "parentage": [
+        "daa0333ebe02bcf5bb4d1032c07e050d3263d50b3f42f444ceb635d681730dd2",
+        "9a1f49cf6a3a5e20cf1dd4412fe5bd610bc71f95775fdc551e45c93e0aaff6b1"
+      ],
+      "stage1_score": 0.5277777777777778,
+      "stage1_x0_score": 0.5,
+      "status": "dead",
+      "structural_lineage": {
+        "chunk_transfer_policy": "split",
+        "defense_policy": "reinforce_first",
+        "fallback_policy": "consolidate",
+        "logistics_route_policy": "interior",
+        "muster_anchor_policy": "largest",
+        "muster_topology": "single",
+        "picker_start_policy": "efficiency"
       },
       "times_tested": 1
     },
@@ -14085,6 +14862,134 @@
       },
       "times_tested": 1
     },
+    "c16fb84dac3da3ce9ecd1b9c3b2eeb1ebfbd5d298398d8fbb65384dc9d34c88b": {
+      "birth_generation": 15,
+      "death_generation": 15,
+      "death_reason": "selection_eliminated",
+      "first_tested_generation": 15,
+      "fitness_history": [
+        {
+          "generation": 15,
+          "stage1_minimum": 0.16666666666666666,
+          "stage1_novelty": 0.23809523809523805,
+          "stage1_score": 0.4027777777777778,
+          "stage1_x0_score": 0.16666666666666666,
+          "stage2_score": null
+        }
+      ],
+      "last_tested_generation": 15,
+      "mutation_lineage": {
+        "bias": null,
+        "changes": {
+          "edge_picker_threshold": [
+            14,
+            16
+          ],
+          "expansion_share_healthy": [
+            0.23725362433868075,
+            0.2778623035688702
+          ],
+          "expansion_share_precontact": [
+            0.4,
+            0.4004019314204014
+          ]
+        },
+        "kind": "crossover"
+      },
+      "parentage": [
+        "ad341bb91806a58638b32f50d9846a2311211b2a543d14cbb8325c5d75d5c35b",
+        "9a1f49cf6a3a5e20cf1dd4412fe5bd610bc71f95775fdc551e45c93e0aaff6b1"
+      ],
+      "stage1_score": 0.4027777777777778,
+      "stage1_x0_score": 0.16666666666666666,
+      "status": "dead",
+      "structural_lineage": {
+        "chunk_transfer_policy": "split",
+        "defense_policy": "block_first",
+        "fallback_policy": "consolidate",
+        "logistics_route_policy": "shortest",
+        "muster_anchor_policy": "largest",
+        "muster_topology": "triple",
+        "picker_start_policy": "margin"
+      },
+      "times_tested": 1
+    },
+    "c2ddc4078a8aa9669af9ddc7ec48dfe97bd8131699ba9f014ec790e4e870bc64": {
+      "birth_generation": 15,
+      "death_generation": 15,
+      "death_reason": "selection_eliminated",
+      "first_tested_generation": 15,
+      "fitness_history": [
+        {
+          "generation": 15,
+          "stage1_minimum": 0.375,
+          "stage1_novelty": 0.38095238095238093,
+          "stage1_score": 0.5694444444444444,
+          "stage1_x0_score": 0.4583333333333333,
+          "stage2_score": 0.5972222222222222
+        }
+      ],
+      "last_tested_generation": 15,
+      "mutation_lineage": {
+        "bias": null,
+        "changes": {
+          "chunk_transfer_policy": [
+            "split",
+            "full"
+          ],
+          "edge_picker_threshold": [
+            14,
+            12
+          ],
+          "fallback_policy": [
+            "consolidate",
+            "aggressive"
+          ],
+          "free_share_war": [
+            0.2405279471907849,
+            0.21656124520294384
+          ],
+          "muster_anchor_policy": [
+            "largest",
+            "central"
+          ],
+          "muster_threshold": [
+            9,
+            7
+          ],
+          "picker_min_efficiency": [
+            2.0,
+            1.9742907905325657
+          ],
+          "precontact_expansion_until": [
+            225,
+            200
+          ],
+          "production_severe_gap": [
+            18,
+            14
+          ]
+        },
+        "kind": "macro-jump"
+      },
+      "parentage": [
+        "9a1f49cf6a3a5e20cf1dd4412fe5bd610bc71f95775fdc551e45c93e0aaff6b1"
+      ],
+      "stage1_score": 0.5694444444444444,
+      "stage1_x0_score": 0.4583333333333333,
+      "stage2_score": 0.5972222222222222,
+      "status": "dead",
+      "structural_lineage": {
+        "chunk_transfer_policy": "full",
+        "defense_policy": "reinforce_first",
+        "fallback_policy": "aggressive",
+        "logistics_route_policy": "interior",
+        "muster_anchor_policy": "central",
+        "muster_topology": "single",
+        "picker_start_policy": "margin"
+      },
+      "times_tested": 1
+    },
     "c4e98dc63d2ca1aa77c3a3d6781f832a9055cfba6a5ff0bdba441f99102ddca3": {
       "birth_generation": 11,
       "death_generation": 12,
@@ -14640,6 +15545,81 @@
       },
       "times_tested": 1
     },
+    "cf1fe7d49d02e960197c1a9b8e4a76cb8a1b2da87f32f430e886dff904985981": {
+      "birth_generation": 15,
+      "death_generation": 15,
+      "death_reason": "selection_eliminated",
+      "first_tested_generation": 15,
+      "fitness_history": [
+        {
+          "generation": 15,
+          "stage1_minimum": 0.0,
+          "stage1_novelty": 0.3333333333333333,
+          "stage1_score": 0.3333333333333333,
+          "stage1_x0_score": 0.20833333333333334,
+          "stage2_score": null
+        }
+      ],
+      "last_tested_generation": 15,
+      "mutation_lineage": {
+        "bias": null,
+        "changes": {
+          "expansion_wait_limit": [
+            5,
+            3
+          ],
+          "fallback_policy": [
+            "aggressive",
+            "balanced"
+          ],
+          "general_reserve_base": [
+            7,
+            9
+          ],
+          "late_finish_base": [
+            70,
+            80
+          ],
+          "late_finish_enemy_mult": [
+            2.29695148044134,
+            2.4591034066417925
+          ],
+          "logistics_route_policy": [
+            "interior",
+            "shortest"
+          ],
+          "muster_opp_divisor": [
+            3,
+            1
+          ],
+          "picker_growth50": [
+            0.06,
+            0.07838981700203862
+          ],
+          "precontact_expansion_until": [
+            175,
+            150
+          ]
+        },
+        "kind": "macro-jump"
+      },
+      "parentage": [
+        "daa0333ebe02bcf5bb4d1032c07e050d3263d50b3f42f444ceb635d681730dd2"
+      ],
+      "stage1_score": 0.3333333333333333,
+      "stage1_x0_score": 0.20833333333333334,
+      "status": "dead",
+      "structural_lineage": {
+        "chunk_transfer_policy": "full",
+        "defense_policy": "reinforce_first",
+        "fallback_policy": "balanced",
+        "logistics_route_policy": "shortest",
+        "muster_anchor_policy": "central",
+        "muster_topology": "dual",
+        "picker_start_policy": "efficiency"
+      },
+      "times_tested": 1
+    },
     "cfaf94cb945e2bf71dd31600ec39acd7dc6ed929ea3c7b0adafb6e6e4cac43b9": {
       "birth_generation": 10,
       "death_generation": 10,
@@ -14992,6 +15972,8 @@
     },
     "daa0333ebe02bcf5bb4d1032c07e050d3263d50b3f42f444ceb635d681730dd2": {
       "birth_generation": 12,
+      "death_generation": 15,
+      "death_reason": "selection_eliminated",
       "first_tested_generation": 12,
       "fitness_history": [
         {
@@ -15017,9 +15999,17 @@
           "stage1_score": 0.5277777777777778,
           "stage1_x0_score": 0.4166666666666667,
           "stage2_score": 0.625
+        },
+        {
+          "generation": 15,
+          "stage1_minimum": 0.25,
+          "stage1_novelty": 0.23809523809523805,
+          "stage1_score": 0.4444444444444444,
+          "stage1_x0_score": 0.4583333333333333,
+          "stage2_score": null
         }
       ],
-      "last_tested_generation": 14,
+      "last_tested_generation": 15,
       "mutation_lineage": {
         "bias": null,
         "changes": {
@@ -15069,10 +16059,10 @@
       "parentage": [
         "0dde410f8e70385889bdbc33727cd9438e35eb8fb5290ccc184de4629a4e85a3"
       ],
-      "stage1_score": 0.5277777777777778,
-      "stage1_x0_score": 0.4166666666666667,
+      "stage1_score": 0.4444444444444444,
+      "stage1_x0_score": 0.4583333333333333,
       "stage2_score": 0.625,
-      "status": "elite",
+      "status": "dead",
       "structural_lineage": {
         "chunk_transfer_policy": "full",
         "defense_policy": "reinforce_first",
@@ -15082,7 +16072,7 @@
         "muster_topology": "dual",
         "picker_start_policy": "efficiency"
       },
-      "times_tested": 3
+      "times_tested": 4
     },
     "dab8a1fe616bd460c9d650f5e4e3eea1dadd9ed7b66a4a1beca9d10719f66b59": {
       "birth_generation": 14,
@@ -16484,6 +17474,49 @@
         "picker_start_policy": "mass"
       },
       "times_tested": 2
+    },
+    "fee250d995e310e7e5c4fa99ddffab6710774d05741b13f66f1444080c20e92b": {
+      "birth_generation": 15,
+      "death_generation": 15,
+      "death_reason": "selection_eliminated",
+      "first_tested_generation": 15,
+      "fitness_history": [
+        {
+          "generation": 15,
+          "stage1_minimum": 0.0,
+          "stage1_novelty": 0.19047619047619047,
+          "stage1_score": 0.4722222222222222,
+          "stage1_x0_score": 0.4583333333333333,
+          "stage2_score": null
+        }
+      ],
+      "last_tested_generation": 15,
+      "mutation_lineage": {
+        "bias": null,
+        "changes": {
+          "chunk_transfer_policy": [
+            "full",
+            "split"
+          ]
+        },
+        "kind": "local"
+      },
+      "parentage": [
+        "876069d03eb744dc9407adbbfe5602226e62d65a5b2421497e6f4362c5ec994d"
+      ],
+      "stage1_score": 0.4722222222222222,
+      "stage1_x0_score": 0.4583333333333333,
+      "status": "dead",
+      "structural_lineage": {
+        "chunk_transfer_policy": "split",
+        "defense_policy": "block_first",
+        "fallback_policy": "consolidate",
+        "logistics_route_policy": "interior",
+        "muster_anchor_policy": "largest",
+        "muster_topology": "single",
+        "picker_start_policy": "speed"
+      },
+      "times_tested": 1
     },
     "ff5a0c54d0038814a00736f9a24798af80b0d5bc7333b4201417d7659c71f584": {
       "birth_generation": 9,
