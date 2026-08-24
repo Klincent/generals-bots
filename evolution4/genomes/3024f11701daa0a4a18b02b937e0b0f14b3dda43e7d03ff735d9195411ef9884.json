@@ -1,0 +1,116 @@
+{
+  "genome_id": "3024f11701daa0a4a18b02b937e0b0f14b3dda43e7d03ff735d9195411ef9884",
+  "meta": {
+    "architecture_epoch": 5,
+    "changes": {
+      "castle2_target_turn": [
+        250,
+        260
+      ],
+      "chunk_transfer_policy": [
+        "full",
+        "split"
+      ],
+      "fallback_policy": [
+        "consolidate",
+        "balanced"
+      ],
+      "general_reserve_opp_divisor": [
+        12,
+        10
+      ],
+      "logistics_route_policy": [
+        "interior",
+        "shortest"
+      ],
+      "muster_anchor_policy": [
+        "central",
+        "forward"
+      ],
+      "muster_ratio_num": [
+        10,
+        9
+      ],
+      "picker_growth50": [
+        0.06,
+        0.05256145688425186
+      ],
+      "picker_mature_turn": [
+        230,
+        270
+      ],
+      "picker_min_efficiency": [
+        1.614476509729913,
+        1.9857953070903387
+      ],
+      "precontact_expansion_until": [
+        275,
+        250
+      ],
+      "production_recover_gap": [
+        8,
+        10
+      ]
+    },
+    "generation": 24,
+    "kind": "macro-jump",
+    "parent": "cebcc79d22f0ef19def2b7935dd28cb10a44a8bb865bec3f3c492f42f3019d56"
+  },
+  "values": {
+    "adjacent_reserve_base": 1,
+    "castle1_target_turn": 150,
+    "castle2_target_turn": 260,
+    "chunk_transfer_policy": "split",
+    "defense_policy": "reinforce_first",
+    "doomguard_enabled": false,
+    "edge_picker_threshold": 14,
+    "expansion_share_healthy": 0.23715116147452128,
+    "expansion_share_precontact": 0.4,
+    "expansion_share_severe": 0.6110217350000584,
+    "expansion_share_soft": 0.509215308075707,
+    "expansion_wait_limit": 3,
+    "fallback_policy": "balanced",
+    "free_share_peace": 0.15,
+    "free_share_war": 0.24291038235920043,
+    "general_reserve_base": 7,
+    "general_reserve_opp_divisor": 10,
+    "late_castle_army_margin": 40,
+    "late_finish_base": 70,
+    "late_finish_enemy_bonus": 20,
+    "late_finish_enemy_mult": 1.8710607998318267,
+    "late_finish_turn": 850,
+    "logistics_route_policy": "shortest",
+    "muster_anchor_policy": "forward",
+    "muster_army_margin": 80,
+    "muster_enemy_bonus": 10,
+    "muster_enemy_mult": 3.1459274923958778,
+    "muster_launch_base": 110,
+    "muster_opp_divisor": 3,
+    "muster_ratio_den": 11,
+    "muster_ratio_num": 9,
+    "muster_start_turn": 275,
+    "muster_threshold": 7,
+    "muster_topology": "triple",
+    "picker_enabled": true,
+    "picker_growth25": 0.08,
+    "picker_growth50": 0.05256145688425186,
+    "picker_growth_land_pct": 50,
+    "picker_mature_land_pct": 35,
+    "picker_mature_turn": 270,
+    "picker_min_efficiency": 1.9857953070903387,
+    "picker_neutrals_max": 3,
+    "picker_not_behind_den": 2,
+    "picker_not_behind_num": 7,
+    "picker_start_policy": "margin",
+    "picker_top3_share_max": 0.619095421365961,
+    "precontact_expansion_until": 250,
+    "production_recover_gap": 10,
+    "production_recover_slope": 0.1037143291684475,
+    "production_severe_gap": 18,
+    "production_soft_gap": 12,
+    "search_share_seen": 0.09947576237631199,
+    "search_share_unseen": 0.2601858813749961,
+    "war_share_contact": 0.3,
+    "war_share_peace": 0.1116910573090159
+  }
+}
