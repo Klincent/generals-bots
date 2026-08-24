@@ -7,7 +7,7 @@ on:
       - 'evolution4/turbo-champion-submission-kick.txt'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   package:
@@ -40,6 +40,7 @@ jobs:
           ./build.sh
 
       - name: Create exact four-file competition ZIP
+        id: zip
         shell: bash
         run: |
           set -euo pipefail
@@ -59,8 +60,10 @@ jobs:
           names=zipfile.ZipFile(out).namelist()
           expected=[f'juraj_v35/{f}' for f in files]
           assert names==expected,(names,expected)
-          print('SHA256',hashlib.sha256(out.read_bytes()).hexdigest())
+          sha=hashlib.sha256(out.read_bytes()).hexdigest()
+          print('SHA256',sha)
           print('ENTRIES',names)
+          Path('/tmp/submission-sha.txt').write_text(sha+'\n')
           PY
 
       - name: Upload latest Turbo champion submission
@@ -70,3 +73,17 @@ jobs:
           path: /tmp/juraj_turbo_champion_latest.zip
           if-no-files-found: error
           retention-days: 30
+
+      - name: Publish run marker for chat handoff
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          sha=$(cat /tmp/submission-sha.txt)
+          body=$(printf '{"run_id":%s,"artifact":"juraj-turbo-champion-latest","zip":"juraj_turbo_champion_latest.zip","sha256":"%s"}\n' "$GITHUB_RUN_ID" "$sha")
+          content=$(printf '%s' "$body" | base64 -w0)
+          gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/evolution4/submission-runs/${GITHUB_RUN_ID}.json" \
+            -f message="ci: record Turbo champion submission run ${GITHUB_RUN_ID}" \
+            -f content="$content" \
+            -f branch="master"
