@@ -1,0 +1,96 @@
+{
+  "genome_id": "a7dc51d018efb7848e7d2d90cedf650ff8ed4ff638d7978ea86e79bbbec47631",
+  "meta": {
+    "architecture_epoch": 4,
+    "changes": {
+      "castle1_target_turn": [
+        150,
+        160
+      ],
+      "defense_policy": [
+        "reinforce_first",
+        "block_first"
+      ],
+      "fallback_policy": [
+        "balanced",
+        "consolidate"
+      ],
+      "logistics_route_policy": [
+        "interior",
+        "shortest"
+      ],
+      "picker_start_policy": [
+        "efficiency",
+        "speed"
+      ],
+      "production_severe_gap": [
+        18,
+        20
+      ],
+      "search_share_unseen": [
+        0.24067012354957157,
+        0.25240269400264764
+      ]
+    },
+    "generation": 19,
+    "kind": "macro-jump",
+    "parent": "8b9e73332f267530ecef07530330e15ffd0caf4154dae157fcb5b0602e09ad7b"
+  },
+  "values": {
+    "adjacent_reserve_base": 1,
+    "castle1_target_turn": 160,
+    "castle2_target_turn": 250,
+    "chunk_transfer_policy": "full",
+    "defense_policy": "block_first",
+    "doomguard_enabled": false,
+    "edge_picker_threshold": 14,
+    "expansion_share_healthy": 0.23715116147452128,
+    "expansion_share_precontact": 0.4,
+    "expansion_share_severe": 0.6302765829308214,
+    "expansion_share_soft": 0.4840891638221738,
+    "expansion_wait_limit": 5,
+    "fallback_policy": "consolidate",
+    "free_share_peace": 0.15,
+    "free_share_war": 0.2405279471907849,
+    "general_reserve_base": 7,
+    "general_reserve_opp_divisor": 14,
+    "late_castle_army_margin": 40,
+    "late_finish_base": 70,
+    "late_finish_enemy_bonus": 20,
+    "late_finish_enemy_mult": 1.8710607998318267,
+    "late_finish_turn": 850,
+    "logistics_route_policy": "shortest",
+    "muster_anchor_policy": "largest",
+    "muster_army_margin": 80,
+    "muster_enemy_bonus": 10,
+    "muster_enemy_mult": 3.0,
+    "muster_launch_base": 90,
+    "muster_opp_divisor": 3,
+    "muster_ratio_den": 9,
+    "muster_ratio_num": 10,
+    "muster_start_turn": 350,
+    "muster_threshold": 7,
+    "muster_topology": "dual",
+    "picker_enabled": true,
+    "picker_growth25": 0.08,
+    "picker_growth50": 0.030010291842568336,
+    "picker_growth_land_pct": 50,
+    "picker_mature_land_pct": 55,
+    "picker_mature_turn": 190,
+    "picker_min_efficiency": 2.1291457193401966,
+    "picker_neutrals_max": 3,
+    "picker_not_behind_den": 4,
+    "picker_not_behind_num": 5,
+    "picker_start_policy": "speed",
+    "picker_top3_share_max": 0.5802451771624354,
+    "precontact_expansion_until": 275,
+    "production_recover_gap": 10,
+    "production_recover_slope": 0.1037143291684475,
+    "production_severe_gap": 20,
+    "production_soft_gap": 12,
+    "search_share_seen": 0.09947576237631199,
+    "search_share_unseen": 0.25240269400264764,
+    "war_share_contact": 0.3,
+    "war_share_peace": 0.1116910573090159
+  }
+}
