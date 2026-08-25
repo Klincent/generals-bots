@@ -1,0 +1,100 @@
+{
+  "genome_id": "8e3dd736bb954045bc2e60849b3aad275027e0cae94c7960d5e2d003b80a388b",
+  "meta": {
+    "architecture_epoch": 8,
+    "changes": {
+      "chunk_transfer_policy": [
+        "full",
+        "split"
+      ],
+      "defense_policy": [
+        "reinforce_first",
+        "block_first"
+      ],
+      "late_castle_army_margin": [
+        40,
+        30
+      ],
+      "logistics_route_policy": [
+        "interior",
+        "shortest"
+      ],
+      "muster_threshold": [
+        7,
+        9
+      ],
+      "picker_growth25": [
+        0.08,
+        0.09256277546953663
+      ],
+      "picker_mature_turn": [
+        170,
+        210
+      ],
+      "search_share_seen": [
+        0.07622756343245453,
+        0.090856975594479
+      ]
+    },
+    "generation": 34,
+    "kind": "macro-jump",
+    "parent": "281904916eb9b3f2c830604234d92ef2db66ae3f69e0f4b31a3c1a5bfad72163"
+  },
+  "values": {
+    "adjacent_reserve_base": 1,
+    "castle1_target_turn": 130,
+    "castle2_target_turn": 250,
+    "chunk_transfer_policy": "split",
+    "defense_policy": "block_first",
+    "doomguard_enabled": true,
+    "edge_picker_threshold": 10,
+    "expansion_share_healthy": 0.2230117154021619,
+    "expansion_share_precontact": 0.39090271193446896,
+    "expansion_share_severe": 0.6117486688021849,
+    "expansion_share_soft": 0.5024087286888066,
+    "expansion_wait_limit": 5,
+    "fallback_policy": "consolidate",
+    "free_share_peace": 0.15,
+    "free_share_war": 0.24291038235920043,
+    "general_reserve_base": 9,
+    "general_reserve_opp_divisor": 12,
+    "late_castle_army_margin": 30,
+    "late_finish_base": 70,
+    "late_finish_enemy_bonus": 25,
+    "late_finish_enemy_mult": 1.8710607998318267,
+    "late_finish_turn": 850,
+    "logistics_route_policy": "shortest",
+    "muster_anchor_policy": "forward",
+    "muster_army_margin": 70,
+    "muster_enemy_bonus": 10,
+    "muster_enemy_mult": 3.1459274923958778,
+    "muster_launch_base": 120,
+    "muster_opp_divisor": 3,
+    "muster_ratio_den": 11,
+    "muster_ratio_num": 10,
+    "muster_start_turn": 275,
+    "muster_threshold": 9,
+    "muster_topology": "dual",
+    "picker_enabled": false,
+    "picker_growth25": 0.09256277546953663,
+    "picker_growth50": 0.06,
+    "picker_growth_land_pct": 60,
+    "picker_mature_land_pct": 25,
+    "picker_mature_turn": 210,
+    "picker_min_efficiency": 2.0,
+    "picker_neutrals_max": 3,
+    "picker_not_behind_den": 3,
+    "picker_not_behind_num": 7,
+    "picker_start_policy": "efficiency",
+    "picker_top3_share_max": 0.6437243954406583,
+    "precontact_expansion_until": 250,
+    "production_recover_gap": 10,
+    "production_recover_slope": 0.1037143291684475,
+    "production_severe_gap": 18,
+    "production_soft_gap": 12,
+    "search_share_seen": 0.090856975594479,
+    "search_share_unseen": 0.24167935194546045,
+    "war_share_contact": 0.32828352888206397,
+    "war_share_peace": 0.1116910573090159
+  }
+}
