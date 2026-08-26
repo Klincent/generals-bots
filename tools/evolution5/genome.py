@@ -21,12 +21,21 @@ def effective_params(genome:dict)->dict:
     c=canonical_genome(genome); return compile_params(c['graph'],c['params'])
 
 
+def runtime_graph_spec(graph:dict)->str:
+    g=canonical_graph(graph); rows=[]
+    for name in sorted(g['nodes']):
+        q=g['nodes'][name]; mods=','.join(q['priority']); trans=','.join(f"{t['condition']}>{t['target']}" for t in q['transitions']); rows.append(f'{name}~{mods}~{trans}')
+    return '|'.join(rows)
+
+
 def env_for(genome:dict)->dict[str,str]:
     c=canonical_genome(genome); out=e4_env_for(compile_params(c['graph'],c['params']))
     out.update({
         'EVO5_GRAPH_HASH':graph_hash(c['graph']),
         'EVO5_GRAPH_MODE':c['graph']['mode'],
         'EVO5_GRAPH_NODES':str(len(c['graph']['nodes'])),
+        'EVO5_GRAPH_ENTRY':c['graph']['entry'],
+        'EVO5_GRAPH_RUNTIME':runtime_graph_spec(c['graph']),
         'EVO5_ACTIVE_MODULES':','.join(sorted({m for q in c['graph']['nodes'].values() for m in q['modules']})),
     })
     return out

@@ -1,11 +1,11 @@
 from __future__ import annotations
-import json, random, tempfile, zipfile
+import json, random, tempfile
 from pathlib import Path
 import pytest
 from tools.evolution4.genome import founder_x0, founder_y0
-from tools.evolution5.graph import baseline_graph, canonical_graph, validate_graph, graph_hash, graph_distance, specialize_graph, descriptor_key, ISLANDS
-from tools.evolution5.genome import canonical_genome, genome_id, effective_params, save_genome, load_genome
-from tools.evolution5.mutate import micro_mutation, module_mutation, graph_rewrite, strategy_bundle, crossover_genomes, random_immigrant
+from tools.evolution5.graph import baseline_graph, validate_graph, graph_hash, graph_distance, specialize_graph, descriptor_key, ISLANDS
+from tools.evolution5.genome import canonical_genome, genome_id, effective_params, save_genome, load_genome, runtime_graph_spec
+from tools.evolution5.mutate import module_mutation, graph_rewrite, strategy_bundle, crossover_genomes, random_immigrant
 from tools.evolution5.archive import update_archive
 from tools.evolution5.league import consider
 
@@ -13,7 +13,7 @@ from tools.evolution5.league import consider
 def base(): return {'graph':baseline_graph(),'params':founder_x0()}
 
 def test_serialization_and_baseline_passthrough():
-    g=canonical_genome(base()); assert genome_id(g)==genome_id(json.loads(json.dumps(g))); assert effective_params(g)==founder_x0(); assert graph_hash(g['graph'])==graph_hash(json.loads(json.dumps(g['graph'])))
+    g=canonical_genome(base()); assert genome_id(g)==genome_id(json.loads(json.dumps(g))); assert effective_params(g)==founder_x0(); assert graph_hash(g['graph'])==graph_hash(json.loads(json.dumps(g['graph']))); assert 'OPENING~' in runtime_graph_spec(g['graph'])
 
 def test_graph_validation_rejects_invalid_target():
     g=baseline_graph(); g['nodes']['OPENING']['transitions'][0]['target']='NOPE'
@@ -41,10 +41,7 @@ def test_archive_preserves_distinct_niches():
     state={}; changed=update_archive(state,rows,lambda gid:genomes[gid],0); assert changed>=2; assert len(state['map_elites'])>=2
 
 def test_league_preserves_protected_and_admits_coverage():
-    x=base(); xid=genome_id(x); r={'graph':specialize_graph('Rush'),'params':founder_x0()}; rid=genome_id(r); genomes={xid:x,rid:r}
-    state={'league':[{'genome_id':xid,'protected':True,'label':'X0','fresh_score':.5,'minimum':.3,'archetypes':{'a':.4}}]}
-    cand={'genome_id':rid,'fresh':{'fitness':{'aggregate':.62,'minimum':.35},'aggregate':{'raw_win_rate':.58,'errors':0,'illegal_actions':0},'archetypes':{'a':.7}},'head_to_head':{xid:{'score':.65}}}
-    changes=consider(state,[cand],lambda gid:genomes[gid],1); assert changes; assert any(x['genome_id']==xid for x in state['league']); assert any(x['genome_id']==rid for x in state['league'])
+    x=base(); xid=genome_id(x); r={'graph':specialize_graph('Rush'),'params':founder_x0()}; rid=genome_id(r); genomes={xid:x,rid:r}; state={'league':[{'genome_id':xid,'protected':True,'label':'X0','fresh_score':.5,'minimum':.3,'archetypes':{'a':.4}}]}; cand={'genome_id':rid,'fresh':{'fitness':{'aggregate':.62,'minimum':.35},'aggregate':{'raw_win_rate':.58,'errors':0,'illegal_actions':0},'archetypes':{'a':.7}},'head_to_head':{xid:{'score':.65}}}; changes=consider(state,[cand],lambda gid:genomes[gid],1); assert changes; assert any(x['genome_id']==xid for x in state['league']); assert any(x['genome_id']==rid for x in state['league'])
 
 def test_genome_file_roundtrip():
     with tempfile.TemporaryDirectory() as td:
