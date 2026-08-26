@@ -1,8 +1,9 @@
 {
-  "completion_time": null,
+  "completion_time": "2026-08-26T09:08:56.244210+00:00",
+  "error": "RuntimeError('paired benchmark failed after retry: rc=1 errors=2 illegal=0 stdout={\"D\": 0, \"L\": 0, \"W\": 0, \"decision_roundtrip_ms\": {\"max\": 0, \"p50\": 0, \"p95\": 0, \"p99\": 0}, \"errors\": 2, \"games\": 2, \"illegal_actions\": 0, \"maps\": 1, \"paired_ci95\": [0, 0], \"paired_score\": 0, \"score\": 0.0, \"seat_score\": {\"0\": 0.0, \"1\": 0.0}, \"seed_end\": 510000, \"seed_start\": 510000, \"turns_mean\": 0}\\n stderr= games={\"candidate_seat\": 0, \"error\": \"process_or_protocol\", \"returncode\": 1, \"rng_seed\": 1431312741, \"seed\": 510000, \"stderr\": \"Traceback (most recent call last):\\\\n  File \\\\\"/home/runner/work/generals-bots/generals-bots/competition/evolution4_matchup_pinned.py\\\\\", line 29, in <module>\\\\n    import jax.numpy as jnp\\\\nModuleNotFoundError: No module named \\'jax\\'\\\\n\"}\\n{\"candidate_seat\": 1, \"error\": \"process_or_protocol\", \"returncode\": 1, \"rng_seed\": 1431312741, \"seed\": 510000, \"stderr\": \"Traceback (most recent call last):\\\\n  File \\\\\"/home/runner/work/generals-bots/generals-bots/competition/evolution4_matchup_pinned.py\\\\\", line 29, in <module>\\\\n    import jax.numpy as jnp\\\\nModuleNotFoundError: No module named \\'jax\\'\\\\n\"}\\n')",
   "expected_generation": 0,
-  "result": "in_progress",
-  "resulting_state_hash": null,
+  "result": "failed",
+  "resulting_state_hash": "9aaba990905b12dc08e500bc418b01cfb44355e66d64f1bf1781c36f9a97d3dc",
   "start_time": "2026-08-26T09:08:23.804613+00:00",
   "transaction_id": "e2729907-fe7f-444b-97cc-1a5a33077b0a",
   "workflow_run_id": "32951356239"
