@@ -15,6 +15,9 @@ concurrency:
   group: evolution4-turbo
   cancel-in-progress: false
 
+env:
+  EVOLUTION4_CUTOVER_FROZEN: '1'
+
 jobs:
   evolve:
     runs-on: ubuntu-24.04
@@ -51,7 +54,10 @@ jobs:
           dead={gid for gid,r in s.get('tested_genomes',{}).items() if r.get('status')=='dead'}
           assert not (dead & set(s.get('current_population',[]))), 'dead genome present before evaluation'
           PY
-          if git cat-file -e origin/evolution4/turbo-structural:evolution4/STOP 2>/dev/null; then
+          if [ "$EVOLUTION4_CUTOVER_FROZEN" = "1" ]; then
+            echo 'Evolution4 Cambrian cutover airlock armed; no new transaction will start.'
+            echo stopped=true >> "$GITHUB_OUTPUT"
+          elif git cat-file -e origin/evolution4/turbo-structural:evolution4/STOP 2>/dev/null; then
             echo stopped=true >> "$GITHUB_OUTPUT"
           else
             echo stopped=false >> "$GITHUB_OUTPUT"
@@ -102,13 +108,8 @@ jobs:
           (cd /tmp/e4-old-template/competition/agents/juraj_v35_cpp && ./build.sh)
           (cd /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp && ./build.sh)
           grep -q '\[e4_structural\]' /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/main.cpp
-          for gene in muster_topology muster_anchor_policy chunk_transfer_policy logistics_route_policy defense_policy fallback_policy picker_start_policy; do
-            grep -q "cfg_.$gene" /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/main.cpp
-          done
-          python -m tools.evolution4.equivalence_check \
-            --original /tmp/e4-old-template/competition/agents/juraj_v35_cpp/run.sh \
-            --template /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/run.sh \
-            --env-json '{}' --seeds 12
+          for gene in muster_topology muster_anchor_policy chunk_transfer_policy logistics_route_policy defense_policy fallback_policy picker_start_policy; do grep -q "cfg_.$gene" /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/main.cpp; done
+          python -m tools.evolution4.equivalence_check --original /tmp/e4-old-template/competition/agents/juraj_v35_cpp/run.sh --template /tmp/e4-turbo-template/competition/agents/juraj_v35_cpp/run.sh --env-json '{}' --seeds 12
           echo 'TURBO NESTED STRUCTURAL PREFLIGHT OK'
 
       - name: Execute exactly one nested Turbo transaction
@@ -133,18 +134,15 @@ jobs:
           git show origin/evolution4/turbo-structural:evolution4/state.json > /tmp/post-state.json
           python - <<'PY'
           import json,os
-          pre=json.load(open('/tmp/pre-state.json')); post=json.load(open('/tmp/post-state.json'))
-          rc=int(os.environ.get('TX_RC','99')); bg=int(pre['generation']); ag=int(post['generation'])
+          pre=json.load(open('/tmp/pre-state.json')); post=json.load(open('/tmp/post-state.json')); rc=int(os.environ.get('TX_RC','99')); bg=int(pre['generation']); ag=int(post['generation'])
           print('TURBO POST mode=',post.get('mode'),'phase=',post['phase'],'generation=',ag,'retry=',post.get('retry_count',0),'last_error=',post.get('last_error'),'tested=',post.get('tested_genome_count',0),'dead=',post.get('dead_genome_count',0),'arch_epoch=',post.get('architecture_epoch',0),'adversaries=',len(post.get('adversary_hof',[])))
           if rc==0 and pre['phase'] in ('exploration','exploitation'):
               if ag != bg+1: raise SystemExit(f'FALSE GREEN turbo generation {bg}->{ag}')
               if post.get('mode')!='turbo_nested_v2': raise SystemExit('Nested Turbo mode not committed')
               if int(post.get('genome_memory_version',0))<2 or int(post.get('selection_policy_version',0))<2: raise SystemExit('X0/memory policy version not committed')
-              h=post.get('generation_history',[])[-1]
-              share=float(h.get('stage1_x0_game_share',-1))
+              h=post.get('generation_history',[])[-1]; share=float(h.get('stage1_x0_game_share',-1))
               if abs(share-.30)>.05: raise SystemExit(f'Stage1 X0 share outside tolerance: {share}')
-              dead={gid for gid,r in post.get('tested_genomes',{}).items() if r.get('status')=='dead'}
-              overlap=dead & set(post.get('current_population',[]))
+              dead={gid for gid,r in post.get('tested_genomes',{}).items() if r.get('status')=='dead'}; overlap=dead & set(post.get('current_population',[]))
               if overlap: raise SystemExit('dead genome entered next population: '+','.join(sorted(overlap)))
               print('X0/MEMORY POST OK share=',share,'x0_median=',h.get('stage1_x0_median'),'duplicates=',h.get('duplicate_generation_rate'))
           PY
