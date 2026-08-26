@@ -1,0 +1,160 @@
+name: evolution5-cambrian
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - 'evolution5/kick.txt'
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: evolution5-cambrian
+  cancel-in-progress: false
+
+jobs:
+  evolve:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    env:
+      SDL_VIDEODRIVER: dummy
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - name: Checkout Evolution5 durable control
+        uses: actions/checkout@v4
+        with:
+          ref: evolution5/cambrian-league
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name ChatGPT
+          git config user.email actions@users.noreply.github.com
+
+      - name: Capture Cambrian pre-state and STOP
+        id: pre
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin evolution5/cambrian-league evolution4/turbo-structural
+          python - <<'PY'
+          import json
+          s=json.load(open('evolution5/state.json'))
+          print('E5 PRE mode=',s.get('mode'),'phase=',s.get('phase'),'generation=',s.get('generation'),'retry=',s.get('retry_count',0),'population=',len(s.get('current_population',[])))
+          assert int(s.get('generation',-2)) >= -1
+          PY
+          if git cat-file -e origin/evolution5/cambrian-league:evolution5/STOP 2>/dev/null; then
+            echo stopped=true >> "$GITHUB_OUTPUT"
+          else
+            echo stopped=false >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-python@v5
+        if: steps.pre.outputs.stopped != 'true'
+        with:
+          python-version: '3.12'
+
+      - name: Evolution5 deterministic unit tests
+        if: steps.pre.outputs.stopped != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install pytest
+          python -m py_compile tools/evolution4/*.py tools/evolution5/*.py
+          pytest -q tests/test_evolution5.py
+
+      - name: V3.5-derived C++ regression and clean build
+        if: steps.pre.outputs.stopped != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash competition/agents/juraj_v35_cpp/test.sh
+          git reset --hard origin/evolution5/cambrian-league
+          bash competition/agents/juraj_v35_cpp/build.sh
+          test -x competition/agents/juraj_v35_cpp/agent
+
+      - name: Execute exactly one Cambrian generation
+        id: tx
+        if: steps.pre.outputs.stopped != 'true'
+        shell: bash
+        run: |
+          set +e
+          python -m tools.evolution5.orchestrator 2>&1 | tee /tmp/evolution5-cambrian.log
+          rc=${PIPESTATUS[0]}
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Fetch and validate Cambrian post-state
+        if: always() && steps.pre.outputs.stopped != 'true' && steps.tx.outcome == 'success'
+        shell: bash
+        env:
+          TX_RC: ${{ steps.tx.outputs.rc }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin evolution5/cambrian-league
+          git show origin/evolution5/cambrian-league:evolution5/state.json > /tmp/e5-post-state.json
+          python - <<'PY'
+          import json,os
+          pre=json.load(open('evolution5/state.json'))
+          post=json.load(open('/tmp/e5-post-state.json'))
+          rc=int(os.environ.get('TX_RC','99'))
+          bg=int(pre.get('generation',-1)); ag=int(post.get('generation',-1))
+          print('E5 POST mode=',post.get('mode'),'phase=',post.get('phase'),'generation=',ag,'retry=',post.get('retry_count',0),'population=',len(post.get('current_population',[])),'league=',len(post.get('league',[])),'archive=',len(post.get('map_elites',{})))
+          if rc==0:
+              if ag != bg+1: raise SystemExit(f'FALSE GREEN Evolution5 generation {bg}->{ag}')
+              if post.get('mode')!='cambrian_league_v1': raise SystemExit('Cambrian mode not committed')
+              if len(post.get('current_population',[]))!=64: raise SystemExit('Cambrian population is not 64')
+              if len(set(post.get('current_population',[])))!=64: raise SystemExit('Cambrian population has duplicates')
+              if len(post.get('islands',{}))!=8: raise SystemExit('Cambrian island count is not 8')
+          else:
+              if ag != bg: raise SystemExit(f'failed transaction advanced generation {bg}->{ag}')
+          PY
+
+      - name: Upload Cambrian transaction evidence
+        if: always() && steps.pre.outputs.stopped != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: evolution5-cambrian-${{ github.run_number }}
+          path: |
+            /tmp/evolution5-cambrian.log
+            /tmp/e5-post-state.json
+            evolution5/heartbeat.json
+            evolution5/results/
+            evolution5/checkpoints/
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Dispatch next Cambrian generation or retry
+        if: always() && steps.pre.outputs.stopped != 'true' && steps.tx.outcome == 'success'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TX_RC: ${{ steps.tx.outputs.rc }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin evolution5/cambrian-league
+          if git cat-file -e origin/evolution5/cambrian-league:evolution5/STOP 2>/dev/null; then
+            echo 'Evolution5 STOP present; no redispatch.'
+            exit 0
+          fi
+          git show origin/evolution5/cambrian-league:evolution5/state.json > /tmp/e5-latest-state.json
+          phase=$(python -c "import json;print(json.load(open('/tmp/e5-latest-state.json')).get('phase',''))")
+          retry=$(python -c "import json;print(int(json.load(open('/tmp/e5-latest-state.json')).get('retry_count',0)))")
+          echo "Cambrian phase=$phase retry=$retry rc=$TX_RC"
+          if [ "$phase" = done ] || [ "$phase" = stopped ]; then exit 0; fi
+          if [ "$TX_RC" != 0 ]; then
+            if [ "$retry" -lt 3 ]; then
+              echo 'Retrying failed infrastructure transaction without advancing generation.'
+              gh workflow run evolution5-cambrian.yml --repo "$GITHUB_REPOSITORY" --ref master
+            fi
+            exit 0
+          fi
+          gh workflow run evolution5-cambrian.yml --repo "$GITHUB_REPOSITORY" --ref master
+
+      - name: Fail visibly on Cambrian transaction error
+        if: steps.pre.outputs.stopped != 'true' && steps.tx.outcome == 'success' && steps.tx.outputs.rc != '0'
+        run: exit 1
