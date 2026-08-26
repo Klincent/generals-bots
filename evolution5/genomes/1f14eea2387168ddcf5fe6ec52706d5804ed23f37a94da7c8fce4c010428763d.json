@@ -1,0 +1,190 @@
+{
+  "genome": {
+    "graph": {
+      "entry": "OPENING",
+      "mode": "evolved",
+      "nodes": {
+        "BEHIND": {
+          "instances": {
+            "ATTACK": 2,
+            "FINISH": 2,
+            "HUNT_GENERAL": 2,
+            "RECOVER": 2
+          },
+          "modules": [
+            "HUNT_GENERAL",
+            "FINISH",
+            "ATTACK",
+            "RECOVER"
+          ],
+          "priority": [
+            "HUNT_GENERAL",
+            "FINISH",
+            "ATTACK",
+            "RECOVER"
+          ],
+          "transitions": [
+            {
+              "condition": "ahead",
+              "target": "CONTACT"
+            },
+            {
+              "condition": "late",
+              "target": "LATE"
+            }
+          ]
+        },
+        "CONTACT": {
+          "instances": {
+            "ATTACK": 3,
+            "INTERCEPT": 1,
+            "PICK": 1,
+            "RECOVER": 2
+          },
+          "modules": [
+            "ATTACK",
+            "INTERCEPT",
+            "RECOVER",
+            "PICK"
+          ],
+          "priority": [
+            "INTERCEPT",
+            "RECOVER",
+            "ATTACK",
+            "PICK"
+          ],
+          "transitions": [
+            {
+              "condition": "ahead",
+              "target": "BEHIND"
+            }
+          ]
+        },
+        "LATE": {
+          "instances": {
+            "EXPAND": 1,
+            "FINISH": 2,
+            "HUNT_GENERAL": 1,
+            "INTERCEPT": 2,
+            "RECOVER": 1,
+            "SCOUT": 1
+          },
+          "modules": [
+            "EXPAND",
+            "HUNT_GENERAL",
+            "RECOVER",
+            "SCOUT",
+            "FINISH",
+            "INTERCEPT"
+          ],
+          "priority": [
+            "SCOUT",
+            "HUNT_GENERAL",
+            "EXPAND",
+            "RECOVER",
+            "INTERCEPT",
+            "FINISH"
+          ],
+          "transitions": []
+        },
+        "OPENING": {
+          "instances": {
+            "BUILD_CASTLE": 1,
+            "PICK": 1,
+            "SCOUT": 2
+          },
+          "modules": [
+            "PICK",
+            "BUILD_CASTLE",
+            "SCOUT"
+          ],
+          "priority": [
+            "BUILD_CASTLE",
+            "SCOUT",
+            "PICK"
+          ],
+          "transitions": [
+            {
+              "condition": "always",
+              "target": "BEHIND"
+            },
+            {
+              "condition": "always",
+              "target": "CONTACT"
+            },
+            {
+              "condition": "always",
+              "target": "LATE"
+            }
+          ]
+        }
+      },
+      "version": 1
+    },
+    "params": {
+      "adjacent_reserve_base": 2,
+      "castle1_target_turn": 130,
+      "castle2_target_turn": 250,
+      "chunk_transfer_policy": "full",
+      "defense_policy": "block_first",
+      "doomguard_enabled": true,
+      "edge_picker_threshold": 4,
+      "expansion_share_healthy": 0.21739623637363986,
+      "expansion_share_precontact": 0.40784127082232363,
+      "expansion_share_severe": 0.6117486688021849,
+      "expansion_share_soft": 0.5249190622020089,
+      "expansion_wait_limit": 9,
+      "fallback_policy": "balanced",
+      "free_share_peace": 0.15,
+      "free_share_war": 0.2513419252106506,
+      "general_reserve_base": 5,
+      "general_reserve_opp_divisor": 11,
+      "late_castle_army_margin": 40,
+      "late_finish_base": 70,
+      "late_finish_enemy_bonus": 25,
+      "late_finish_enemy_mult": 1.8710607998318267,
+      "late_finish_turn": 800,
+      "logistics_route_policy": "shortest",
+      "muster_anchor_policy": "largest",
+      "muster_army_margin": 100,
+      "muster_enemy_bonus": 20,
+      "muster_enemy_mult": 2.974375944829749,
+      "muster_launch_base": 145,
+      "muster_opp_divisor": 1,
+      "muster_ratio_den": 12,
+      "muster_ratio_num": 8,
+      "muster_start_turn": 199,
+      "muster_threshold": 6,
+      "muster_topology": "single",
+      "picker_enabled": true,
+      "picker_growth25": 0.08246177619085701,
+      "picker_growth50": 0.08648022449203041,
+      "picker_growth_land_pct": 37,
+      "picker_mature_land_pct": 25,
+      "picker_mature_turn": 170,
+      "picker_min_efficiency": 2.0,
+      "picker_neutrals_max": 3,
+      "picker_not_behind_den": 3,
+      "picker_not_behind_num": 7,
+      "picker_start_policy": "margin",
+      "picker_top3_share_max": 0.603301374290287,
+      "precontact_expansion_until": 250,
+      "production_recover_gap": 10,
+      "production_recover_slope": 0.1037143291684475,
+      "production_severe_gap": 18,
+      "production_soft_gap": 9,
+      "search_share_seen": 0.07622756343245453,
+      "search_share_unseen": 0.24167935194546045,
+      "war_share_contact": 0.32828352888206397,
+      "war_share_peace": 0.1116910573090159
+    }
+  },
+  "genome_id": "1f14eea2387168ddcf5fe6ec52706d5804ed23f37a94da7c8fce4c010428763d",
+  "meta": {
+    "bootstrap": true,
+    "e4_source_generation": 37,
+    "index": 6,
+    "island": "Wildcard",
+    "kind": "double-graph-rewrite"
+  }
+}
