@@ -40,9 +40,10 @@ jobs:
         run: |
           set -euo pipefail
           git fetch --no-tags origin evolution5/cambrian-league evolution4/turbo-structural
+          cp evolution5/state.json /tmp/e5-pre-state.json
           python - <<'PY'
           import json
-          s=json.load(open('evolution5/state.json'))
+          s=json.load(open('/tmp/e5-pre-state.json'))
           print('E5 PRE mode=',s.get('mode'),'phase=',s.get('phase'),'generation=',s.get('generation'),'retry=',s.get('retry_count',0),'population=',len(s.get('current_population',[])))
           assert int(s.get('generation',-2)) >= -1
           PY
@@ -99,10 +100,9 @@ jobs:
           git show origin/evolution5/cambrian-league:evolution5/state.json > /tmp/e5-post-state.json
           python - <<'PY'
           import json,os
-          pre=json.load(open('evolution5/state.json'))
+          pre=json.load(open('/tmp/e5-pre-state.json'))
           post=json.load(open('/tmp/e5-post-state.json'))
-          rc=int(os.environ.get('TX_RC','99'))
-          bg=int(pre.get('generation',-1)); ag=int(post.get('generation',-1))
+          rc=int(os.environ.get('TX_RC','99')); bg=int(pre.get('generation',-1)); ag=int(post.get('generation',-1))
           print('E5 POST mode=',post.get('mode'),'phase=',post.get('phase'),'generation=',ag,'retry=',post.get('retry_count',0),'population=',len(post.get('current_population',[])),'league=',len(post.get('league',[])),'archive=',len(post.get('map_elites',{})))
           if rc==0:
               if ag != bg+1: raise SystemExit(f'FALSE GREEN Evolution5 generation {bg}->{ag}')
@@ -121,6 +121,7 @@ jobs:
           name: evolution5-cambrian-${{ github.run_number }}
           path: |
             /tmp/evolution5-cambrian.log
+            /tmp/e5-pre-state.json
             /tmp/e5-post-state.json
             evolution5/heartbeat.json
             evolution5/results/
@@ -137,20 +138,14 @@ jobs:
         run: |
           set -euo pipefail
           git fetch --no-tags origin evolution5/cambrian-league
-          if git cat-file -e origin/evolution5/cambrian-league:evolution5/STOP 2>/dev/null; then
-            echo 'Evolution5 STOP present; no redispatch.'
-            exit 0
-          fi
+          if git cat-file -e origin/evolution5/cambrian-league:evolution5/STOP 2>/dev/null; then echo 'Evolution5 STOP present; no redispatch.'; exit 0; fi
           git show origin/evolution5/cambrian-league:evolution5/state.json > /tmp/e5-latest-state.json
           phase=$(python -c "import json;print(json.load(open('/tmp/e5-latest-state.json')).get('phase',''))")
           retry=$(python -c "import json;print(int(json.load(open('/tmp/e5-latest-state.json')).get('retry_count',0)))")
           echo "Cambrian phase=$phase retry=$retry rc=$TX_RC"
           if [ "$phase" = done ] || [ "$phase" = stopped ]; then exit 0; fi
           if [ "$TX_RC" != 0 ]; then
-            if [ "$retry" -lt 3 ]; then
-              echo 'Retrying failed infrastructure transaction without advancing generation.'
-              gh workflow run evolution5-cambrian.yml --repo "$GITHUB_REPOSITORY" --ref master
-            fi
+            if [ "$retry" -lt 3 ]; then gh workflow run evolution5-cambrian.yml --repo "$GITHUB_REPOSITORY" --ref master; fi
             exit 0
           fi
           gh workflow run evolution5-cambrian.yml --repo "$GITHUB_REPOSITORY" --ref master
