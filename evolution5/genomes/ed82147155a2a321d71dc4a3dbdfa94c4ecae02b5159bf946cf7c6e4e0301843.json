@@ -1,0 +1,252 @@
+{
+  "genome": {
+    "graph": {
+      "entry": "OPENING",
+      "mode": "evolved",
+      "nodes": {
+        "BEHIND": {
+          "instances": {
+            "BUILD_CASTLE": 2,
+            "CONSOLIDATE": 2,
+            "DEFEND_GENERAL": 1,
+            "FINISH": 1,
+            "HUNT_GENERAL": 2,
+            "INTERCEPT": 1,
+            "MUSTER": 2,
+            "SCOUT": 1
+          },
+          "modules": [
+            "CONSOLIDATE",
+            "FINISH",
+            "BUILD_CASTLE",
+            "INTERCEPT",
+            "HUNT_GENERAL",
+            "SCOUT",
+            "DEFEND_GENERAL",
+            "MUSTER"
+          ],
+          "priority": [
+            "DEFEND_GENERAL",
+            "SCOUT",
+            "BUILD_CASTLE",
+            "HUNT_GENERAL",
+            "MUSTER",
+            "INTERCEPT",
+            "CONSOLIDATE",
+            "FINISH"
+          ],
+          "transitions": [
+            {
+              "condition": "threat",
+              "target": "OPENING"
+            },
+            {
+              "condition": "contact",
+              "target": "NOVEL_77272"
+            }
+          ]
+        },
+        "CONTACT": {
+          "instances": {
+            "ATTACK": 2,
+            "BUILD_CASTLE": 2,
+            "CONSOLIDATE": 2,
+            "DEFEND_GENERAL": 1,
+            "FINISH": 2
+          },
+          "modules": [
+            "BUILD_CASTLE",
+            "CONSOLIDATE",
+            "FINISH",
+            "DEFEND_GENERAL",
+            "ATTACK"
+          ],
+          "priority": [
+            "CONSOLIDATE",
+            "BUILD_CASTLE",
+            "ATTACK",
+            "FINISH",
+            "DEFEND_GENERAL"
+          ],
+          "transitions": [
+            {
+              "condition": "late",
+              "target": "BEHIND"
+            }
+          ]
+        },
+        "LATE": {
+          "instances": {
+            "ATTACK": 3,
+            "BUILD_CASTLE": 2,
+            "DEFEND_GENERAL": 2,
+            "HUNT_GENERAL": 1,
+            "INTERCEPT": 2,
+            "LOGISTICS": 2,
+            "RECOVER": 2,
+            "SCOUT": 1
+          },
+          "modules": [
+            "BUILD_CASTLE",
+            "INTERCEPT",
+            "LOGISTICS",
+            "SCOUT",
+            "ATTACK",
+            "RECOVER",
+            "HUNT_GENERAL",
+            "DEFEND_GENERAL"
+          ],
+          "priority": [
+            "ATTACK",
+            "LOGISTICS",
+            "DEFEND_GENERAL",
+            "SCOUT",
+            "RECOVER",
+            "HUNT_GENERAL",
+            "BUILD_CASTLE",
+            "INTERCEPT"
+          ],
+          "transitions": [
+            {
+              "condition": "contact",
+              "target": "OPENING"
+            }
+          ]
+        },
+        "NOVEL_77272": {
+          "instances": {
+            "ATTACK": 3,
+            "DEFEND_GENERAL": 1,
+            "EXPAND": 2,
+            "HUNT_GENERAL": 1,
+            "LOGISTICS": 2,
+            "MUSTER": 1
+          },
+          "modules": [
+            "EXPAND",
+            "MUSTER",
+            "ATTACK",
+            "HUNT_GENERAL",
+            "DEFEND_GENERAL",
+            "LOGISTICS"
+          ],
+          "priority": [
+            "LOGISTICS",
+            "ATTACK",
+            "MUSTER",
+            "EXPAND",
+            "HUNT_GENERAL",
+            "DEFEND_GENERAL"
+          ],
+          "transitions": [
+            {
+              "condition": "enemy_seen",
+              "target": "BEHIND"
+            }
+          ]
+        },
+        "OPENING": {
+          "instances": {
+            "FINISH": 1,
+            "MUSTER": 2,
+            "RECOVER": 2
+          },
+          "modules": [
+            "FINISH",
+            "MUSTER",
+            "RECOVER"
+          ],
+          "priority": [
+            "RECOVER",
+            "MUSTER",
+            "FINISH"
+          ],
+          "transitions": [
+            {
+              "condition": "late",
+              "target": "OPENING"
+            },
+            {
+              "condition": "ahead",
+              "target": "NOVEL_77272"
+            },
+            {
+              "condition": "always",
+              "target": "CONTACT"
+            },
+            {
+              "condition": "always",
+              "target": "LATE"
+            }
+          ]
+        }
+      },
+      "version": 1
+    },
+    "params": {
+      "adjacent_reserve_base": 4,
+      "castle1_target_turn": 150,
+      "castle2_target_turn": 220,
+      "chunk_transfer_policy": "full",
+      "defense_policy": "block_first",
+      "doomguard_enabled": true,
+      "edge_picker_threshold": 10,
+      "expansion_share_healthy": 0.2230117154021619,
+      "expansion_share_precontact": 0.4438132953557825,
+      "expansion_share_severe": 0.6112807959930999,
+      "expansion_share_soft": 0.5024087286888066,
+      "expansion_wait_limit": 5,
+      "fallback_policy": "aggressive",
+      "free_share_peace": 0.15,
+      "free_share_war": 0.24291038235920043,
+      "general_reserve_base": 9,
+      "general_reserve_opp_divisor": 12,
+      "late_castle_army_margin": 30,
+      "late_finish_base": 114,
+      "late_finish_enemy_bonus": 3,
+      "late_finish_enemy_mult": 1.8710607998318267,
+      "late_finish_turn": 812,
+      "logistics_route_policy": "interior",
+      "muster_anchor_policy": "forward",
+      "muster_army_margin": 26,
+      "muster_enemy_bonus": 4,
+      "muster_enemy_mult": 3.0,
+      "muster_launch_base": 90,
+      "muster_opp_divisor": 2,
+      "muster_ratio_den": 6,
+      "muster_ratio_num": 7,
+      "muster_start_turn": 300,
+      "muster_threshold": 8,
+      "muster_topology": "single",
+      "picker_enabled": true,
+      "picker_growth25": 0.08,
+      "picker_growth50": 0.05318610096478861,
+      "picker_growth_land_pct": 70,
+      "picker_mature_land_pct": 25,
+      "picker_mature_turn": 230,
+      "picker_min_efficiency": 2.0,
+      "picker_neutrals_max": 3,
+      "picker_not_behind_den": 3,
+      "picker_not_behind_num": 3,
+      "picker_start_policy": "mass",
+      "picker_top3_share_max": 0.8211707623265745,
+      "precontact_expansion_until": 250,
+      "production_recover_gap": 12,
+      "production_recover_slope": 0.11428504268404294,
+      "production_severe_gap": 22,
+      "production_soft_gap": 20,
+      "search_share_seen": 0.05364998929596382,
+      "search_share_unseen": 0.24167935194546045,
+      "war_share_contact": 0.22188462682942428,
+      "war_share_peace": 0.11947782225615676
+    }
+  },
+  "genome_id": "ed82147155a2a321d71dc4a3dbdfa94c4ecae02b5159bf946cf7c6e4e0301843",
+  "meta": {
+    "generation": 3,
+    "island": "Muster-Logistics",
+    "kind": "immigrant",
+    "parent": null,
+    "temperature": 1.15
+  }
+}

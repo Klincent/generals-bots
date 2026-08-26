@@ -1,0 +1,154 @@
+{
+  "genome": {
+    "graph": {
+      "entry": "OPENING",
+      "mode": "evolved",
+      "nodes": {
+        "CONTACT": {
+          "instances": {
+            "BUILD_CASTLE": 2,
+            "EXPAND": 1,
+            "HUNT_GENERAL": 1
+          },
+          "modules": [
+            "BUILD_CASTLE",
+            "EXPAND",
+            "HUNT_GENERAL"
+          ],
+          "priority": [
+            "EXPAND",
+            "BUILD_CASTLE",
+            "HUNT_GENERAL"
+          ],
+          "transitions": [
+            {
+              "condition": "behind",
+              "target": "LATE"
+            },
+            {
+              "condition": "threat",
+              "target": "CONTACT"
+            }
+          ]
+        },
+        "LATE": {
+          "instances": {
+            "DEFEND_GENERAL": 1,
+            "EXPAND": 2,
+            "SCOUT": 1
+          },
+          "modules": [
+            "DEFEND_GENERAL",
+            "SCOUT",
+            "EXPAND"
+          ],
+          "priority": [
+            "EXPAND",
+            "SCOUT",
+            "DEFEND_GENERAL"
+          ],
+          "transitions": []
+        },
+        "OPENING": {
+          "instances": {
+            "DEFEND_GENERAL": 1,
+            "EXPAND": 1,
+            "LOGISTICS": 1,
+            "PICK": 1,
+            "SCOUT": 1
+          },
+          "modules": [
+            "EXPAND",
+            "LOGISTICS",
+            "PICK",
+            "SCOUT",
+            "DEFEND_GENERAL"
+          ],
+          "priority": [
+            "EXPAND",
+            "LOGISTICS",
+            "PICK",
+            "SCOUT",
+            "DEFEND_GENERAL"
+          ],
+          "transitions": [
+            {
+              "condition": "contact",
+              "target": "CONTACT"
+            },
+            {
+              "condition": "late",
+              "target": "LATE"
+            }
+          ]
+        }
+      },
+      "version": 1
+    },
+    "params": {
+      "adjacent_reserve_base": 2,
+      "castle1_target_turn": 135,
+      "castle2_target_turn": 272,
+      "chunk_transfer_policy": "split",
+      "defense_policy": "block_first",
+      "doomguard_enabled": false,
+      "edge_picker_threshold": 10,
+      "expansion_share_healthy": 0.15,
+      "expansion_share_precontact": 0.2803032814504206,
+      "expansion_share_severe": 0.5997419074284588,
+      "expansion_share_soft": 0.5024087286888066,
+      "expansion_wait_limit": 5,
+      "fallback_policy": "aggressive",
+      "free_share_peace": 0.15,
+      "free_share_war": 0.18960531433101122,
+      "general_reserve_base": 2,
+      "general_reserve_opp_divisor": 14,
+      "late_castle_army_margin": 46,
+      "late_finish_base": 84,
+      "late_finish_enemy_bonus": 26,
+      "late_finish_enemy_mult": 1.2,
+      "late_finish_turn": 726,
+      "logistics_route_policy": "shortest",
+      "muster_anchor_policy": "forward",
+      "muster_army_margin": 102,
+      "muster_enemy_bonus": 12,
+      "muster_enemy_mult": 2.852350843163293,
+      "muster_launch_base": 46,
+      "muster_opp_divisor": 4,
+      "muster_ratio_den": 6,
+      "muster_ratio_num": 3,
+      "muster_start_turn": 300,
+      "muster_threshold": 4,
+      "muster_topology": "dual",
+      "picker_enabled": true,
+      "picker_growth25": 0.08,
+      "picker_growth50": 0.06,
+      "picker_growth_land_pct": 68,
+      "picker_mature_land_pct": 42,
+      "picker_mature_turn": 170,
+      "picker_min_efficiency": 2.547888438971357,
+      "picker_neutrals_max": 3,
+      "picker_not_behind_den": 3,
+      "picker_not_behind_num": 7,
+      "picker_start_policy": "margin",
+      "picker_top3_share_max": 0.5443518148327097,
+      "precontact_expansion_until": 326,
+      "production_recover_gap": 18,
+      "production_recover_slope": 0.1037143291684475,
+      "production_severe_gap": 22,
+      "production_soft_gap": 12,
+      "search_share_seen": 0.07799094322891222,
+      "search_share_unseen": 0.1999634560720648,
+      "war_share_contact": 0.5964447697106454,
+      "war_share_peace": 0.08087732592792923
+    }
+  },
+  "genome_id": "88076e9ea6c1e98143c992ec8fa32947c13fb783da9bf9e9326000af475282f5",
+  "meta": {
+    "generation": 3,
+    "island": "Muster-Logistics",
+    "kind": "immigrant",
+    "parent": null,
+    "temperature": 1.15
+  }
+}

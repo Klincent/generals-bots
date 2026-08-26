@@ -1,0 +1,371 @@
+{
+  "archive_occupancy": 34,
+  "fresh": {
+    "aggregate": {
+      "D": 5,
+      "L": 9,
+      "W": 34,
+      "errors": 0,
+      "games": 48,
+      "illegal_actions": 0,
+      "raw_win_rate": 0.7083333333333334,
+      "score": 0.7604166666666666
+    },
+    "archetypes": {
+      "aggressive-expansion": 1.0,
+      "attack-pass": 0.875,
+      "defense-turtle": 0.5625,
+      "doomer-rusher": 0.8125,
+      "logistics-recenter": 0.6875,
+      "search-hunter": 0.625
+    },
+    "fitness": {
+      "aggregate": 0.7604166666666666,
+      "color_imbalance": 0.3125,
+      "minimum": 0.5625,
+      "raw_win_rate": 0.7083333333333334
+    },
+    "summaries": {
+      "aggressive-expansion": {
+        "D": 0,
+        "L": 0,
+        "W": 8,
+        "decision_roundtrip_ms": {
+          "max": 17.30029300051683,
+          "p50": 1.0312060003343504,
+          "p95": 1.173410000774311,
+          "p99": 1.173410000774311
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "maps": 4,
+        "paired_ci95": [
+          1.0,
+          1.0
+        ],
+        "paired_score": 1.0,
+        "score": 1.0,
+        "seat_score": {
+          "0": 1.0,
+          "1": 1.0
+        },
+        "seed_end": 710495,
+        "seed_start": 710492,
+        "turns_mean": 679.875
+      },
+      "attack-pass": {
+        "D": 0,
+        "L": 1,
+        "W": 7,
+        "decision_roundtrip_ms": {
+          "max": 15.902795999863883,
+          "p50": 1.0327079999115085,
+          "p95": 1.1732090006262297,
+          "p99": 1.1732090006262297
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "maps": 4,
+        "paired_ci95": [
+          0.625,
+          1.0
+        ],
+        "paired_score": 0.875,
+        "score": 0.875,
+        "seat_score": {
+          "0": 0.75,
+          "1": 1.0
+        },
+        "seed_end": 710618,
+        "seed_start": 710615,
+        "turns_mean": 696.75
+      },
+      "defense-turtle": {
+        "D": 1,
+        "L": 3,
+        "W": 4,
+        "decision_roundtrip_ms": {
+          "max": 17.195917998833465,
+          "p50": 1.065538999682758,
+          "p95": 1.237959000718547,
+          "p99": 1.237959000718547
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "maps": 4,
+        "paired_ci95": [
+          0.5,
+          0.6875
+        ],
+        "paired_score": 0.5625,
+        "score": 0.5625,
+        "seat_score": {
+          "0": 0.5,
+          "1": 0.625
+        },
+        "seed_end": 710536,
+        "seed_start": 710533,
+        "turns_mean": 941.125
+      },
+      "doomer-rusher": {
+        "D": 1,
+        "L": 1,
+        "W": 6,
+        "decision_roundtrip_ms": {
+          "max": 16.032448000260047,
+          "p50": 1.0713789997680578,
+          "p95": 1.1207819989067502,
+          "p99": 1.1207819989067502
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "maps": 4,
+        "paired_ci95": [
+          0.625,
+          1.0
+        ],
+        "paired_score": 0.8125,
+        "score": 0.8125,
+        "seat_score": {
+          "0": 0.625,
+          "1": 1.0
+        },
+        "seed_end": 710700,
+        "seed_start": 710697,
+        "turns_mean": 765.625
+      },
+      "logistics-recenter": {
+        "D": 3,
+        "L": 1,
+        "W": 4,
+        "decision_roundtrip_ms": {
+          "max": 16.48071799900208,
+          "p50": 1.0794050012918888,
+          "p95": 1.1382039992895443,
+          "p99": 1.1382039992895443
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "maps": 4,
+        "paired_ci95": [
+          0.5,
+          0.875
+        ],
+        "paired_score": 0.6875,
+        "score": 0.6875,
+        "seat_score": {
+          "0": 0.5,
+          "1": 0.875
+        },
+        "seed_end": 710577,
+        "seed_start": 710574,
+        "turns_mean": 923.375
+      },
+      "search-hunter": {
+        "D": 0,
+        "L": 3,
+        "W": 5,
+        "decision_roundtrip_ms": {
+          "max": 15.460983999219025,
+          "p50": 1.0806270001921803,
+          "p95": 1.128666999647976,
+          "p99": 1.128666999647976
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "maps": 4,
+        "paired_ci95": [
+          0.5,
+          0.875
+        ],
+        "paired_score": 0.625,
+        "score": 0.625,
+        "seat_score": {
+          "0": 0.25,
+          "1": 1.0
+        },
+        "seed_end": 710659,
+        "seed_start": 710656,
+        "turns_mean": 737.5
+      }
+    }
+  },
+  "generation": 2,
+  "genome_id": "74419480d6fc727946037467956b604571e9578f9a84a154e36205923d4b3638",
+  "league": [
+    {
+      "archetypes": {},
+      "bootstrap": true,
+      "counter_score": 0.5,
+      "coverage_gain": 0.0,
+      "fresh_score": 0.0,
+      "fresh_win_rate": 0.0,
+      "generation": -1,
+      "genome_id": "c89b8a6eb29298bf20bf93c471da5b4be0e0b8d53811d155de48ad4cb7038835",
+      "label": "X0",
+      "minimum": 0.0,
+      "novelty": 0.0,
+      "protected": true
+    },
+    {
+      "archetypes": {},
+      "bootstrap": true,
+      "counter_score": 0.5,
+      "coverage_gain": 0.0,
+      "fresh_score": 0.0,
+      "fresh_win_rate": 0.0,
+      "generation": -1,
+      "genome_id": "9ca02686dd5fcf11809073316e924a27e697abc8cd93a48de0eb90915bfe51e2",
+      "label": "Y0",
+      "minimum": 0.0,
+      "novelty": 0.0,
+      "protected": true
+    },
+    {
+      "archetypes": {
+        "aggressive-expansion": 1.0,
+        "defense-turtle": 0.5,
+        "gatherer-economy": 0.75,
+        "logistics-recenter": 1.0,
+        "normal-expansion": 0.9375,
+        "recent-reference": 0.5625
+      },
+      "counter_score": 1.0,
+      "coverage_gain": 1.0,
+      "fresh_score": 0.7916666666666666,
+      "fresh_win_rate": 0.7291666666666666,
+      "generation": 1,
+      "genome_id": "b74ce7da556e3a17a3136226bd681f9ab7e9228ab9301f27e4d3f658c9650767",
+      "minimum": 0.5,
+      "novelty": 0.5452556818181818,
+      "protected": false
+    },
+    {
+      "archetypes": {
+        "aggressive-expansion": 0.6875,
+        "defense-turtle": 0.6875,
+        "gatherer-economy": 0.75,
+        "logistics-recenter": 0.75,
+        "normal-expansion": 1.0,
+        "recent-reference": 0.375
+      },
+      "counter_score": 1.0,
+      "coverage_gain": 0.1875,
+      "fresh_score": 0.7083333333333334,
+      "fresh_win_rate": 0.6666666666666666,
+      "generation": 1,
+      "genome_id": "23af715469612c28d79d050a98d7187d717054263ef1532c089160a016c8db41",
+      "minimum": 0.375,
+      "novelty": 0.018749999999999985,
+      "protected": false
+    },
+    {
+      "archetypes": {
+        "aggressive-expansion": 0.8125,
+        "attack-pass": 0.75,
+        "defense-turtle": 0.375,
+        "doomer-rusher": 0.75,
+        "logistics-recenter": 0.6875,
+        "search-hunter": 0.8125
+      },
+      "counter_score": 0.5,
+      "coverage_gain": 0.75,
+      "fresh_score": 0.6979166666666666,
+      "fresh_win_rate": 0.6666666666666666,
+      "generation": 2,
+      "genome_id": "33c085890056d6484b6710f4d2e0a4874c6452d7874362785e5745da826f65e6",
+      "minimum": 0.375,
+      "novelty": 0.42240740740740745,
+      "protected": false
+    },
+    {
+      "archetypes": {
+        "aggressive-expansion": 0.6875,
+        "defense-turtle": 0.75,
+        "gatherer-economy": 0.5625,
+        "logistics-recenter": 0.9375,
+        "normal-expansion": 0.875,
+        "recent-reference": 0.25
+      },
+      "counter_score": 1.0,
+      "coverage_gain": 0.0625,
+      "fresh_score": 0.6770833333333334,
+      "fresh_win_rate": 0.6458333333333334,
+      "generation": 1,
+      "genome_id": "e939c70c10f1148623f507c00684e18759239f7c1f77fcc887b0837af00799cb",
+      "minimum": 0.25,
+      "novelty": 0.18525862068965518,
+      "protected": false
+    },
+    {
+      "archetypes": {
+        "aggressive-expansion": 0.9375,
+        "attack-pass": 0.75,
+        "defense-turtle": 0.5625,
+        "doomer-rusher": 0.25,
+        "logistics-recenter": 0.875,
+        "search-hunter": 0.625
+      },
+      "counter_score": 1.0,
+      "coverage_gain": 0.0,
+      "fresh_score": 0.6666666666666666,
+      "fresh_win_rate": 0.5833333333333334,
+      "generation": 2,
+      "genome_id": "c01cb74517a8f270acfd35cd55c8694a36d9238f5e0bb88d5e661686865d3793",
+      "minimum": 0.25,
+      "novelty": 0.0,
+      "protected": false
+    },
+    {
+      "archetypes": {
+        "aggressive-expansion": 0.8125,
+        "attack-pass": 0.625,
+        "defense-turtle": 0.5,
+        "doomer-rusher": 0.5625,
+        "logistics-recenter": 0.75,
+        "search-hunter": 0.5625
+      },
+      "counter_score": 0.75,
+      "coverage_gain": 0.0,
+      "fresh_score": 0.6354166666666666,
+      "fresh_win_rate": 0.6041666666666666,
+      "generation": 2,
+      "genome_id": "d0c8bf54530a8d8a3a25f303d690928cceb34672e0694fb52fa878e0f89e34d9",
+      "minimum": 0.5,
+      "novelty": 0.4307400932400932,
+      "protected": false
+    }
+  ],
+  "league_changes": [
+    {
+      "action": "replace",
+      "genome_id": "33c085890056d6484b6710f4d2e0a4874c6452d7874362785e5745da826f65e6",
+      "reason": "better",
+      "victim": "b5576d1379729efddf91da9bc72e318c54c9d5d4e66eb96a9a46765aef94963c"
+    },
+    {
+      "action": "replace",
+      "genome_id": "c01cb74517a8f270acfd35cd55c8694a36d9238f5e0bb88d5e661686865d3793",
+      "reason": "better",
+      "victim": "74419480d6fc727946037467956b604571e9578f9a84a154e36205923d4b3638"
+    },
+    {
+      "action": "replace",
+      "genome_id": "d0c8bf54530a8d8a3a25f303d690928cceb34672e0694fb52fa878e0f89e34d9",
+      "reason": "better",
+      "victim": "d63adb92432cf6d29403cca3988028ec4362e01277b2a61f3cac645e73a25b6a"
+    }
+  ],
+  "state_hash": "7dadfd82cbb362db76fe5ecf78b8ab52303bd0a0543683d334edf33ca676a2f2",
+  "submission": {
+    "path": "/home/runner/work/generals-bots/generals-bots/evolution5/checkpoints/evolution5_g002_74419480d6fc_submission.zip",
+    "sha256": "fa6ab2b269c9e0d520fc135e95e7b9f0aeb44a82e821600fa37266a0929031b0",
+    "size": 77662
+  }
+}
