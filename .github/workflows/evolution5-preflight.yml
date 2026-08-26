@@ -67,21 +67,27 @@ jobs:
           git worktree add --detach /tmp/e5-baseline origin/evolution4/turbo-template
           bash /tmp/e5-baseline/competition/agents/juraj_v35_cpp/build.sh
           python -m tools.evolution4.equivalence_check --original /tmp/e5-baseline/competition/agents/juraj_v35_cpp/run.sh --template competition/agents/juraj_v35_cpp/run.sh --env-json '{}' --seeds 12
-      - name: Clean standalone submission freeze
+      - name: Clean evolved standalone submission freeze
         run: |
           set -euo pipefail
           python - <<'PY'
           from pathlib import Path
           from tools.evolution4.genome import founder_x0
-          from tools.evolution5.graph import baseline_graph
+          from tools.evolution5.graph import specialize_graph
           from tools.evolution5.freeze import freeze_submission
-          info=freeze_submission({'graph':baseline_graph(),'params':founder_x0()},Path('.'),Path('/tmp/e5-preflight-submission.zip'))
+          genome={'graph':specialize_graph('Rush'),'params':founder_x0()}
+          info=freeze_submission(genome,Path('.'),Path('/tmp/e5-preflight-submission.zip'))
           assert info['size']>1000
-          print('FREEZE OK',info)
+          print('EVOLVED FREEZE OK',info)
           PY
           python - <<'PY'
           import zipfile
           z=zipfile.ZipFile('/tmp/e5-preflight-submission.zip')
           assert sorted(z.namelist())==sorted(['main.cpp','core.hpp','build.sh','run.sh'])
-          print('ZIP CONTENTS OK',z.namelist())
+          run=z.read('run.sh').decode()
+          assert 'EVO5_GRAPH_MODE=evolved' in run
+          assert 'EVO5_GRAPH_RUNTIME=' in run
+          assert 'EVO5_GRAPH_ENTRY=' in run
+          assert 'EVO5_ACTIVE_MODULES=' in run
+          print('EVOLVED ZIP CONTENTS/GRAPH ENV OK',z.namelist())
           PY
