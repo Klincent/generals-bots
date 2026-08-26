@@ -1,10 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")"
-if ! grep -q 'muster_threshold_' main.cpp; then
-  python3 apply_picker_v9.py
+
+# Legacy v3.5 source needs the picker patches. The Evolution4 Turbo template is
+# already structurally transformed and must not receive those patches twice.
+if grep -q '\[e4_structural\]' main.cpp; then
+  echo 'structural runtime detected; skipping legacy picker re-apply'
+else
+  if ! grep -q 'muster_threshold_' main.cpp; then
+    python3 apply_picker_v9.py
+  fi
+  python3 apply_picker_v9_priority.py
 fi
-python3 apply_picker_v9_priority.py
 
 g++ -O2 -std=c++17 -Wall -Wextra -Wpedantic test_core.cpp -o test_core
 ./test_core
