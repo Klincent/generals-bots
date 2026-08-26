@@ -39,7 +39,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch --no-tags origin evolution5/cambrian-league evolution4/turbo-structural
+          git fetch --no-tags origin evolution5/cambrian-league evolution4/turbo-structural evolution4/turbo-template
           cp evolution5/state.json /tmp/e5-pre-state.json
           python - <<'PY'
           import json
@@ -47,11 +47,7 @@ jobs:
           print('E5 PRE mode=',s.get('mode'),'phase=',s.get('phase'),'generation=',s.get('generation'),'retry=',s.get('retry_count',0),'population=',len(s.get('current_population',[])))
           assert int(s.get('generation',-2)) >= -1
           PY
-          if git cat-file -e origin/evolution5/cambrian-league:evolution5/STOP 2>/dev/null; then
-            echo stopped=true >> "$GITHUB_OUTPUT"
-          else
-            echo stopped=false >> "$GITHUB_OUTPUT"
-          fi
+          if git cat-file -e origin/evolution5/cambrian-league:evolution5/STOP 2>/dev/null; then echo stopped=true >> "$GITHUB_OUTPUT"; else echo stopped=false >> "$GITHUB_OUTPUT"; fi
 
       - uses: actions/setup-python@v5
         if: steps.pre.outputs.stopped != 'true'
@@ -68,15 +64,27 @@ jobs:
           python -m py_compile tools/evolution4/*.py tools/evolution5/*.py
           pytest -q tests/test_evolution5.py
 
-      - name: V3.5-derived C++ regression and clean build
+      - name: V3.5 regression, activate graph runtime, and prove backward equivalence
         if: steps.pre.outputs.stopped != 'true'
         shell: bash
         run: |
           set -euo pipefail
           bash competition/agents/juraj_v35_cpp/test.sh
           git reset --hard origin/evolution5/cambrian-league
+          python -m tools.evolution5.apply_cpp
+          grep -q 'e5_.update' competition/agents/juraj_v35_cpp/main.cpp
+          grep -q 'evolution5_behavior.hpp' competition/agents/juraj_v35_cpp/main.cpp
           bash competition/agents/juraj_v35_cpp/build.sh
           test -x competition/agents/juraj_v35_cpp/agent
+          rm -rf /tmp/e5-baseline
+          git worktree prune
+          git worktree add --detach /tmp/e5-baseline origin/evolution4/turbo-template
+          bash /tmp/e5-baseline/competition/agents/juraj_v35_cpp/build.sh
+          python -m tools.evolution4.equivalence_check \
+            --original /tmp/e5-baseline/competition/agents/juraj_v35_cpp/run.sh \
+            --template competition/agents/juraj_v35_cpp/run.sh \
+            --env-json '{}' --seeds 12
+          echo 'EVOLUTION5 C++ GRAPH RUNTIME PREFLIGHT OK'
 
       - name: Execute exactly one Cambrian generation
         id: tx
@@ -100,8 +108,7 @@ jobs:
           git show origin/evolution5/cambrian-league:evolution5/state.json > /tmp/e5-post-state.json
           python - <<'PY'
           import json,os
-          pre=json.load(open('/tmp/e5-pre-state.json'))
-          post=json.load(open('/tmp/e5-post-state.json'))
+          pre=json.load(open('/tmp/e5-pre-state.json')); post=json.load(open('/tmp/e5-post-state.json'))
           rc=int(os.environ.get('TX_RC','99')); bg=int(pre.get('generation',-1)); ag=int(post.get('generation',-1))
           print('E5 POST mode=',post.get('mode'),'phase=',post.get('phase'),'generation=',ag,'retry=',post.get('retry_count',0),'population=',len(post.get('current_population',[])),'league=',len(post.get('league',[])),'archive=',len(post.get('map_elites',{})))
           if rc==0:
