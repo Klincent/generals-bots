@@ -54,13 +54,21 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Evolution5 deterministic unit tests
+      - name: Install evaluator dependencies and run Evolution5 deterministic unit tests
         if: steps.pre.outputs.stopped != 'true'
         shell: bash
         run: |
           set -euo pipefail
           python -m pip install --upgrade pip
-          python -m pip install pytest
+          python -m pip install pytest numpy jax jaxlib
+          python -m pip install -e . --no-deps
+          python - <<'PY'
+          import numpy
+          import jax
+          import jax.numpy as jnp
+          print('E5 evaluator deps OK numpy=',numpy.__version__,'jax=',jax.__version__,'jax_device_count=',jax.device_count())
+          assert jnp.asarray([1,2,3]).sum().item()==6
+          PY
           python -m py_compile tools/evolution4/*.py tools/evolution5/*.py
           pytest -q tests/test_evolution5.py
 
