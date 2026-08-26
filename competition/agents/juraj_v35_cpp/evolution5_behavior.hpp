@@ -24,12 +24,17 @@ class Evo5Behavior {
  public:
  void load(){
   const char*mode=std::getenv("EVO5_GRAPH_MODE");const char*spec=std::getenv("EVO5_GRAPH_RUNTIME");const char*entry=std::getenv("EVO5_GRAPH_ENTRY");
-  enabled_=mode&&std::string(mode)=="evolved"&&spec&&*spec;if(!enabled_)return;entry_=entry&&*entry?entry:"OPENING";state_=entry_;
+  enabled_=mode&&std::string(mode)=="evolved"&&spec&&*spec;
+  if(!enabled_)return;
+  entry_=entry&&*entry?entry:"OPENING";state_=entry_;
   for(const auto&raw:split(spec,'|')){auto f=split(raw,'~');if(f.size()<2||f[0].empty())continue;Evo5NodeRuntime n;for(const auto&m:split(f[1],','))if(!m.empty())n.modules.insert(m);if(f.size()>=3)for(const auto&t:split(f[2],',')){auto p=t.find('>');if(p!=std::string::npos)n.transitions.push_back({t.substr(0,p),t.substr(p+1)});}nodes_[f[0]]=std::move(n);}
   if(!nodes_.count(state_)&&!nodes_.empty())state_=nodes_.begin()->first;
  }
  void update(int turn,bool contact,bool enemy_seen,bool ahead,bool behind,bool threat){
-  if(!enabled_)return;auto it=nodes_.find(state_);if(it==nodes_.end())return;bool late=turn>=650;
+  if(!enabled_)return;
+  auto it=nodes_.find(state_);
+  if(it==nodes_.end())return;
+  bool late=turn>=650;
   for(const auto&t:it->second.transitions)if(condition(t.first,contact,enemy_seen,ahead,behind,late,threat)&&nodes_.count(t.second)){if(t.second!=state_){state_=t.second;++transitions_;}break;}
  }
  bool allow(const v35::Candidate&q){
@@ -45,7 +50,8 @@ class Evo5Behavior {
   else if(q.role==v35::PacketRole::GENERAL_DEFENSE||q.role==v35::PacketRole::REACTION)ok=any({"DEFEND_GENERAL","INTERCEPT"});
   else if(q.action_class==v35::ActionClass::OFFENSE||q.role==v35::PacketRole::ATTACK||q.role==v35::PacketRole::COUNTERATTACK)ok=any({"ATTACK","HUNT_GENERAL","FINISH","MUSTER"});
   else if(q.action_class==v35::ActionClass::LOGISTICS)ok=any({"LOGISTICS","CONSOLIDATE","RECOVER","PICK","MUSTER"});
-  if(!ok)++filtered_;return ok;
+  if(!ok){++filtered_;}
+  return ok;
  }
  void report()const{std::fprintf(stderr,"[e5_behavior] enabled=%d state=%s nodes=%zu transitions=%ld filtered=%ld\n",enabled_?1:0,state_.c_str(),nodes_.size(),transitions_,filtered_);}
 };
