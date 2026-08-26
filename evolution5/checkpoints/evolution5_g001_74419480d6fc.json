@@ -1,0 +1,366 @@
+{
+  "archive_occupancy": 27,
+  "fresh": {
+    "aggregate": {
+      "D": 3,
+      "L": 8,
+      "W": 37,
+      "errors": 0,
+      "games": 48,
+      "illegal_actions": 0,
+      "raw_win_rate": 0.7708333333333334,
+      "score": 0.8020833333333334
+    },
+    "archetypes": {
+      "aggressive-expansion": 1.0,
+      "defense-turtle": 0.5625,
+      "gatherer-economy": 0.9375,
+      "logistics-recenter": 0.9375,
+      "normal-expansion": 0.875,
+      "recent-reference": 0.5
+    },
+    "fitness": {
+      "aggregate": 0.8020833333333334,
+      "color_imbalance": 0.2708333333333333,
+      "minimum": 0.5,
+      "raw_win_rate": 0.7708333333333334
+    },
+    "summaries": {
+      "aggressive-expansion": {
+        "D": 0,
+        "L": 0,
+        "W": 8,
+        "decision_roundtrip_ms": {
+          "max": 15.877906999776314,
+          "p50": 0.9208600004058098,
+          "p95": 1.18970099993021,
+          "p99": 1.18970099993021
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "maps": 4,
+        "paired_ci95": [
+          1.0,
+          1.0
+        ],
+        "paired_score": 1.0,
+        "score": 1.0,
+        "seat_score": {
+          "0": 1.0,
+          "1": 1.0
+        },
+        "seed_end": 710372,
+        "seed_start": 710369,
+        "turns_mean": 494.5
+      },
+      "defense-turtle": {
+        "D": 1,
+        "L": 3,
+        "W": 4,
+        "decision_roundtrip_ms": {
+          "max": 17.278641998927924,
+          "p50": 0.9554839998600073,
+          "p95": 1.1737219992937753,
+          "p99": 1.1737219992937753
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "maps": 4,
+        "paired_ci95": [
+          0.3125,
+          0.875
+        ],
+        "paired_score": 0.5625,
+        "score": 0.5625,
+        "seat_score": {
+          "0": 0.25,
+          "1": 0.875
+        },
+        "seed_end": 710413,
+        "seed_start": 710410,
+        "turns_mean": 627.25
+      },
+      "gatherer-economy": {
+        "D": 1,
+        "L": 0,
+        "W": 7,
+        "decision_roundtrip_ms": {
+          "max": 17.345164999824192,
+          "p50": 0.9949180002877256,
+          "p95": 1.2157799992564833,
+          "p99": 1.2157799992564833
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "maps": 4,
+        "paired_ci95": [
+          0.8125,
+          1.0
+        ],
+        "paired_score": 0.9375,
+        "score": 0.9375,
+        "seat_score": {
+          "0": 1.0,
+          "1": 0.875
+        },
+        "seed_end": 710249,
+        "seed_start": 710246,
+        "turns_mean": 804.125
+      },
+      "logistics-recenter": {
+        "D": 1,
+        "L": 0,
+        "W": 7,
+        "decision_roundtrip_ms": {
+          "max": 16.28382600028999,
+          "p50": 1.07045899858349,
+          "p95": 1.1087800012319349,
+          "p99": 1.1087800012319349
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "maps": 4,
+        "paired_ci95": [
+          0.8125,
+          1.0
+        ],
+        "paired_score": 0.9375,
+        "score": 0.9375,
+        "seat_score": {
+          "0": 0.875,
+          "1": 1.0
+        },
+        "seed_end": 710454,
+        "seed_start": 710451,
+        "turns_mean": 623.625
+      },
+      "normal-expansion": {
+        "D": 0,
+        "L": 1,
+        "W": 7,
+        "decision_roundtrip_ms": {
+          "max": 14.935295999748632,
+          "p50": 0.9838870000749012,
+          "p95": 1.041944999997213,
+          "p99": 1.041944999997213
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "maps": 4,
+        "paired_ci95": [
+          0.625,
+          1.0
+        ],
+        "paired_score": 0.875,
+        "score": 0.875,
+        "seat_score": {
+          "0": 1.0,
+          "1": 0.75
+        },
+        "seed_end": 710331,
+        "seed_start": 710328,
+        "turns_mean": 684.75
+      },
+      "recent-reference": {
+        "D": 0,
+        "L": 4,
+        "W": 4,
+        "decision_roundtrip_ms": {
+          "max": 17.311852000602812,
+          "p50": 1.0061889997814433,
+          "p95": 1.168701999631594,
+          "p99": 1.168701999631594
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "maps": 4,
+        "paired_ci95": [
+          0.125,
+          0.875
+        ],
+        "paired_score": 0.5,
+        "score": 0.5,
+        "seat_score": {
+          "0": 0.75,
+          "1": 0.25
+        },
+        "seed_end": 710290,
+        "seed_start": 710287,
+        "turns_mean": 852
+      }
+    }
+  },
+  "generation": 1,
+  "genome_id": "74419480d6fc727946037467956b604571e9578f9a84a154e36205923d4b3638",
+  "league": [
+    {
+      "archetypes": {},
+      "bootstrap": true,
+      "counter_score": 0.5,
+      "coverage_gain": 0.0,
+      "fresh_score": 0.0,
+      "fresh_win_rate": 0.0,
+      "generation": -1,
+      "genome_id": "c89b8a6eb29298bf20bf93c471da5b4be0e0b8d53811d155de48ad4cb7038835",
+      "label": "X0",
+      "minimum": 0.0,
+      "novelty": 0.0,
+      "protected": true
+    },
+    {
+      "archetypes": {},
+      "bootstrap": true,
+      "counter_score": 0.5,
+      "coverage_gain": 0.0,
+      "fresh_score": 0.0,
+      "fresh_win_rate": 0.0,
+      "generation": -1,
+      "genome_id": "9ca02686dd5fcf11809073316e924a27e697abc8cd93a48de0eb90915bfe51e2",
+      "label": "Y0",
+      "minimum": 0.0,
+      "novelty": 0.0,
+      "protected": true
+    },
+    {
+      "archetypes": {
+        "aggressive-expansion": 1.0,
+        "defense-turtle": 0.5,
+        "gatherer-economy": 0.75,
+        "logistics-recenter": 1.0,
+        "normal-expansion": 0.9375,
+        "recent-reference": 0.5625
+      },
+      "counter_score": 1.0,
+      "coverage_gain": 1.0,
+      "fresh_score": 0.7916666666666666,
+      "fresh_win_rate": 0.7291666666666666,
+      "generation": 1,
+      "genome_id": "b74ce7da556e3a17a3136226bd681f9ab7e9228ab9301f27e4d3f658c9650767",
+      "minimum": 0.5,
+      "novelty": 0.5452556818181818,
+      "protected": false
+    },
+    {
+      "archetypes": {
+        "aggressive-expansion": 0.6875,
+        "defense-turtle": 0.6875,
+        "gatherer-economy": 0.75,
+        "logistics-recenter": 0.75,
+        "normal-expansion": 1.0,
+        "recent-reference": 0.375
+      },
+      "counter_score": 1.0,
+      "coverage_gain": 0.1875,
+      "fresh_score": 0.7083333333333334,
+      "fresh_win_rate": 0.6666666666666666,
+      "generation": 1,
+      "genome_id": "23af715469612c28d79d050a98d7187d717054263ef1532c089160a016c8db41",
+      "minimum": 0.375,
+      "novelty": 0.018749999999999985,
+      "protected": false
+    },
+    {
+      "archetypes": {
+        "aggressive-expansion": 0.6875,
+        "defense-turtle": 0.75,
+        "gatherer-economy": 0.5625,
+        "logistics-recenter": 0.9375,
+        "normal-expansion": 0.875,
+        "recent-reference": 0.25
+      },
+      "counter_score": 1.0,
+      "coverage_gain": 0.0625,
+      "fresh_score": 0.6770833333333334,
+      "fresh_win_rate": 0.6458333333333334,
+      "generation": 1,
+      "genome_id": "e939c70c10f1148623f507c00684e18759239f7c1f77fcc887b0837af00799cb",
+      "minimum": 0.25,
+      "novelty": 0.18525862068965518,
+      "protected": false
+    },
+    {
+      "archetypes": {
+        "doomer-rusher": 0.5625,
+        "gatherer-economy": 0.5,
+        "normal-expansion": 0.875,
+        "picker-muster": 0.375,
+        "recent-reference": 0.4375,
+        "search-hunter": 0.875
+      },
+      "counter_score": 1.0,
+      "coverage_gain": 0.875,
+      "fresh_score": 0.6041666666666666,
+      "fresh_win_rate": 0.5208333333333334,
+      "generation": 0,
+      "genome_id": "d63adb92432cf6d29403cca3988028ec4362e01277b2a61f3cac645e73a25b6a",
+      "minimum": 0.375,
+      "novelty": 0.03599999999999998,
+      "protected": false
+    },
+    {
+      "archetypes": {
+        "doomer-rusher": 0.5,
+        "gatherer-economy": 0.8125,
+        "normal-expansion": 0.875,
+        "picker-muster": 0.5,
+        "recent-reference": 0.625,
+        "search-hunter": 0.3125
+      },
+      "counter_score": 0.75,
+      "coverage_gain": 0.3125,
+      "fresh_score": 0.6041666666666666,
+      "fresh_win_rate": 0.5,
+      "generation": 0,
+      "genome_id": "74419480d6fc727946037467956b604571e9578f9a84a154e36205923d4b3638",
+      "minimum": 0.3125,
+      "novelty": 0.23099999999999998,
+      "protected": false
+    },
+    {
+      "archetypes": {},
+      "bootstrap": true,
+      "counter_score": 0.5,
+      "coverage_gain": 0.0,
+      "fresh_score": 0.0,
+      "fresh_win_rate": 0.0,
+      "generation": -1,
+      "genome_id": "b5576d1379729efddf91da9bc72e318c54c9d5d4e66eb96a9a46765aef94963c",
+      "label": "Muster-seed",
+      "minimum": 0.0,
+      "novelty": 0.0,
+      "protected": false
+    }
+  ],
+  "league_changes": [
+    {
+      "action": "replace",
+      "genome_id": "b74ce7da556e3a17a3136226bd681f9ab7e9228ab9301f27e4d3f658c9650767",
+      "reason": "better",
+      "victim": "49ab01f8d2c57aa741315b27ccacdebfa280dd21758d3a843f07e59b184ea992"
+    },
+    {
+      "action": "replace",
+      "genome_id": "23af715469612c28d79d050a98d7187d717054263ef1532c089160a016c8db41",
+      "reason": "better",
+      "victim": "7bb2b2e7157df54b11203b3ffcffb98d02ca727c4e6bb124ece56bebb23afd63"
+    },
+    {
+      "action": "replace",
+      "genome_id": "e939c70c10f1148623f507c00684e18759239f7c1f77fcc887b0837af00799cb",
+      "reason": "better",
+      "victim": "4c446acd05113b2fbe3268f0361d760b625cb96945a4366e1ca26852bb10d781"
+    }
+  ],
+  "state_hash": "d0f9b52687b9fe0d6a40f44dc1f95aae19fc7b058057e6a2cbee6b9413a8dd33",
+  "submission": {
+    "path": "/home/runner/work/generals-bots/generals-bots/evolution5/checkpoints/evolution5_g001_74419480d6fc_submission.zip",
+    "sha256": "fa6ab2b269c9e0d520fc135e95e7b9f0aeb44a82e821600fa37266a0929031b0",
+    "size": 77662
+  }
+}
