@@ -27,8 +27,8 @@ def micro_mutation(genome:dict,rng:random.Random,temperature:float=1.0)->dict:
     g=canonical_genome(genome); g['params']=_mutate_params(g['params'],rng,temperature); return canonical_genome(g)
 
 
-def module_mutation(genome:dict,rng:random.Random)->dict:
-    g=canonical_genome(genome); graph=copy.deepcopy(g['graph']); graph['mode']='evolved'; names=list(graph['nodes']); name=rng.choice(names); q=graph['nodes'][name]
+def _one_module_edit(graph:dict,rng:random.Random)->dict:
+    graph=copy.deepcopy(graph); graph['mode']='evolved'; names=list(graph['nodes']); name=rng.choice(names); q=graph['nodes'][name]
     action=rng.choice(('add','remove','reorder','instances','transition'))
     if action=='add':
         opts=[m for m in MODULES if m not in q['modules']]
@@ -36,14 +36,30 @@ def module_mutation(genome:dict,rng:random.Random)->dict:
             m=rng.choice(opts); q['modules'].append(m); q['priority'].insert(rng.randrange(len(q['priority'])+1),m); q['instances'][m]=rng.randint(1,2)
     elif action=='remove' and len(q['modules'])>2:
         m=rng.choice(q['modules']); q['modules'].remove(m); q['priority']=[x for x in q['priority'] if x!=m]; q['instances'].pop(m,None)
-    elif action=='reorder': rng.shuffle(q['priority'])
+    elif action=='reorder' and len(q['priority'])>1:
+        i,j=rng.sample(range(len(q['priority'])),2); q['priority'][i],q['priority'][j]=q['priority'][j],q['priority'][i]
     elif action=='instances':
-        m=rng.choice(q['modules']); q['instances'][m]=rng.randint(1,3)
+        m=rng.choice(q['modules']); old=int(q['instances'].get(m,1)); opts=[x for x in (1,2,3) if x!=old]; q['instances'][m]=rng.choice(opts)
     elif len(names)>1:
         if q['transitions']:
-            t=rng.choice(q['transitions']); t['condition']=rng.choice(CONDITIONS); t['target']=rng.choice(names)
+            t=rng.choice(q['transitions']); old=(t['condition'],t['target']); choices=[(c,target) for c in CONDITIONS for target in names if (c,target)!=old]
+            t['condition'],t['target']=rng.choice(choices)
         else: q['transitions'].append({'condition':rng.choice(CONDITIONS),'target':rng.choice(names)})
-    graph=repair_graph(graph); g['graph']=graph; return canonical_genome(g)
+    return repair_graph(graph)
+
+
+def module_mutation(genome:dict,rng:random.Random)->dict:
+    g=canonical_genome(genome); original=g['graph']
+    for _ in range(12):
+        changed=_one_module_edit(original,rng)
+        if changed!=original:
+            g['graph']=changed; return canonical_genome(g)
+    graph=copy.deepcopy(original); graph['mode']='evolved'; name=graph['entry']; q=graph['nodes'][name]; opts=[m for m in MODULES if m not in q['modules']]
+    if opts:
+        m=opts[0]; q['modules'].append(m); q['priority'].insert(0,m); q['instances'][m]=1
+    else:
+        m=q['modules'][0]; q['instances'][m]=2 if int(q['instances'].get(m,1))!=2 else 3
+    g['graph']=repair_graph(graph); return canonical_genome(g)
 
 
 def _random_node(rng:random.Random,names:list[str]):
@@ -59,7 +75,7 @@ def graph_rewrite(genome:dict,rng:random.Random,intensity:float=.30)->dict:
         q=nodes[name]; mods=rng.sample(list(MODULES),rng.randint(3,9)); q['modules']=mods; q['priority']=rng.sample(mods,len(mods)); q['instances']={m:rng.randint(1,3 if m in ('ATTACK','MUSTER') else 2) for m in mods}
         if len(names)>1: q['transitions']=[{'condition':rng.choice(CONDITIONS),'target':rng.choice(names)} for _ in range(rng.randint(0,2))]
     if rng.random()<.45 and len(nodes)<8:
-        new=f'NOVEL_{rng.randrange(100000)}'; nodes[new]=_random_node(rng,list(nodes)); src=rng.choice(list(nodes));
+        new=f'NOVEL_{rng.randrange(100000)}'; nodes[new]=_random_node(rng,list(nodes)); src=rng.choice(list(nodes))
         if src!=new: nodes[src]['transitions'].append({'condition':rng.choice(CONDITIONS),'target':new})
     if rng.random()<.30 and len(nodes)>3:
         victim=rng.choice([n for n in nodes if n!=graph['entry']]); nodes.pop(victim)
@@ -69,12 +85,22 @@ def graph_rewrite(genome:dict,rng:random.Random,intensity:float=.30)->dict:
     g['graph']=repair_graph(graph); g['params']=_mutate_params(g['params'],rng,1.5,rng.randint(4,9)); return canonical_genome(g)
 
 
+def _force_finish_phase(graph:dict):
+    if 'LATE' not in graph['nodes']: return
+    q=graph['nodes']['LATE']
+    if 'FINISH' not in q['modules']:
+        q['modules'].append('FINISH'); q['instances']['FINISH']=2
+    q['instances']['FINISH']=max(2,int(q['instances'].get('FINISH',1)))
+    q['priority']=['FINISH']+[x for x in q['priority'] if x!='FINISH']
+
+
 def strategy_bundle(genome:dict,rng:random.Random,bundle:str|None=None)->dict:
     g=canonical_genome(genome); bundle=bundle or rng.choice(BUNDLES)
     island={'rush':'Rush','fortress':'Fortress','economy':'Economy','hunter':'Hunter','muster':'Muster-Logistics','defense':'Fortress','finish':'Hunter','adaptive':'Adaptive'}[bundle]
     target=specialize_graph(island); graph=copy.deepcopy(g['graph']); graph['mode']='evolved'
     for name,q in target['nodes'].items():
         if name not in graph['nodes'] or rng.random()<.65: graph['nodes'][name]=copy.deepcopy(q)
+    if bundle in ('rush','finish'): _force_finish_phase(graph)
     g['graph']=repair_graph(graph); p=dict(g['params'])
     if bundle=='rush': p.update({'war_share_contact':.58,'war_share_peace':.28,'castle1_target_turn':240,'castle2_target_turn':400,'muster_start_turn':190,'late_finish_turn':675,'general_reserve_base':3})
     elif bundle=='fortress': p.update({'doomguard_enabled':True,'general_reserve_base':12,'adjacent_reserve_base':6,'castle1_target_turn':120,'castle2_target_turn':210,'war_share_contact':.22})
