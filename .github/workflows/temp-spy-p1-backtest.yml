@@ -1,0 +1,207 @@
+name: temp-spy-p1-real-backtest
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/temp-spy-p1-backtest.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: temp-spy-p1-real-backtest
+  cancel-in-progress: false
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install analysis dependencies
+        run: python -m pip install --quiet pandas numpy
+
+      - name: Download NYSE-TAQ-derived SPY minute data
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 \
+            https://raw.githubusercontent.com/joseparreiras/finc585/main/data/SPY_HF.zip \
+            --output /tmp/SPY_HF.zip
+          ls -lh /tmp/SPY_HF.zip
+          unzip -l /tmp/SPY_HF.zip | head -20
+
+      - name: Run frozen P1 first-half-hour to last-half-hour momentum backtest
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/spy-p1-results
+          cat > /tmp/backtest.py <<'PY'
+          import json, zipfile
+          from pathlib import Path
+          import numpy as np
+          import pandas as pd
+
+          ZIP='/tmp/SPY_HF.zip'
+          OUT=Path('/tmp/spy-p1-results')
+          SOURCE='NYSE TAQ Consolidated Trades via WRDS; joseparreiras/finc585 SPY_HF.zip'
+
+          with zipfile.ZipFile(ZIP) as z:
+              names=[n for n in z.namelist() if n.lower().endswith(('.csv','.txt'))]
+              if len(names)!=1:
+                  print('archive names=', z.namelist())
+                  if not names: raise SystemExit('no CSV/TXT in ZIP')
+              name=names[0]
+              print('reading', name)
+              with z.open(name) as f:
+                  df=pd.read_csv(f, usecols=['DATETIME','PRICE'])
+
+          df['DATETIME']=pd.to_datetime(df['DATETIME'], format='%d%b%Y:%H:%M:%S', errors='raise')
+          df=df.sort_values('DATETIME').drop_duplicates('DATETIME', keep='last')
+          df['date']=df['DATETIME'].dt.date
+          df['time']=df['DATETIME'].dt.time
+
+          # Build exact time lookup from the documented regular-session data.
+          # Dataset timestamps are Eastern Time and already restricted to 09:30-16:00 ET.
+          pivot=df.pivot_table(index='date', columns='time', values='PRICE', aggfunc='last')
+          from datetime import time, date
+          t1000=time(10,0); t1530=time(15,30); t1600=time(16,0)
+          for t in (t1000,t1530,t1600):
+              if t not in pivot.columns:
+                  raise SystemExit(f'missing required timestamp column {t}')
+
+          closes=pivot[t1600]
+          dates=list(pivot.index)
+          prior_close={dates[i]: closes.loc[dates[i-1]] for i in range(1,len(dates)) if pd.notna(closes.loc[dates[i-1]])}
+          rows=[]
+          start=date(2016,1,1); end=date(2024,3,28)
+          for d in dates:
+              if d<start or d>end or d not in prior_close: continue
+              pc=prior_close[d]; fh=pivot.at[d,t1000]; ent=pivot.at[d,t1530]; ex=pivot.at[d,t1600]
+              if any(pd.isna(x) for x in (pc,fh,ent,ex)): continue
+              sig=float(fh/pc-1.0)
+              if sig==0: continue
+              direction='LONG' if sig>0 else 'SHORT'
+              rr=float(ex/ent-1.0) if sig>0 else float(ent/ex-1.0)
+              rows.append({
+                  'date':str(d),
+                  'previous_close':float(pc),
+                  'first_half_hour_price':float(fh),
+                  'first_half_hour_return':sig,
+                  'direction':direction,
+                  'entry_datetime':f'{d} 15:30:00 America/New_York',
+                  'entry_price':float(ent),
+                  'exit_datetime':f'{d} 16:00:00 America/New_York',
+                  'exit_price':float(ex),
+                  'raw_return':rr,
+                  'win_flag':bool(rr>0),
+                  'data_source':SOURCE,
+              })
+
+          trades=pd.DataFrame(rows)
+          if trades.empty: raise SystemExit('NO TRADES GENERATED')
+          trades['date']=pd.to_datetime(trades['date'])
+          trades['year']=trades['date'].dt.year
+          trades['segment']=np.select(
+              [trades['year']<=2021, trades['year']<=2023],
+              ['2016-2021','2022-2023'], default='2024_to_Mar28')
+
+          r=trades['raw_return']
+          wins=r[r>0]; losses=r[r<0]
+          equity=(1+r).cumprod()
+          dd=equity/equity.cummax()-1
+          # losing streak
+          max_ls=cur=0
+          for w in trades['win_flag']:
+              if w: cur=0
+              else: cur+=1; max_ls=max(max_ls,cur)
+          summary={
+              'source_file_in_zip':name,
+              'raw_rows':int(len(df)),
+              'dataset_min_datetime':str(df['DATETIME'].min()),
+              'dataset_max_datetime':str(df['DATETIME'].max()),
+              'requested_start':'2016-01-01',
+              'requested_end':'2024-03-28',
+              'trade_count':int(len(trades)),
+              'long_count':int((trades.direction=='LONG').sum()),
+              'short_count':int((trades.direction=='SHORT').sum()),
+              'win_rate':float(trades.win_flag.mean()),
+              'mean_return':float(r.mean()),
+              'median_return':float(r.median()),
+              'avg_win':float(wins.mean()) if len(wins) else None,
+              'avg_loss':float(losses.mean()) if len(losses) else None,
+              'profit_factor':float(wins.sum()/abs(losses.sum())) if len(losses) and losses.sum()!=0 else None,
+              'expectancy':float(r.mean()),
+              'compounded_growth_100pct_notional':float(equity.iloc[-1]-1),
+              'max_drawdown':float(dd.min()),
+              'trade_sharpe_sqrt252':float(r.mean()/r.std(ddof=1)*np.sqrt(252)) if r.std(ddof=1)>0 else None,
+              'worst_losing_streak':int(max_ls),
+              'best_trade':float(r.max()),
+              'best_trade_date':str(trades.loc[r.idxmax(),'date'].date()),
+              'worst_trade':float(r.min()),
+              'worst_trade_date':str(trades.loc[r.idxmin(),'date'].date()),
+              'positive_sum':float(wins.sum()),
+              'negative_sum':float(losses.sum()),
+          }
+
+          yearly=[]
+          for y,g in trades.groupby('year'):
+              gr=g.raw_return; gw=gr[gr>0]; gl=gr[gr<0]
+              eq=(1+gr).cumprod()
+              yearly.append({
+                  'year':int(y),'trades':int(len(g)),'longs':int((g.direction=='LONG').sum()),
+                  'shorts':int((g.direction=='SHORT').sum()),'win_rate':float(g.win_flag.mean()),
+                  'mean_return':float(gr.mean()),'median_return':float(gr.median()),
+                  'profit_factor':float(gw.sum()/abs(gl.sum())) if len(gl) and gl.sum()!=0 else None,
+                  'compounded_return':float(eq.iloc[-1]-1),
+              })
+          segments=[]
+          for s,g in trades.groupby('segment', sort=False):
+              gr=g.raw_return; gw=gr[gr>0]; gl=gr[gr<0]; eq=(1+gr).cumprod()
+              segments.append({
+                  'segment':s,'trades':int(len(g)),'win_rate':float(g.win_flag.mean()),
+                  'mean_return':float(gr.mean()),
+                  'profit_factor':float(gw.sum()/abs(gl.sum())) if len(gl) and gl.sum()!=0 else None,
+                  'compounded_return':float(eq.iloc[-1]-1),
+              })
+
+          # Correlation between first-half-hour signed move and the ACTUAL raw last-half-hour market return.
+          # Reconstruct market last-half return regardless of signal direction.
+          market_lhm=trades['exit_price']/trades['entry_price']-1
+          summary['corr_first_half_vs_last_half_market_return']=float(trades['first_half_hour_return'].corr(market_lhm))
+
+          trades['raw_equity_1000']=1000*(1+trades.raw_return).cumprod()
+          trades['raw_peak_equity_1000']=trades.raw_equity_1000.cummax()
+          trades['raw_drawdown']=trades.raw_equity_1000/trades.raw_peak_equity_1000-1
+
+          trades.to_csv(OUT/'trades_underlying.csv', index=False)
+          pd.DataFrame(yearly).to_csv(OUT/'yearly_summary.csv', index=False)
+          pd.DataFrame(segments).to_csv(OUT/'segment_summary.csv', index=False)
+          (OUT/'summary.json').write_text(json.dumps(summary, indent=2))
+          (OUT/'README.txt').write_text(
+              'REAL SPY P1 backtest. Source: NYSE TAQ/WRDS-derived SPY_HF.zip from joseparreiras/finc585.\n'
+              'Frozen rule: signal sign at 10:00 ET vs previous 16:00 ET close; enter 15:30 ET; exit 16:00 ET.\n'
+              'No threshold, no news filter, no optimization. Requested sample 2016-01-01 through 2024-03-28.\n')
+          print(json.dumps(summary, indent=2))
+          print('generated trades', len(trades))
+          PY
+          python /tmp/backtest.py
+          echo '--- summary.json ---'
+          cat /tmp/spy-p1-results/summary.json
+          echo '--- first trades ---'
+          head -6 /tmp/spy-p1-results/trades_underlying.csv
+          echo '--- last trades ---'
+          tail -6 /tmp/spy-p1-results/trades_underlying.csv
+
+      - name: Upload real trade ledger
+        uses: actions/upload-artifact@v4
+        with:
+          name: spy-p1-real-backtest
+          path: /tmp/spy-p1-results/
+          retention-days: 7
