@@ -1,5 +1,6 @@
 from __future__ import annotations
 import json
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from . import orchestrator as b
@@ -24,6 +25,24 @@ PRESSURE_MIX = {
     'graph': .25,
     'immigrant': .10,
 }
+
+
+def _phase_heartbeat(state: dict, status: str, **extra) -> None:
+    try:
+        heart = json.loads(b.HEART.read_text()) if b.HEART.exists() else {}
+    except Exception:
+        heart = {}
+    heart.update({
+        'result': 'in_progress',
+        'lineage_generation': int(state.get('lineage_generation', 0)),
+        'attempt': int(state.get('promotion_attempt', 0)) + 1,
+        'current_champion': state.get('current_champion'),
+        'challenger_status': status,
+        'last_progress_time': b.now(),
+        **extra,
+    })
+    b.dump(b.HEART, heart)
+    b.persist([b.HEART], f'lineage: progress {status}')
 
 
 def _generation_members(state: dict, target_generation: int, main: str | None) -> list[str]:
@@ -81,6 +100,74 @@ def generation_matchup(state: dict, cand: str, distance: int, total_pairs: int, 
     return q
 
 
+def screen_parallel(state: dict, ids: list[str], refs: list[dict]) -> list[dict]:
+    g = int(state['lineage_generation'])
+    a = int(state['promotion_attempt']) + 1
+    parent = state['current_champion']
+    mix = b.opponent_mix(g)
+    ref_count = 2 if mix['reference'] >= .50 else 1 if mix['reference'] > 0 else 0
+    pgraph = b.genome(parent)['graph']
+    start_index = (g * 3 + a * 5) % len(refs) if refs else 0
+    chosen = [refs[(start_index + i) % len(refs)] for i in range(min(ref_count, len(refs)))] if refs else []
+
+    # Preserve the exact deterministic ledger order from the original sequential screen:
+    # for each challenger allocate parent seeds first, then reference seeds.
+    plans = []
+    for gid in ids:
+        screen_seed = b.allocate(state, 'screen', 4, f'g{g}-a{a}-screen-{gid[:8]}')
+        ref_plan = []
+        for r in chosen:
+            st = b.allocate(state, 'reference', 1, f'g{g}-a{a}-ref-{r["archetype"]}')
+            ref_plan.append((r, st))
+        plans.append((gid, screen_seed, ref_plan))
+
+    _phase_heartbeat(state, 'screening_parallel', challengers=len(ids), workers=4)
+
+    def one(plan):
+        gid, screen_seed, ref_plan = plan
+        out = b.TMP / 'screen' / gid[:10]
+        cw = b.wrapper(gid, out / f'{gid[:10]}-cand.sh')
+        ow = b.wrapper(parent, out / f'{parent[:10]}-opp.sh')
+        raw = b.ev.paired(cw, ow, screen_seed, 4, out / 'games')
+        m = b.compact(raw)
+        m['timing_ok'] = b.timing_ok(raw)
+
+        summaries = {}
+        if ref_plan:
+            rw = b.wrapper(gid, b.TMP / 'reference' / gid[:10] / 'candidate.sh')
+            for i, (r, st) in enumerate(ref_plan):
+                s = b.ev.paired(rw, Path(r['run']), st, 1, b.TMP / 'reference' / gid[:10] / f'{i}-{r["archetype"]}')
+                summaries[r['archetype']] = s
+            agg = b.ev.combine(list(summaries.values()))
+            ref = {
+                'score': float(agg.get('score', 0.0)),
+                'raw_win_rate': float(agg.get('raw_win_rate', 0.0)),
+                'games': int(agg.get('games', 0)),
+                'summaries': {k: b.compact(v) for k, v in summaries.items()},
+            }
+        else:
+            ref = {'score': 0.0, 'raw_win_rate': 0.0, 'games': 0, 'summaries': {}}
+
+        selection = mix['lineage'] * float(m['score']) + mix['reference'] * float(ref['score'])
+        return {
+            'genome_id': gid,
+            'screen_parent': m,
+            'reference': ref,
+            'reference_score': float(ref['score']),
+            'selection_score': selection,
+            'novelty': float(b.graph_distance(b.genome(gid)['graph'], pgraph)),
+        }
+
+    rows = []
+    with ThreadPoolExecutor(max_workers=4) as ex:
+        futures = [ex.submit(one, p) for p in plans]
+        for fut in as_completed(futures):
+            rows.append(fut.result())
+    rows.sort(key=lambda r: (r['selection_score'], r['screen_parent']['raw_win_rate'], r['novelty']), reverse=True)
+    _phase_heartbeat(state, 'screening_complete', screened=len(rows), survivors=min(16, len(rows)))
+    return rows[:16]
+
+
 def deep_lineage_pool(state: dict, rows: list[dict]) -> list[dict]:
     g = int(state['lineage_generation'])
     a = int(state['promotion_attempt']) + 1
@@ -91,7 +178,8 @@ def deep_lineage_pool(state: dict, rows: list[dict]) -> list[dict]:
     }
     # Funnel: 16 screened -> 6 deep G-1 -> 4 G-2 -> up to 4 G-3.
     parent_rows = rows[:6]
-    for r in parent_rows:
+    _phase_heartbeat(state, 'deep_g1', candidates=len(parent_rows))
+    for index, r in enumerate(parent_rows, 1):
         r['matchups'] = {
             1: generation_matchup(
                 state, r['genome_id'], 1, 48, 'parent',
@@ -99,6 +187,8 @@ def deep_lineage_pool(state: dict, rows: list[dict]) -> list[dict]:
                 b.TMP / 'deep-parent' / r['genome_id'][:10],
             )
         }
+        if index in (2, 4, 6):
+            _phase_heartbeat(state, 'deep_g1', completed=index, candidates=len(parent_rows))
     parent_rows.sort(key=lambda r: (
         r['matchups'][1]['raw_win_rate'],
         r['matchups'][1]['score'],
@@ -107,12 +197,15 @@ def deep_lineage_pool(state: dict, rows: list[dict]) -> list[dict]:
     survivors = parent_rows[:4]
 
     if available[2]:
-        for r in survivors:
+        _phase_heartbeat(state, 'deep_g2', candidates=len(survivors))
+        for index, r in enumerate(survivors, 1):
             r['matchups'][2] = generation_matchup(
                 state, r['genome_id'], 2, 32, 'grandparent',
                 f'g{g}-a{a}-grand-{r["genome_id"][:8]}',
                 b.TMP / 'deep-grand' / r['genome_id'][:10],
             )
+            if index in (2, 4):
+                _phase_heartbeat(state, 'deep_g2', completed=index, candidates=len(survivors))
         survivors.sort(key=lambda r: (
             r['matchups'][1]['raw_win_rate'],
             r['matchups'][2]['raw_win_rate'],
@@ -120,12 +213,15 @@ def deep_lineage_pool(state: dict, rows: list[dict]) -> list[dict]:
         ), reverse=True)
 
     if available[3]:
-        for r in survivors:
+        _phase_heartbeat(state, 'deep_g3', candidates=len(survivors))
+        for index, r in enumerate(survivors, 1):
             r['matchups'][3] = generation_matchup(
                 state, r['genome_id'], 3, 24, 'great',
                 f'g{g}-a{a}-great-{r["genome_id"][:8]}',
                 b.TMP / 'deep-great' / r['genome_id'][:10],
             )
+            if index in (2, 4):
+                _phase_heartbeat(state, 'deep_g3', completed=index, candidates=len(survivors))
 
     for r in survivors:
         r['promotion_gate_passed'] = b.gate_pass(r['matchups']) and all(
@@ -135,6 +231,7 @@ def deep_lineage_pool(state: dict, rows: list[dict]) -> list[dict]:
         r['weighted_lineage_score'] = b.weighted_lineage_score(r['matchups'])
         r['minimum_lineage_score'] = b.minimum_lineage_score(r['matchups'])
     survivors.sort(key=b.promotion_key, reverse=True)
+    _phase_heartbeat(state, 'deep_complete', finalists=len(survivors))
     return survivors
 
 
@@ -148,7 +245,9 @@ def create_challengers_biased(state: dict):
         elif bias == 'pressure':
             b.NORMAL_MIX = PRESSURE_MIX
             b.PLATEAU_MIX = PRESSURE_MIX
-        return _ORIG_CREATE(state)
+        result = _ORIG_CREATE(state)
+        _phase_heartbeat(state, 'population_created', challengers=len(result[0]), mutation_counts=result[2])
+        return result
     finally:
         b.NORMAL_MIX, b.PLATEAU_MIX = old_normal, old_plateau
 
@@ -223,6 +322,7 @@ def transaction_hardened(state: dict, txid: str):
 
 def main():
     b.deep_lineage = deep_lineage_pool
+    b.screen = screen_parallel
     b.create_challengers = create_challengers_biased
     b.transaction = transaction_hardened
     b.main()
