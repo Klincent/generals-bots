@@ -89,7 +89,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          python -m tools.evolution5_lineage.orchestrator 2>&1 | tee /tmp/evolution5-lineage.log
+          python -m tools.evolution5_lineage.orchestrator_pool 2>&1 | tee /tmp/evolution5-lineage.log
           rc=${PIPESTATUS[0]}
           echo "rc=$rc" >> "$GITHUB_OUTPUT"
           exit 0
@@ -148,7 +148,7 @@ jobs:
           python - <<'PY'
           import json
           s=json.load(open('/tmp/lineage-latest.json'))
-          print('next lineage generation=',s['lineage_generation'],'attempt=',s['promotion_attempt'],'champion=',s['current_champion'],'dominance=',s['dominance_gate_passed'])
+          print('next lineage generation=',s['lineage_generation'],'attempt=',s['promotion_attempt'],'champion=',s['current_champion'],'dominance=',s['dominance_gate_passed'],'bias=',s.get('mutation_bias'))
           PY
           gh workflow run evolution5-lineage.yml --repo "$GITHUB_REPOSITORY" --ref master
 
