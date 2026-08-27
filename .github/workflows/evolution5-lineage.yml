@@ -1,0 +1,157 @@
+name: evolution5-lineage
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: evolution5-lineage
+  cancel-in-progress: false
+
+jobs:
+  selfplay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    env:
+      SDL_VIDEODRIVER: dummy
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - name: Checkout lineage durable control
+        uses: actions/checkout@v4
+        with:
+          ref: evolution5/lineage-selfplay
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name ChatGPT
+          git config user.email actions@users.noreply.github.com
+
+      - name: Capture lineage pre-state and STOP
+        id: pre
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin evolution5/lineage-selfplay evolution4/turbo-template
+          cp evolution5_lineage/state.json /tmp/lineage-pre-state.json
+          python - <<'PY'
+          import json
+          s=json.load(open('/tmp/lineage-pre-state.json'))
+          print('LINEAGE PRE generation=',s['lineage_generation'],'attempt=',s['promotion_attempt'],'champion=',s['current_champion'])
+          assert s['mode']=='evolution5_lineage_selfplay_v1'
+          PY
+          if git cat-file -e origin/evolution5/lineage-selfplay:evolution5_lineage/STOP 2>/dev/null; then echo stopped=true >> "$GITHUB_OUTPUT"; else echo stopped=false >> "$GITHUB_OUTPUT"; fi
+
+      - uses: actions/setup-python@v5
+        if: steps.pre.outputs.stopped != 'true'
+        with:
+          python-version: '3.12'
+
+      - name: Install evaluator dependencies and run lineage tests
+        if: steps.pre.outputs.stopped != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install pytest numpy jax jaxlib
+          python -m pip install -e . --no-deps
+          python -m py_compile tools/evolution4/*.py tools/evolution5/*.py tools/evolution5_lineage/*.py
+          pytest -q tests/test_evolution5.py tests/test_evolution5_lineage.py
+
+      - name: V3.5 regression and graph-runtime equivalence
+        if: steps.pre.outputs.stopped != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash competition/agents/juraj_v35_cpp/test.sh
+          git reset --hard origin/evolution5/lineage-selfplay
+          python -m tools.evolution5.apply_cpp
+          grep -q 'e5_.update' competition/agents/juraj_v35_cpp/main.cpp
+          grep -q 'evolution5_behavior.hpp' competition/agents/juraj_v35_cpp/main.cpp
+          bash competition/agents/juraj_v35_cpp/build.sh
+          test -x competition/agents/juraj_v35_cpp/agent
+          rm -rf /tmp/e5-lineage-baseline
+          git worktree prune
+          git worktree add --detach /tmp/e5-lineage-baseline origin/evolution4/turbo-template
+          bash /tmp/e5-lineage-baseline/competition/agents/juraj_v35_cpp/build.sh
+          python -m tools.evolution4.equivalence_check \
+            --original /tmp/e5-lineage-baseline/competition/agents/juraj_v35_cpp/run.sh \
+            --template competition/agents/juraj_v35_cpp/run.sh \
+            --env-json '{}' --seeds 12
+          echo 'LINEAGE V3.5 GRAPH RUNTIME PREFLIGHT OK'
+
+      - name: Execute one challenger/promotion cycle
+        id: tx
+        if: steps.pre.outputs.stopped != 'true'
+        shell: bash
+        run: |
+          set +e
+          python -m tools.evolution5_lineage.orchestrator 2>&1 | tee /tmp/evolution5-lineage.log
+          rc=${PIPESTATUS[0]}
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Validate durable lineage post-state
+        if: always() && steps.pre.outputs.stopped != 'true' && steps.tx.outcome == 'success'
+        shell: bash
+        env:
+          TX_RC: ${{ steps.tx.outputs.rc }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin evolution5/lineage-selfplay
+          git show origin/evolution5/lineage-selfplay:evolution5_lineage/state.json > /tmp/lineage-post-state.json
+          python - <<'PY'
+          import json,os
+          pre=json.load(open('/tmp/lineage-pre-state.json')); post=json.load(open('/tmp/lineage-post-state.json'))
+          rc=int(os.environ.get('TX_RC','99'))
+          bg=int(pre['lineage_generation']); ag=int(post['lineage_generation'])
+          ba=int(pre['promotion_attempt']); aa=int(post['promotion_attempt'])
+          print('LINEAGE POST generation=',ag,'attempt=',aa,'champion=',post['current_champion'],'promoted=',post['promotion_gate_passed'])
+          assert post['mode']=='evolution5_lineage_selfplay_v1'
+          if rc==0:
+              if aa != ba+1: raise SystemExit(f'FALSE GREEN attempt {ba}->{aa}')
+              if ag not in (bg,bg+1): raise SystemExit(f'illegal lineage generation jump {bg}->{ag}')
+              if ag==bg and post['current_champion']!=pre['current_champion']: raise SystemExit('champion changed without promotion')
+              if ag==bg+1 and post['current_champion']==pre['current_champion']: raise SystemExit('promotion advanced generation without new champion')
+          else:
+              if ag!=bg: raise SystemExit('failed transaction advanced lineage generation')
+          PY
+
+      - name: Upload lineage transaction evidence
+        if: always() && steps.pre.outputs.stopped != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: evolution5-lineage-${{ github.run_number }}
+          path: |
+            /tmp/evolution5-lineage.log
+            /tmp/lineage-pre-state.json
+            /tmp/lineage-post-state.json
+            evolution5_lineage/heartbeat.json
+            evolution5_lineage/results/
+            evolution5_lineage/checkpoints/
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Dispatch next lineage attempt
+        if: always() && steps.pre.outputs.stopped != 'true' && steps.tx.outcome == 'success' && steps.tx.outputs.rc == '0'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin evolution5/lineage-selfplay
+          if git cat-file -e origin/evolution5/lineage-selfplay:evolution5_lineage/STOP 2>/dev/null; then echo 'LINEAGE STOP present; no redispatch.'; exit 0; fi
+          git show origin/evolution5/lineage-selfplay:evolution5_lineage/state.json > /tmp/lineage-latest.json
+          python - <<'PY'
+          import json
+          s=json.load(open('/tmp/lineage-latest.json'))
+          print('next lineage generation=',s['lineage_generation'],'attempt=',s['promotion_attempt'],'champion=',s['current_champion'],'dominance=',s['dominance_gate_passed'])
+          PY
+          gh workflow run evolution5-lineage.yml --repo "$GITHUB_REPOSITORY" --ref master
+
+      - name: Fail visibly on lineage transaction error
+        if: steps.pre.outputs.stopped != 'true' && steps.tx.outcome == 'success' && steps.tx.outputs.rc != '0'
+        run: exit 1
