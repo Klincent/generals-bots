@@ -66,6 +66,7 @@ def build(force: bool = False) -> dict:
         'grandparent_champion': None,
         'great_grandparent_champion': None,
         'champion_pool': pool,
+        'generation_elites': {'0': pool},
         'lineage_hof': [root],
         'lineage_history': [{
             'generation': 0,
@@ -87,6 +88,7 @@ def build(force: bool = False) -> dict:
         'vs_great_grandparent_win_rate': None,
         'attempt_history': [],
         'watchdog_history': [],
+        'watchdog_regression_warnings': [],
         'ancestor_gauntlets': [],
         'seed_ledger': {
             'screen': {'next_seed': 1200000},
@@ -98,6 +100,7 @@ def build(force: bool = False) -> dict:
             'gauntlet': {'next_seed': 7200000},
         },
         'mutation_temperature': 1.0,
+        'mutation_bias': 'normal',
         'failed_promotion_streak': 0,
         'tested_challengers': 0,
     }
