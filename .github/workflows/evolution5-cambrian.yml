@@ -11,26 +11,33 @@ permissions:
   contents: write
   actions: write
 
+# Same group as the old loop: a cutover run cannot execute until any already-running
+# Cambrian generation has finished its durable transaction.
 concurrency:
   group: evolution5-cambrian
   cancel-in-progress: false
 
 jobs:
-  cutover-stop:
+  lineage-cutover:
     runs-on: ubuntu-24.04
+    timeout-minutes: 60
     steps:
       - name: Checkout latest Cambrian durable control
         uses: actions/checkout@v4
         with:
           ref: evolution5/cambrian-league
           fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name ChatGPT
+          git config user.email actions@users.noreply.github.com
+
       - name: Stop old Cambrian after prior transaction completed
         shell: bash
         run: |
           set -euo pipefail
-          git config user.name ChatGPT
-          git config user.email actions@users.noreply.github.com
-          git fetch --no-tags origin evolution5/cambrian-league
+          git fetch --no-tags origin master evolution5/cambrian-league
           git reset --hard origin/evolution5/cambrian-league
           if [ ! -f evolution5/STOP ]; then
             printf '%s\n' 'Evolution5 Cambrian stopped for lineage self-play cutover.' > evolution5/STOP
@@ -38,4 +45,64 @@ jobs:
             git commit -m 'evolution5: stop Cambrian for lineage self-play cutover'
             git push origin HEAD:evolution5/cambrian-league
           fi
-          echo 'Old Cambrian auto-loop is stopped. Lineage self-play workflow will own subsequent evolution.'
+          echo 'OLD_CAMBRIAN_STOPPED=1'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install bootstrap/test dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install pytest numpy jax jaxlib
+          python -m pip install -e . --no-deps
+
+      - name: Create or refresh lineage durable branch from final Cambrian state
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin master evolution5/cambrian-league
+          if git ls-remote --exit-code --heads origin refs/heads/evolution5/lineage-selfplay >/dev/null 2>&1; then
+            git checkout -B evolution5/lineage-selfplay origin/evolution5/lineage-selfplay
+            echo 'Existing lineage control detected; preserving its durable state.'
+          else
+            git checkout -B evolution5/lineage-selfplay origin/evolution5/cambrian-league
+            echo 'Creating lineage control from final stopped Cambrian state.'
+          fi
+          git checkout origin/master -- tools/evolution5_lineage tests/test_evolution5_lineage.py
+          python -m py_compile tools/evolution5_lineage/*.py
+          pytest -q tests/test_evolution5.py tests/test_evolution5_lineage.py
+          python -m tools.evolution5_lineage.bootstrap
+          git add tools/evolution5_lineage tests/test_evolution5_lineage.py evolution5_lineage
+          if ! git diff --cached --quiet; then
+            git commit -m 'evolution5: initialize lineage self-play control'
+          fi
+          git push origin HEAD:evolution5/lineage-selfplay
+
+      - name: Verify old loop stopped and lineage state initialized
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin evolution5/cambrian-league evolution5/lineage-selfplay
+          git cat-file -e origin/evolution5/cambrian-league:evolution5/STOP
+          git show origin/evolution5/lineage-selfplay:evolution5_lineage/state.json > /tmp/lineage-state.json
+          python - <<'PY'
+          import json
+          s=json.load(open('/tmp/lineage-state.json'))
+          assert s['mode']=='evolution5_lineage_selfplay_v1'
+          assert int(s['lineage_generation']) >= 0
+          assert s['current_champion']
+          assert len(s.get('champion_pool',[])) >= 1
+          print('LINEAGE CUTOVER OK source_g=',s.get('source_cambrian_generation'),'root=',s['current_champion'],'pool=',len(s['champion_pool']))
+          PY
+
+      - name: Start lineage self-play loop
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh workflow run evolution5-lineage.yml --repo "$GITHUB_REPOSITORY" --ref master
+          echo 'Evolution5 lineage self-play dispatched.'
