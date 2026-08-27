@@ -1,6 +1,17 @@
 {
   "ancestor_gauntlets": [],
-  "attempt_history": [],
+  "attempt_history": [
+    {
+      "attempt": 1,
+      "best_challenger": "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+      "best_vs_parent_win_rate": 0.5520833333333334,
+      "dominance_gate_passed": false,
+      "generation_after": 1,
+      "generation_before": 0,
+      "promoted": "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+      "promotion_gate_passed": true
+    }
+  ],
   "bootstrap_candidates": [
     {
       "archetypes": {
@@ -212,16 +223,13 @@
     "4c88012bf9dbda847229e2bfcfe8206fe31030614bef0820ae70a892c67c06fb"
   ],
   "champion_pool": [
-    "50d7b439ab7763f63b1be67e41378c1e3650e109c9bebcdbe86a5b357b54c144",
-    "f254ebccd78154614cc6b8b36f4f8ecda7916827bd2b0e0064350f3d1c32ff57",
-    "4a6ff9d9884e731c66e76ca8970862fd0aea7a45e21f7151cfd4fd322a950f68",
-    "b74ce7da556e3a17a3136226bd681f9ab7e9228ab9301f27e4d3f658c9650767",
-    "3f7db2ee03b4d3dde726ddc81fbd66898d74b59f03c8797f681dfb89584ab6e3",
-    "409b5cf85ef73860554f63b400b6d16a9b1a603bbfae66269bd307538dcc0f1d",
-    "c89b8a6eb29298bf20bf93c471da5b4be0e0b8d53811d155de48ad4cb7038835",
-    "9ca02686dd5fcf11809073316e924a27e697abc8cd93a48de0eb90915bfe51e2"
+    "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+    "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8",
+    "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d",
+    "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e",
+    "50d7b439ab7763f63b1be67e41378c1e3650e109c9bebcdbe86a5b357b54c144"
   ],
-  "current_champion": "50d7b439ab7763f63b1be67e41378c1e3650e109c9bebcdbe86a5b357b54c144",
+  "current_champion": "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
   "dominance_gate_passed": false,
   "failed_promotion_streak": 0,
   "generation_elites": {
@@ -238,7 +246,7 @@
   },
   "grandparent_champion": null,
   "great_grandparent_champion": null,
-  "lineage_generation": 0,
+  "lineage_generation": 1,
   "lineage_history": [
     {
       "bootstrap": true,
@@ -248,18 +256,139 @@
       "great_grandparent": null,
       "parent": null,
       "source_cambrian_generation": 7
+    },
+    {
+      "attempt": 1,
+      "dominance": false,
+      "generation": 1,
+      "genome_id": "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+      "grandparent": null,
+      "great_grandparent": null,
+      "parent": "50d7b439ab7763f63b1be67e41378c1e3650e109c9bebcdbe86a5b357b54c144",
+      "vs_grandparent": null,
+      "vs_great_grandparent": null,
+      "vs_parent": {
+        "D": 17,
+        "L": 26,
+        "W": 53,
+        "decision_roundtrip_ms": {},
+        "elite_members": [
+          "50d7b439ab7763f63b1be67e41378c1e3650e109c9bebcdbe86a5b357b54c144",
+          "f254ebccd78154614cc6b8b36f4f8ecda7916827bd2b0e0064350f3d1c32ff57",
+          "4a6ff9d9884e731c66e76ca8970862fd0aea7a45e21f7151cfd4fd322a950f68",
+          "b74ce7da556e3a17a3136226bd681f9ab7e9228ab9301f27e4d3f658c9650767"
+        ],
+        "errors": 0,
+        "games": 96,
+        "illegal_actions": 0,
+        "main_champion": "50d7b439ab7763f63b1be67e41378c1e3650e109c9bebcdbe86a5b357b54c144",
+        "member_results": {
+          "4a6ff9d9884e731c66e76ca8970862fd0aea7a45e21f7151cfd4fd322a950f68": {
+            "D": 3,
+            "L": 5,
+            "W": 8,
+            "decision_roundtrip_ms": {
+              "max": 14.042718000382592,
+              "p50": 0.8313660000567324,
+              "p95": 0.9430950003661565,
+              "p99": 0.9688939999250579
+            },
+            "errors": 0,
+            "games": 16,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.71875
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.59375
+          },
+          "50d7b439ab7763f63b1be67e41378c1e3650e109c9bebcdbe86a5b357b54c144": {
+            "D": 4,
+            "L": 10,
+            "W": 34,
+            "decision_roundtrip_ms": {
+              "max": 15.434156999617699,
+              "p50": 0.8183250001820852,
+              "p95": 0.9682319996500155,
+              "p99": 1.0201499999311636
+            },
+            "errors": 0,
+            "games": 48,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.6458333333333334,
+              0.8541666666666666
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.75
+          },
+          "b74ce7da556e3a17a3136226bd681f9ab7e9228ab9301f27e4d3f658c9650767": {
+            "D": 7,
+            "L": 4,
+            "W": 5,
+            "decision_roundtrip_ms": {
+              "max": 14.707536999594595,
+              "p50": 0.8722080001462018,
+              "p95": 0.941711999985273,
+              "p99": 0.9509370001978823
+            },
+            "errors": 0,
+            "games": 16,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.34375,
+              0.6875
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.53125
+          },
+          "f254ebccd78154614cc6b8b36f4f8ecda7916827bd2b0e0064350f3d1c32ff57": {
+            "D": 3,
+            "L": 7,
+            "W": 6,
+            "decision_roundtrip_ms": {
+              "max": 14.865787999951863,
+              "p50": 0.7928370005174656,
+              "p95": 0.9153720002359478,
+              "p99": 0.9541109993733699
+            },
+            "errors": 0,
+            "games": 16,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.28125,
+              0.65625
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.46875
+          }
+        },
+        "pair_distribution": [
+          24,
+          8,
+          8,
+          8
+        ],
+        "paired_ci95": [],
+        "raw_win_rate": 0.5520833333333334,
+        "score": 0.640625,
+        "target_generation": 0,
+        "timing_ok": true
+      }
     }
   ],
   "lineage_hof": [
-    "50d7b439ab7763f63b1be67e41378c1e3650e109c9bebcdbe86a5b357b54c144"
+    "50d7b439ab7763f63b1be67e41378c1e3650e109c9bebcdbe86a5b357b54c144",
+    "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f"
   ],
   "mode": "evolution5_lineage_selfplay_v1",
   "mutation_bias": "normal",
   "mutation_temperature": 1.0,
   "phase": "active",
-  "previous_champion": null,
-  "promotion_attempt": 0,
-  "promotion_gate_passed": false,
+  "previous_champion": "50d7b439ab7763f63b1be67e41378c1e3650e109c9bebcdbe86a5b357b54c144",
+  "promotion_attempt": 1,
+  "promotion_gate_passed": true,
   "seed_ledger": {
     "gauntlet": {
       "next_seed": 7200000
@@ -271,24 +400,1293 @@
       "next_seed": 4200000
     },
     "parent": {
-      "next_seed": 2200000
+      "next_seed": 2201176,
+      "ranges": [
+        {
+          "label": "g0-a2-parent-968f7b3c-d1-0-50d7b439",
+          "maps": 24,
+          "start": 2200000
+        },
+        {
+          "label": "g0-a2-parent-968f7b3c-d1-1-f254ebcc",
+          "maps": 8,
+          "start": 2200061
+        },
+        {
+          "label": "g0-a2-parent-968f7b3c-d1-2-4a6ff9d9",
+          "maps": 8,
+          "start": 2200106
+        },
+        {
+          "label": "g0-a2-parent-968f7b3c-d1-3-b74ce7da",
+          "maps": 8,
+          "start": 2200151
+        },
+        {
+          "label": "g0-a2-parent-9096559f-d1-0-50d7b439",
+          "maps": 24,
+          "start": 2200196
+        },
+        {
+          "label": "g0-a2-parent-9096559f-d1-1-f254ebcc",
+          "maps": 8,
+          "start": 2200257
+        },
+        {
+          "label": "g0-a2-parent-9096559f-d1-2-4a6ff9d9",
+          "maps": 8,
+          "start": 2200302
+        },
+        {
+          "label": "g0-a2-parent-9096559f-d1-3-b74ce7da",
+          "maps": 8,
+          "start": 2200347
+        },
+        {
+          "label": "g0-a2-parent-af89cd76-d1-0-50d7b439",
+          "maps": 24,
+          "start": 2200392
+        },
+        {
+          "label": "g0-a2-parent-af89cd76-d1-1-f254ebcc",
+          "maps": 8,
+          "start": 2200453
+        },
+        {
+          "label": "g0-a2-parent-af89cd76-d1-2-4a6ff9d9",
+          "maps": 8,
+          "start": 2200498
+        },
+        {
+          "label": "g0-a2-parent-af89cd76-d1-3-b74ce7da",
+          "maps": 8,
+          "start": 2200543
+        },
+        {
+          "label": "g0-a2-parent-cf11e81d-d1-0-50d7b439",
+          "maps": 24,
+          "start": 2200588
+        },
+        {
+          "label": "g0-a2-parent-cf11e81d-d1-1-f254ebcc",
+          "maps": 8,
+          "start": 2200649
+        },
+        {
+          "label": "g0-a2-parent-cf11e81d-d1-2-4a6ff9d9",
+          "maps": 8,
+          "start": 2200694
+        },
+        {
+          "label": "g0-a2-parent-cf11e81d-d1-3-b74ce7da",
+          "maps": 8,
+          "start": 2200739
+        },
+        {
+          "label": "g0-a2-parent-e1dea9c3-d1-0-50d7b439",
+          "maps": 24,
+          "start": 2200784
+        },
+        {
+          "label": "g0-a2-parent-e1dea9c3-d1-1-f254ebcc",
+          "maps": 8,
+          "start": 2200845
+        },
+        {
+          "label": "g0-a2-parent-e1dea9c3-d1-2-4a6ff9d9",
+          "maps": 8,
+          "start": 2200890
+        },
+        {
+          "label": "g0-a2-parent-e1dea9c3-d1-3-b74ce7da",
+          "maps": 8,
+          "start": 2200935
+        },
+        {
+          "label": "g0-a2-parent-a0a6771a-d1-0-50d7b439",
+          "maps": 24,
+          "start": 2200980
+        },
+        {
+          "label": "g0-a2-parent-a0a6771a-d1-1-f254ebcc",
+          "maps": 8,
+          "start": 2201041
+        },
+        {
+          "label": "g0-a2-parent-a0a6771a-d1-2-4a6ff9d9",
+          "maps": 8,
+          "start": 2201086
+        },
+        {
+          "label": "g0-a2-parent-a0a6771a-d1-3-b74ce7da",
+          "maps": 8,
+          "start": 2201131
+        }
+      ]
     },
     "reference": {
-      "next_seed": 5200000
+      "next_seed": 5204864,
+      "ranges": [
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5200000
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5200038
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5200076
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5200114
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5200152
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5200190
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5200228
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5200266
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5200304
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5200342
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5200380
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5200418
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5200456
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5200494
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5200532
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5200570
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5200608
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5200646
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5200684
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5200722
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5200760
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5200798
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5200836
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5200874
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5200912
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5200950
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5200988
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5201026
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5201064
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5201102
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5201140
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5201178
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5201216
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5201254
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5201292
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5201330
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5201368
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5201406
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5201444
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5201482
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5201520
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5201558
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5201596
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5201634
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5201672
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5201710
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5201748
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5201786
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5201824
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5201862
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5201900
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5201938
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5201976
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5202014
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5202052
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5202090
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5202128
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5202166
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5202204
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5202242
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5202280
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5202318
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5202356
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5202394
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5202432
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5202470
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5202508
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5202546
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5202584
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5202622
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5202660
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5202698
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5202736
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5202774
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5202812
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5202850
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5202888
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5202926
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5202964
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5203002
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5203040
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5203078
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5203116
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5203154
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5203192
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5203230
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5203268
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5203306
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5203344
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5203382
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5203420
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5203458
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5203496
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5203534
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5203572
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5203610
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5203648
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5203686
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5203724
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5203762
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5203800
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5203838
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5203876
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5203914
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5203952
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5203990
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5204028
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5204066
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5204104
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5204142
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5204180
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5204218
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5204256
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5204294
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5204332
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5204370
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5204408
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5204446
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5204484
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5204522
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5204560
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5204598
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5204636
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5204674
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5204712
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5204750
+        },
+        {
+          "label": "g0-a2-ref-normal-expansion",
+          "maps": 1,
+          "start": 5204788
+        },
+        {
+          "label": "g0-a2-ref-aggressive-expansion",
+          "maps": 1,
+          "start": 5204826
+        }
+      ]
     },
     "screen": {
-      "next_seed": 1200000
+      "next_seed": 1202624,
+      "ranges": [
+        {
+          "label": "g0-a2-screen-08ce5348",
+          "maps": 4,
+          "start": 1200000
+        },
+        {
+          "label": "g0-a2-screen-ac17e77d",
+          "maps": 4,
+          "start": 1200041
+        },
+        {
+          "label": "g0-a2-screen-e32f27c6",
+          "maps": 4,
+          "start": 1200082
+        },
+        {
+          "label": "g0-a2-screen-af89cd76",
+          "maps": 4,
+          "start": 1200123
+        },
+        {
+          "label": "g0-a2-screen-995e2d93",
+          "maps": 4,
+          "start": 1200164
+        },
+        {
+          "label": "g0-a2-screen-c17a09d0",
+          "maps": 4,
+          "start": 1200205
+        },
+        {
+          "label": "g0-a2-screen-7b7f7051",
+          "maps": 4,
+          "start": 1200246
+        },
+        {
+          "label": "g0-a2-screen-28a6d1bc",
+          "maps": 4,
+          "start": 1200287
+        },
+        {
+          "label": "g0-a2-screen-77bdc286",
+          "maps": 4,
+          "start": 1200328
+        },
+        {
+          "label": "g0-a2-screen-0113df2d",
+          "maps": 4,
+          "start": 1200369
+        },
+        {
+          "label": "g0-a2-screen-7d8279d5",
+          "maps": 4,
+          "start": 1200410
+        },
+        {
+          "label": "g0-a2-screen-22c8cf55",
+          "maps": 4,
+          "start": 1200451
+        },
+        {
+          "label": "g0-a2-screen-0ffb103f",
+          "maps": 4,
+          "start": 1200492
+        },
+        {
+          "label": "g0-a2-screen-6be6ebce",
+          "maps": 4,
+          "start": 1200533
+        },
+        {
+          "label": "g0-a2-screen-c6c2ed3f",
+          "maps": 4,
+          "start": 1200574
+        },
+        {
+          "label": "g0-a2-screen-51ff8cb6",
+          "maps": 4,
+          "start": 1200615
+        },
+        {
+          "label": "g0-a2-screen-968f7b3c",
+          "maps": 4,
+          "start": 1200656
+        },
+        {
+          "label": "g0-a2-screen-5c576d09",
+          "maps": 4,
+          "start": 1200697
+        },
+        {
+          "label": "g0-a2-screen-6bc07a6e",
+          "maps": 4,
+          "start": 1200738
+        },
+        {
+          "label": "g0-a2-screen-444a5969",
+          "maps": 4,
+          "start": 1200779
+        },
+        {
+          "label": "g0-a2-screen-28cb8934",
+          "maps": 4,
+          "start": 1200820
+        },
+        {
+          "label": "g0-a2-screen-8ec27f1c",
+          "maps": 4,
+          "start": 1200861
+        },
+        {
+          "label": "g0-a2-screen-13e3463d",
+          "maps": 4,
+          "start": 1200902
+        },
+        {
+          "label": "g0-a2-screen-6b458879",
+          "maps": 4,
+          "start": 1200943
+        },
+        {
+          "label": "g0-a2-screen-e8839bbc",
+          "maps": 4,
+          "start": 1200984
+        },
+        {
+          "label": "g0-a2-screen-30906410",
+          "maps": 4,
+          "start": 1201025
+        },
+        {
+          "label": "g0-a2-screen-476c4656",
+          "maps": 4,
+          "start": 1201066
+        },
+        {
+          "label": "g0-a2-screen-b725ffff",
+          "maps": 4,
+          "start": 1201107
+        },
+        {
+          "label": "g0-a2-screen-99e4edfa",
+          "maps": 4,
+          "start": 1201148
+        },
+        {
+          "label": "g0-a2-screen-410c7055",
+          "maps": 4,
+          "start": 1201189
+        },
+        {
+          "label": "g0-a2-screen-54d68851",
+          "maps": 4,
+          "start": 1201230
+        },
+        {
+          "label": "g0-a2-screen-03b211c0",
+          "maps": 4,
+          "start": 1201271
+        },
+        {
+          "label": "g0-a2-screen-74e6e55b",
+          "maps": 4,
+          "start": 1201312
+        },
+        {
+          "label": "g0-a2-screen-defacc4e",
+          "maps": 4,
+          "start": 1201353
+        },
+        {
+          "label": "g0-a2-screen-e628a20b",
+          "maps": 4,
+          "start": 1201394
+        },
+        {
+          "label": "g0-a2-screen-f8cb3869",
+          "maps": 4,
+          "start": 1201435
+        },
+        {
+          "label": "g0-a2-screen-19ab4bb3",
+          "maps": 4,
+          "start": 1201476
+        },
+        {
+          "label": "g0-a2-screen-06a3e43f",
+          "maps": 4,
+          "start": 1201517
+        },
+        {
+          "label": "g0-a2-screen-ccb404f3",
+          "maps": 4,
+          "start": 1201558
+        },
+        {
+          "label": "g0-a2-screen-a80e3fdf",
+          "maps": 4,
+          "start": 1201599
+        },
+        {
+          "label": "g0-a2-screen-b5ee053d",
+          "maps": 4,
+          "start": 1201640
+        },
+        {
+          "label": "g0-a2-screen-62d9e1cd",
+          "maps": 4,
+          "start": 1201681
+        },
+        {
+          "label": "g0-a2-screen-2ecb7fe7",
+          "maps": 4,
+          "start": 1201722
+        },
+        {
+          "label": "g0-a2-screen-b0ada3a7",
+          "maps": 4,
+          "start": 1201763
+        },
+        {
+          "label": "g0-a2-screen-3a4812ce",
+          "maps": 4,
+          "start": 1201804
+        },
+        {
+          "label": "g0-a2-screen-c9f80e37",
+          "maps": 4,
+          "start": 1201845
+        },
+        {
+          "label": "g0-a2-screen-9096559f",
+          "maps": 4,
+          "start": 1201886
+        },
+        {
+          "label": "g0-a2-screen-1ff75586",
+          "maps": 4,
+          "start": 1201927
+        },
+        {
+          "label": "g0-a2-screen-1b5eaa8a",
+          "maps": 4,
+          "start": 1201968
+        },
+        {
+          "label": "g0-a2-screen-cf11e81d",
+          "maps": 4,
+          "start": 1202009
+        },
+        {
+          "label": "g0-a2-screen-34d1329f",
+          "maps": 4,
+          "start": 1202050
+        },
+        {
+          "label": "g0-a2-screen-a0a6771a",
+          "maps": 4,
+          "start": 1202091
+        },
+        {
+          "label": "g0-a2-screen-646b3773",
+          "maps": 4,
+          "start": 1202132
+        },
+        {
+          "label": "g0-a2-screen-a3b0aef5",
+          "maps": 4,
+          "start": 1202173
+        },
+        {
+          "label": "g0-a2-screen-9dda04bc",
+          "maps": 4,
+          "start": 1202214
+        },
+        {
+          "label": "g0-a2-screen-1e0b77fa",
+          "maps": 4,
+          "start": 1202255
+        },
+        {
+          "label": "g0-a2-screen-0f7ec198",
+          "maps": 4,
+          "start": 1202296
+        },
+        {
+          "label": "g0-a2-screen-f1c17a28",
+          "maps": 4,
+          "start": 1202337
+        },
+        {
+          "label": "g0-a2-screen-fdf68699",
+          "maps": 4,
+          "start": 1202378
+        },
+        {
+          "label": "g0-a2-screen-21bbb5f8",
+          "maps": 4,
+          "start": 1202419
+        },
+        {
+          "label": "g0-a2-screen-9f91be99",
+          "maps": 4,
+          "start": 1202460
+        },
+        {
+          "label": "g0-a2-screen-e1dea9c3",
+          "maps": 4,
+          "start": 1202501
+        },
+        {
+          "label": "g0-a2-screen-d7cba053",
+          "maps": 4,
+          "start": 1202542
+        },
+        {
+          "label": "g0-a2-screen-ac7536c0",
+          "maps": 4,
+          "start": 1202583
+        }
+      ]
     },
     "watchdog": {
-      "next_seed": 6200000
+      "next_seed": 6200273,
+      "ranges": [
+        {
+          "label": "g1-watchdog-normal-expansion",
+          "maps": 2,
+          "start": 6200000
+        },
+        {
+          "label": "g1-watchdog-aggressive-expansion",
+          "maps": 2,
+          "start": 6200039
+        },
+        {
+          "label": "g1-watchdog-defense-turtle",
+          "maps": 2,
+          "start": 6200078
+        },
+        {
+          "label": "g1-watchdog-logistics-recenter",
+          "maps": 2,
+          "start": 6200117
+        },
+        {
+          "label": "g1-watchdog-attack-pass",
+          "maps": 2,
+          "start": 6200156
+        },
+        {
+          "label": "g1-watchdog-search-hunter",
+          "maps": 2,
+          "start": 6200195
+        },
+        {
+          "label": "g1-watchdog-doomer-rusher",
+          "maps": 2,
+          "start": 6200234
+        }
+      ]
     }
   },
   "source_cambrian_best": "3f7db2ee03b4d3dde726ddc81fbd66898d74b59f03c8797f681dfb89584ab6e3",
   "source_cambrian_generation": 7,
-  "tested_challengers": 0,
+  "tested_challengers": 64,
   "vs_grandparent_win_rate": null,
   "vs_great_grandparent_win_rate": null,
-  "vs_parent_win_rate": null,
-  "watchdog_history": [],
+  "vs_parent_win_rate": 0.5520833333333334,
+  "watchdog_history": [
+    {
+      "generation": 1,
+      "results": {
+        "aggressive-expansion": {
+          "D": 0,
+          "L": 1,
+          "W": 3,
+          "decision_roundtrip_ms": {
+            "max": 13.715580998905352,
+            "p50": 0.7327259991143364,
+            "p95": 0.8806299993011635,
+            "p99": 0.8806299993011635
+          },
+          "errors": 0,
+          "games": 4,
+          "illegal_actions": 0,
+          "paired_ci95": [
+            0.5,
+            1.0
+          ],
+          "raw_win_rate": 0.0,
+          "score": 0.75
+        },
+        "attack-pass": {
+          "D": 1,
+          "L": 1,
+          "W": 2,
+          "decision_roundtrip_ms": {
+            "max": 15.14295099877927,
+            "p50": 0.9154520012089051,
+            "p95": 1.0160550009459257,
+            "p99": 1.0160550009459257
+          },
+          "errors": 0,
+          "games": 4,
+          "illegal_actions": 0,
+          "paired_ci95": [
+            0.25,
+            1.0
+          ],
+          "raw_win_rate": 0.0,
+          "score": 0.625
+        },
+        "defense-turtle": {
+          "D": 1,
+          "L": 3,
+          "W": 0,
+          "decision_roundtrip_ms": {
+            "max": 15.54401199973654,
+            "p50": 0.9928890012815828,
+            "p95": 1.00234399906185,
+            "p99": 1.00234399906185
+          },
+          "errors": 0,
+          "games": 4,
+          "illegal_actions": 0,
+          "paired_ci95": [
+            0.0,
+            0.25
+          ],
+          "raw_win_rate": 0.0,
+          "score": 0.125
+        },
+        "doomer-rusher": {
+          "D": 1,
+          "L": 2,
+          "W": 1,
+          "decision_roundtrip_ms": {
+            "max": 14.40581499991822,
+            "p50": 0.7957509988045786,
+            "p95": 0.8712669987289701,
+            "p99": 0.8712669987289701
+          },
+          "errors": 0,
+          "games": 4,
+          "illegal_actions": 0,
+          "paired_ci95": [
+            0.25,
+            0.5
+          ],
+          "raw_win_rate": 0.0,
+          "score": 0.375
+        },
+        "logistics-recenter": {
+          "D": 0,
+          "L": 0,
+          "W": 4,
+          "decision_roundtrip_ms": {
+            "max": 14.333422999698087,
+            "p50": 0.9579970010236138,
+            "p95": 1.0215519996563671,
+            "p99": 1.0215519996563671
+          },
+          "errors": 0,
+          "games": 4,
+          "illegal_actions": 0,
+          "paired_ci95": [
+            1.0,
+            1.0
+          ],
+          "raw_win_rate": 0.0,
+          "score": 1.0
+        },
+        "normal-expansion": {
+          "D": 0,
+          "L": 1,
+          "W": 3,
+          "decision_roundtrip_ms": {
+            "max": 12.306103000810253,
+            "p50": 0.6207269998412812,
+            "p95": 0.8213399996748194,
+            "p99": 0.8213399996748194
+          },
+          "errors": 0,
+          "games": 4,
+          "illegal_actions": 0,
+          "paired_ci95": [
+            0.5,
+            1.0
+          ],
+          "raw_win_rate": 0.0,
+          "score": 0.75
+        },
+        "search-hunter": {
+          "D": 2,
+          "L": 0,
+          "W": 2,
+          "decision_roundtrip_ms": {
+            "max": 13.340024999706657,
+            "p50": 0.6517950005218154,
+            "p95": 0.8394989999942482,
+            "p99": 0.8394989999942482
+          },
+          "errors": 0,
+          "games": 4,
+          "illegal_actions": 0,
+          "paired_ci95": [
+            0.75,
+            0.75
+          ],
+          "raw_win_rate": 0.0,
+          "score": 0.75
+        }
+      }
+    }
+  ],
   "watchdog_regression_warnings": []
 }
