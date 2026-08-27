@@ -41,12 +41,11 @@ def gate_pass(matchups: dict[int, dict]) -> bool:
 
 
 def dominance_pass(matchups: dict[int, dict]) -> bool:
-    if not matchups:
+    # 60/70/80 is only a true dominance claim once all three ancestors exist.
+    if not all(distance in matchups for distance in DOMINANCE_TARGETS):
         return False
-    for distance, result in matchups.items():
-        if distance not in DOMINANCE_TARGETS:
-            continue
-        if float(result.get('raw_win_rate', 0.0)) < DOMINANCE_TARGETS[distance]:
+    for distance, target in DOMINANCE_TARGETS.items():
+        if float(matchups[distance].get('raw_win_rate', 0.0)) < target:
             return False
     return True
 
