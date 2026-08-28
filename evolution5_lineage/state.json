@@ -30,6 +30,16 @@
       "generation_before": 1,
       "promoted": null,
       "promotion_gate_passed": false
+    },
+    {
+      "attempt": 4,
+      "best_challenger": "57401095ec44244fbab2ee10ff4a0b6fc555848741c4bd1e6c85d3fcd8b45060",
+      "best_vs_parent_win_rate": 0.4166666666666667,
+      "dominance_gate_passed": false,
+      "generation_after": 1,
+      "generation_before": 1,
+      "promoted": null,
+      "promotion_gate_passed": false
     }
   ],
   "bootstrap_candidates": [
@@ -251,7 +261,7 @@
   ],
   "current_champion": "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
   "dominance_gate_passed": false,
-  "failed_promotion_streak": 2,
+  "failed_promotion_streak": 3,
   "generation_elites": {
     "0": [
       "50d7b439ab7763f63b1be67e41378c1e3650e109c9bebcdbe86a5b357b54c144",
@@ -410,17 +420,17 @@
   ],
   "mode": "evolution5_lineage_selfplay_v1",
   "mutation_bias": "pressure",
-  "mutation_temperature": 1.4,
+  "mutation_temperature": 1.6,
   "phase": "active",
   "previous_champion": "50d7b439ab7763f63b1be67e41378c1e3650e109c9bebcdbe86a5b357b54c144",
-  "promotion_attempt": 3,
+  "promotion_attempt": 4,
   "promotion_gate_passed": false,
   "seed_ledger": {
     "gauntlet": {
       "next_seed": 7200000
     },
     "grandparent": {
-      "next_seed": 3201440,
+      "next_seed": 3202160,
       "ranges": [
         {
           "label": "g1-a3-grand-7991a8ea-d2-0-50d7b439",
@@ -581,6 +591,86 @@
           "label": "g1-a4-grand-12084384-d2-3-b74ce7da",
           "maps": 5,
           "start": 3201398
+        },
+        {
+          "label": "g1-a5-grand-57401095-d2-0-50d7b439",
+          "maps": 16,
+          "start": 3201440
+        },
+        {
+          "label": "g1-a5-grand-57401095-d2-1-f254ebcc",
+          "maps": 6,
+          "start": 3201493
+        },
+        {
+          "label": "g1-a5-grand-57401095-d2-2-4a6ff9d9",
+          "maps": 5,
+          "start": 3201536
+        },
+        {
+          "label": "g1-a5-grand-57401095-d2-3-b74ce7da",
+          "maps": 5,
+          "start": 3201578
+        },
+        {
+          "label": "g1-a5-grand-778527e0-d2-0-50d7b439",
+          "maps": 16,
+          "start": 3201620
+        },
+        {
+          "label": "g1-a5-grand-778527e0-d2-1-f254ebcc",
+          "maps": 6,
+          "start": 3201673
+        },
+        {
+          "label": "g1-a5-grand-778527e0-d2-2-4a6ff9d9",
+          "maps": 5,
+          "start": 3201716
+        },
+        {
+          "label": "g1-a5-grand-778527e0-d2-3-b74ce7da",
+          "maps": 5,
+          "start": 3201758
+        },
+        {
+          "label": "g1-a5-grand-cf1b2d3f-d2-0-50d7b439",
+          "maps": 16,
+          "start": 3201800
+        },
+        {
+          "label": "g1-a5-grand-cf1b2d3f-d2-1-f254ebcc",
+          "maps": 6,
+          "start": 3201853
+        },
+        {
+          "label": "g1-a5-grand-cf1b2d3f-d2-2-4a6ff9d9",
+          "maps": 5,
+          "start": 3201896
+        },
+        {
+          "label": "g1-a5-grand-cf1b2d3f-d2-3-b74ce7da",
+          "maps": 5,
+          "start": 3201938
+        },
+        {
+          "label": "g1-a5-grand-716208f9-d2-0-50d7b439",
+          "maps": 16,
+          "start": 3201980
+        },
+        {
+          "label": "g1-a5-grand-716208f9-d2-1-f254ebcc",
+          "maps": 6,
+          "start": 3202033
+        },
+        {
+          "label": "g1-a5-grand-716208f9-d2-2-4a6ff9d9",
+          "maps": 5,
+          "start": 3202076
+        },
+        {
+          "label": "g1-a5-grand-716208f9-d2-3-b74ce7da",
+          "maps": 5,
+          "start": 3202118
         }
       ]
     },
@@ -588,7 +678,7 @@
       "next_seed": 4200000
     },
     "parent": {
-      "next_seed": 2203528,
+      "next_seed": 2204704,
       "ranges": [
         {
           "label": "g0-a2-parent-968f7b3c-d1-0-50d7b439",
@@ -949,11 +1039,131 @@
           "label": "g1-a4-parent-f4cf967d-d1-3-af89cd76",
           "maps": 8,
           "start": 2203483
+        },
+        {
+          "label": "g1-a5-parent-716208f9-d1-0-9096559f",
+          "maps": 24,
+          "start": 2203528
+        },
+        {
+          "label": "g1-a5-parent-716208f9-d1-1-e1dea9c3",
+          "maps": 8,
+          "start": 2203589
+        },
+        {
+          "label": "g1-a5-parent-716208f9-d1-2-968f7b3c",
+          "maps": 8,
+          "start": 2203634
+        },
+        {
+          "label": "g1-a5-parent-716208f9-d1-3-af89cd76",
+          "maps": 8,
+          "start": 2203679
+        },
+        {
+          "label": "g1-a5-parent-778527e0-d1-0-9096559f",
+          "maps": 24,
+          "start": 2203724
+        },
+        {
+          "label": "g1-a5-parent-778527e0-d1-1-e1dea9c3",
+          "maps": 8,
+          "start": 2203785
+        },
+        {
+          "label": "g1-a5-parent-778527e0-d1-2-968f7b3c",
+          "maps": 8,
+          "start": 2203830
+        },
+        {
+          "label": "g1-a5-parent-778527e0-d1-3-af89cd76",
+          "maps": 8,
+          "start": 2203875
+        },
+        {
+          "label": "g1-a5-parent-cf1b2d3f-d1-0-9096559f",
+          "maps": 24,
+          "start": 2203920
+        },
+        {
+          "label": "g1-a5-parent-cf1b2d3f-d1-1-e1dea9c3",
+          "maps": 8,
+          "start": 2203981
+        },
+        {
+          "label": "g1-a5-parent-cf1b2d3f-d1-2-968f7b3c",
+          "maps": 8,
+          "start": 2204026
+        },
+        {
+          "label": "g1-a5-parent-cf1b2d3f-d1-3-af89cd76",
+          "maps": 8,
+          "start": 2204071
+        },
+        {
+          "label": "g1-a5-parent-57401095-d1-0-9096559f",
+          "maps": 24,
+          "start": 2204116
+        },
+        {
+          "label": "g1-a5-parent-57401095-d1-1-e1dea9c3",
+          "maps": 8,
+          "start": 2204177
+        },
+        {
+          "label": "g1-a5-parent-57401095-d1-2-968f7b3c",
+          "maps": 8,
+          "start": 2204222
+        },
+        {
+          "label": "g1-a5-parent-57401095-d1-3-af89cd76",
+          "maps": 8,
+          "start": 2204267
+        },
+        {
+          "label": "g1-a5-parent-68509974-d1-0-9096559f",
+          "maps": 24,
+          "start": 2204312
+        },
+        {
+          "label": "g1-a5-parent-68509974-d1-1-e1dea9c3",
+          "maps": 8,
+          "start": 2204373
+        },
+        {
+          "label": "g1-a5-parent-68509974-d1-2-968f7b3c",
+          "maps": 8,
+          "start": 2204418
+        },
+        {
+          "label": "g1-a5-parent-68509974-d1-3-af89cd76",
+          "maps": 8,
+          "start": 2204463
+        },
+        {
+          "label": "g1-a5-parent-403c459f-d1-0-9096559f",
+          "maps": 24,
+          "start": 2204508
+        },
+        {
+          "label": "g1-a5-parent-403c459f-d1-1-e1dea9c3",
+          "maps": 8,
+          "start": 2204569
+        },
+        {
+          "label": "g1-a5-parent-403c459f-d1-2-968f7b3c",
+          "maps": 8,
+          "start": 2204614
+        },
+        {
+          "label": "g1-a5-parent-403c459f-d1-3-af89cd76",
+          "maps": 8,
+          "start": 2204659
         }
       ]
     },
     "reference": {
-      "next_seed": 5214592,
+      "next_seed": 5219456,
       "ranges": [
         {
           "label": "g0-a2-ref-normal-expansion",
@@ -2874,11 +3084,651 @@
           "label": "g1-a4-ref-attack-pass",
           "maps": 1,
           "start": 5214554
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5214592
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5214630
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5214668
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5214706
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5214744
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5214782
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5214820
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5214858
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5214896
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5214934
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5214972
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5215010
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5215048
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5215086
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5215124
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5215162
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5215200
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5215238
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5215276
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5215314
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5215352
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5215390
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5215428
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5215466
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5215504
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5215542
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5215580
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5215618
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5215656
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5215694
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5215732
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5215770
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5215808
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5215846
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5215884
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5215922
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5215960
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5215998
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5216036
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5216074
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5216112
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5216150
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5216188
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5216226
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5216264
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5216302
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5216340
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5216378
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5216416
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5216454
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5216492
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5216530
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5216568
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5216606
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5216644
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5216682
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5216720
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5216758
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5216796
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5216834
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5216872
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5216910
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5216948
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5216986
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5217024
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5217062
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5217100
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5217138
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5217176
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5217214
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5217252
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5217290
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5217328
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5217366
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5217404
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5217442
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5217480
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5217518
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5217556
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5217594
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5217632
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5217670
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5217708
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5217746
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5217784
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5217822
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5217860
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5217898
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5217936
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5217974
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5218012
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5218050
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5218088
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5218126
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5218164
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5218202
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5218240
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5218278
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5218316
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5218354
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5218392
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5218430
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5218468
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5218506
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5218544
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5218582
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5218620
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5218658
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5218696
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5218734
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5218772
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5218810
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5218848
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5218886
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5218924
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5218962
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5219000
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5219038
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5219076
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5219114
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5219152
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5219190
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5219228
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5219266
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5219304
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5219342
+        },
+        {
+          "label": "g1-a5-ref-gatherer-economy",
+          "maps": 1,
+          "start": 5219380
+        },
+        {
+          "label": "g1-a5-ref-recent-reference",
+          "maps": 1,
+          "start": 5219418
         }
       ]
     },
     "screen": {
-      "next_seed": 1207872,
+      "next_seed": 1210496,
       "ranges": [
         {
           "label": "g0-a2-screen-08ce5348",
@@ -3839,6 +4689,326 @@
           "label": "g1-a4-screen-7448622e",
           "maps": 4,
           "start": 1207831
+        },
+        {
+          "label": "g1-a5-screen-d538645a",
+          "maps": 4,
+          "start": 1207872
+        },
+        {
+          "label": "g1-a5-screen-ce1b18ab",
+          "maps": 4,
+          "start": 1207913
+        },
+        {
+          "label": "g1-a5-screen-c1255f89",
+          "maps": 4,
+          "start": 1207954
+        },
+        {
+          "label": "g1-a5-screen-5d24ec74",
+          "maps": 4,
+          "start": 1207995
+        },
+        {
+          "label": "g1-a5-screen-dbd5bc2e",
+          "maps": 4,
+          "start": 1208036
+        },
+        {
+          "label": "g1-a5-screen-68509974",
+          "maps": 4,
+          "start": 1208077
+        },
+        {
+          "label": "g1-a5-screen-aef66288",
+          "maps": 4,
+          "start": 1208118
+        },
+        {
+          "label": "g1-a5-screen-63d2a904",
+          "maps": 4,
+          "start": 1208159
+        },
+        {
+          "label": "g1-a5-screen-b4a3579e",
+          "maps": 4,
+          "start": 1208200
+        },
+        {
+          "label": "g1-a5-screen-57401095",
+          "maps": 4,
+          "start": 1208241
+        },
+        {
+          "label": "g1-a5-screen-91c64691",
+          "maps": 4,
+          "start": 1208282
+        },
+        {
+          "label": "g1-a5-screen-08fa8207",
+          "maps": 4,
+          "start": 1208323
+        },
+        {
+          "label": "g1-a5-screen-7fefbe6f",
+          "maps": 4,
+          "start": 1208364
+        },
+        {
+          "label": "g1-a5-screen-7765a9c2",
+          "maps": 4,
+          "start": 1208405
+        },
+        {
+          "label": "g1-a5-screen-cd4e6889",
+          "maps": 4,
+          "start": 1208446
+        },
+        {
+          "label": "g1-a5-screen-dd3f1c47",
+          "maps": 4,
+          "start": 1208487
+        },
+        {
+          "label": "g1-a5-screen-9d9b0645",
+          "maps": 4,
+          "start": 1208528
+        },
+        {
+          "label": "g1-a5-screen-c7a5f8ec",
+          "maps": 4,
+          "start": 1208569
+        },
+        {
+          "label": "g1-a5-screen-d4be6d99",
+          "maps": 4,
+          "start": 1208610
+        },
+        {
+          "label": "g1-a5-screen-0365cc50",
+          "maps": 4,
+          "start": 1208651
+        },
+        {
+          "label": "g1-a5-screen-ede1f4e7",
+          "maps": 4,
+          "start": 1208692
+        },
+        {
+          "label": "g1-a5-screen-31504b5c",
+          "maps": 4,
+          "start": 1208733
+        },
+        {
+          "label": "g1-a5-screen-0070a26e",
+          "maps": 4,
+          "start": 1208774
+        },
+        {
+          "label": "g1-a5-screen-0951f4a8",
+          "maps": 4,
+          "start": 1208815
+        },
+        {
+          "label": "g1-a5-screen-b7f5218c",
+          "maps": 4,
+          "start": 1208856
+        },
+        {
+          "label": "g1-a5-screen-76fb08aa",
+          "maps": 4,
+          "start": 1208897
+        },
+        {
+          "label": "g1-a5-screen-cf1b2d3f",
+          "maps": 4,
+          "start": 1208938
+        },
+        {
+          "label": "g1-a5-screen-720ee4f3",
+          "maps": 4,
+          "start": 1208979
+        },
+        {
+          "label": "g1-a5-screen-c79d67e2",
+          "maps": 4,
+          "start": 1209020
+        },
+        {
+          "label": "g1-a5-screen-9b37961a",
+          "maps": 4,
+          "start": 1209061
+        },
+        {
+          "label": "g1-a5-screen-ba2bc8ff",
+          "maps": 4,
+          "start": 1209102
+        },
+        {
+          "label": "g1-a5-screen-e30cca1c",
+          "maps": 4,
+          "start": 1209143
+        },
+        {
+          "label": "g1-a5-screen-a16dc3b8",
+          "maps": 4,
+          "start": 1209184
+        },
+        {
+          "label": "g1-a5-screen-a2c8e8c8",
+          "maps": 4,
+          "start": 1209225
+        },
+        {
+          "label": "g1-a5-screen-9d20914e",
+          "maps": 4,
+          "start": 1209266
+        },
+        {
+          "label": "g1-a5-screen-22924459",
+          "maps": 4,
+          "start": 1209307
+        },
+        {
+          "label": "g1-a5-screen-34e743c9",
+          "maps": 4,
+          "start": 1209348
+        },
+        {
+          "label": "g1-a5-screen-604ef10d",
+          "maps": 4,
+          "start": 1209389
+        },
+        {
+          "label": "g1-a5-screen-fe216a42",
+          "maps": 4,
+          "start": 1209430
+        },
+        {
+          "label": "g1-a5-screen-2d426a06",
+          "maps": 4,
+          "start": 1209471
+        },
+        {
+          "label": "g1-a5-screen-166383de",
+          "maps": 4,
+          "start": 1209512
+        },
+        {
+          "label": "g1-a5-screen-7f5dbf16",
+          "maps": 4,
+          "start": 1209553
+        },
+        {
+          "label": "g1-a5-screen-1223e591",
+          "maps": 4,
+          "start": 1209594
+        },
+        {
+          "label": "g1-a5-screen-e97ae0f1",
+          "maps": 4,
+          "start": 1209635
+        },
+        {
+          "label": "g1-a5-screen-bc6fb388",
+          "maps": 4,
+          "start": 1209676
+        },
+        {
+          "label": "g1-a5-screen-778527e0",
+          "maps": 4,
+          "start": 1209717
+        },
+        {
+          "label": "g1-a5-screen-ff65da6b",
+          "maps": 4,
+          "start": 1209758
+        },
+        {
+          "label": "g1-a5-screen-634fdab8",
+          "maps": 4,
+          "start": 1209799
+        },
+        {
+          "label": "g1-a5-screen-19fa0e94",
+          "maps": 4,
+          "start": 1209840
+        },
+        {
+          "label": "g1-a5-screen-470a2888",
+          "maps": 4,
+          "start": 1209881
+        },
+        {
+          "label": "g1-a5-screen-59d19e68",
+          "maps": 4,
+          "start": 1209922
+        },
+        {
+          "label": "g1-a5-screen-07858451",
+          "maps": 4,
+          "start": 1209963
+        },
+        {
+          "label": "g1-a5-screen-c55339b2",
+          "maps": 4,
+          "start": 1210004
+        },
+        {
+          "label": "g1-a5-screen-89b01aab",
+          "maps": 4,
+          "start": 1210045
+        },
+        {
+          "label": "g1-a5-screen-301bcbdc",
+          "maps": 4,
+          "start": 1210086
+        },
+        {
+          "label": "g1-a5-screen-2e5df496",
+          "maps": 4,
+          "start": 1210127
+        },
+        {
+          "label": "g1-a5-screen-a4c32e86",
+          "maps": 4,
+          "start": 1210168
+        },
+        {
+          "label": "g1-a5-screen-716208f9",
+          "maps": 4,
+          "start": 1210209
+        },
+        {
+          "label": "g1-a5-screen-4c6e2650",
+          "maps": 4,
+          "start": 1210250
+        },
+        {
+          "label": "g1-a5-screen-76d446c8",
+          "maps": 4,
+          "start": 1210291
+        },
+        {
+          "label": "g1-a5-screen-35884359",
+          "maps": 4,
+          "start": 1210332
+        },
+        {
+          "label": "g1-a5-screen-5dab02bf",
+          "maps": 4,
+          "start": 1210373
+        },
+        {
+          "label": "g1-a5-screen-403c459f",
+          "maps": 4,
+          "start": 1210414
+        },
+        {
+          "label": "g1-a5-screen-f7008e8e",
+          "maps": 4,
+          "start": 1210455
         }
       ]
     },
@@ -3885,10 +5055,10 @@
   },
   "source_cambrian_best": "3f7db2ee03b4d3dde726ddc81fbd66898d74b59f03c8797f681dfb89584ab6e3",
   "source_cambrian_generation": 7,
-  "tested_challengers": 192,
-  "vs_grandparent_win_rate": 0.4375,
+  "tested_challengers": 256,
+  "vs_grandparent_win_rate": 0.421875,
   "vs_great_grandparent_win_rate": null,
-  "vs_parent_win_rate": 0.46875,
+  "vs_parent_win_rate": 0.4166666666666667,
   "watchdog_history": [
     {
       "generation": 1,
