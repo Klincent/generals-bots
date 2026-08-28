@@ -89,7 +89,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          python -m tools.evolution5_lineage.orchestrator_pool 2>&1 | tee /tmp/evolution5-lineage.log
+          python -m tools.evolution5_lineage.orchestrator_focus 2>&1 | tee /tmp/evolution5-lineage.log
           rc=${PIPESTATUS[0]}
           echo "rc=$rc" >> "$GITHUB_OUTPUT"
           exit 0
