@@ -1,0 +1,218 @@
+{
+  "genome": {
+    "graph": {
+      "entry": "OPENING",
+      "mode": "evolved",
+      "nodes": {
+        "CONTACT": {
+          "instances": {
+            "CONSOLIDATE": 2,
+            "DEFEND_GENERAL": 1,
+            "FINISH": 2,
+            "HUNT_GENERAL": 2,
+            "LOGISTICS": 1,
+            "RECOVER": 2,
+            "SCOUT": 1
+          },
+          "modules": [
+            "HUNT_GENERAL",
+            "FINISH",
+            "CONSOLIDATE",
+            "RECOVER",
+            "LOGISTICS",
+            "SCOUT",
+            "DEFEND_GENERAL"
+          ],
+          "priority": [
+            "LOGISTICS",
+            "RECOVER",
+            "CONSOLIDATE",
+            "HUNT_GENERAL",
+            "DEFEND_GENERAL",
+            "SCOUT",
+            "FINISH"
+          ],
+          "transitions": []
+        },
+        "LATE": {
+          "instances": {
+            "CONSOLIDATE": 2,
+            "EXPAND": 1,
+            "FINISH": 2,
+            "HUNT_GENERAL": 1,
+            "LOGISTICS": 2,
+            "MUSTER": 3,
+            "PICK": 2,
+            "RECOVER": 1,
+            "SCOUT": 2
+          },
+          "modules": [
+            "LOGISTICS",
+            "RECOVER",
+            "PICK",
+            "EXPAND",
+            "CONSOLIDATE",
+            "SCOUT",
+            "FINISH",
+            "MUSTER",
+            "HUNT_GENERAL"
+          ],
+          "priority": [
+            "SCOUT",
+            "PICK",
+            "FINISH",
+            "CONSOLIDATE",
+            "RECOVER",
+            "MUSTER",
+            "EXPAND",
+            "HUNT_GENERAL",
+            "LOGISTICS"
+          ],
+          "transitions": [
+            {
+              "condition": "no_contact",
+              "target": "LATE"
+            }
+          ]
+        },
+        "NOVEL_23782": {
+          "instances": {
+            "ATTACK": 2,
+            "CONSOLIDATE": 1,
+            "DEFEND_GENERAL": 2,
+            "FINISH": 2,
+            "HUNT_GENERAL": 1,
+            "MUSTER": 3,
+            "PICK": 1
+          },
+          "modules": [
+            "ATTACK",
+            "HUNT_GENERAL",
+            "CONSOLIDATE",
+            "PICK",
+            "MUSTER",
+            "DEFEND_GENERAL",
+            "FINISH"
+          ],
+          "priority": [
+            "CONSOLIDATE",
+            "FINISH",
+            "DEFEND_GENERAL",
+            "MUSTER",
+            "PICK",
+            "HUNT_GENERAL",
+            "ATTACK"
+          ],
+          "transitions": [
+            {
+              "condition": "ahead",
+              "target": "LATE"
+            }
+          ]
+        },
+        "OPENING": {
+          "instances": {
+            "DEFEND_GENERAL": 1,
+            "EXPAND": 2,
+            "LOGISTICS": 1,
+            "MUSTER": 1
+          },
+          "modules": [
+            "MUSTER",
+            "DEFEND_GENERAL",
+            "EXPAND",
+            "LOGISTICS"
+          ],
+          "priority": [
+            "DEFEND_GENERAL",
+            "MUSTER",
+            "LOGISTICS",
+            "EXPAND"
+          ],
+          "transitions": [
+            {
+              "condition": "always",
+              "target": "CONTACT"
+            },
+            {
+              "condition": "always",
+              "target": "LATE"
+            },
+            {
+              "condition": "always",
+              "target": "NOVEL_23782"
+            }
+          ]
+        }
+      },
+      "version": 1
+    },
+    "params": {
+      "adjacent_reserve_base": 4,
+      "castle1_target_turn": 130,
+      "castle2_target_turn": 265,
+      "chunk_transfer_policy": "split",
+      "defense_policy": "block_first",
+      "doomguard_enabled": false,
+      "edge_picker_threshold": 10,
+      "expansion_share_healthy": 0.2230117154021619,
+      "expansion_share_precontact": 0.4412586087842365,
+      "expansion_share_severe": 0.5909315973897509,
+      "expansion_share_soft": 0.48113366978915817,
+      "expansion_wait_limit": 9,
+      "fallback_policy": "aggressive",
+      "free_share_peace": 0.18739591707828698,
+      "free_share_war": 0.16535410006119977,
+      "general_reserve_base": 3,
+      "general_reserve_opp_divisor": 11,
+      "late_castle_army_margin": 40,
+      "late_finish_base": 100,
+      "late_finish_enemy_bonus": 17,
+      "late_finish_enemy_mult": 2.008366212238764,
+      "late_finish_turn": 821,
+      "logistics_route_policy": "shortest",
+      "muster_anchor_policy": "forward",
+      "muster_army_margin": 33,
+      "muster_enemy_bonus": 18,
+      "muster_enemy_mult": 2.974375944829749,
+      "muster_launch_base": 120,
+      "muster_opp_divisor": 3,
+      "muster_ratio_den": 11,
+      "muster_ratio_num": 10,
+      "muster_start_turn": 351,
+      "muster_threshold": 4,
+      "muster_topology": "triple",
+      "picker_enabled": false,
+      "picker_growth25": 0.08246177619085701,
+      "picker_growth50": 0.09232615799674757,
+      "picker_growth_land_pct": 40,
+      "picker_mature_land_pct": 25,
+      "picker_mature_turn": 170,
+      "picker_min_efficiency": 2.0,
+      "picker_neutrals_max": 3,
+      "picker_not_behind_den": 2,
+      "picker_not_behind_num": 10,
+      "picker_start_policy": "margin",
+      "picker_top3_share_max": 0.6632793467152491,
+      "precontact_expansion_until": 250,
+      "production_recover_gap": 7,
+      "production_recover_slope": 0.15209224249946943,
+      "production_severe_gap": 12,
+      "production_soft_gap": 10,
+      "search_share_seen": 0.06358970357807557,
+      "search_share_unseen": 0.24167935194546045,
+      "war_share_contact": 0.3805600393411776,
+      "war_share_peace": 0.11803784745886267
+    }
+  },
+  "genome_id": "7791e9c27ac2f8f962ab0d8408c951b63ae413288090fbe27799cc36b53ca7e9",
+  "meta": {
+    "crossover_parent": null,
+    "island": "Adaptive",
+    "kind": "immigrant",
+    "lineage_generation_target": 2,
+    "lineage_parent": "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d",
+    "promotion_attempt": 9,
+    "temperature": 2.4000000000000004
+  }
+}
