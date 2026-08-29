@@ -60,6 +60,16 @@
       "generation_before": 1,
       "promoted": null,
       "promotion_gate_passed": false
+    },
+    {
+      "attempt": 7,
+      "best_challenger": "d5ba4f297c6ac24a7fc90f31797059ea71b1cf1ee98100ade9520fbcc298b44a",
+      "best_vs_parent_win_rate": 0.4895833333333333,
+      "dominance_gate_passed": false,
+      "generation_after": 1,
+      "generation_before": 1,
+      "promoted": null,
+      "promotion_gate_passed": false
     }
   ],
   "bootstrap_candidates": [
@@ -281,7 +291,7 @@
   ],
   "current_champion": "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
   "dominance_gate_passed": false,
-  "failed_promotion_streak": 5,
+  "failed_promotion_streak": 6,
   "generation_elites": {
     "0": [
       "50d7b439ab7763f63b1be67e41378c1e3650e109c9bebcdbe86a5b357b54c144",
@@ -440,10 +450,10 @@
   ],
   "mode": "evolution5_lineage_selfplay_v1",
   "mutation_bias": "pressure",
-  "mutation_temperature": 2.0,
+  "mutation_temperature": 2.2,
   "phase": "active",
   "previous_champion": "50d7b439ab7763f63b1be67e41378c1e3650e109c9bebcdbe86a5b357b54c144",
-  "promotion_attempt": 6,
+  "promotion_attempt": 7,
   "promotion_gate_passed": false,
   "seed_ledger": {
     "gauntlet": {
@@ -698,7 +708,7 @@
       "next_seed": 4200000
     },
     "parent": {
-      "next_seed": 2209000,
+      "next_seed": 2211148,
       "ranges": [
         {
           "label": "g0-a2-parent-968f7b3c-d1-0-50d7b439",
@@ -1699,11 +1709,271 @@
           "label": "g1-a7-parent-5770b9d7-d1-3-af89cd76",
           "maps": 8,
           "start": 2208955
+        },
+        {
+          "label": "g1-a8-preview-c092ca51-d1-0-9096559f",
+          "maps": 4,
+          "start": 2209000
+        },
+        {
+          "label": "g1-a8-preview-c092ca51-d1-1-e1dea9c3",
+          "maps": 2,
+          "start": 2209041
+        },
+        {
+          "label": "g1-a8-preview-c092ca51-d1-2-968f7b3c",
+          "maps": 1,
+          "start": 2209080
+        },
+        {
+          "label": "g1-a8-preview-c092ca51-d1-3-af89cd76",
+          "maps": 1,
+          "start": 2209118
+        },
+        {
+          "label": "g1-a8-preview-d5ba4f29-d1-0-9096559f",
+          "maps": 4,
+          "start": 2209156
+        },
+        {
+          "label": "g1-a8-preview-d5ba4f29-d1-1-e1dea9c3",
+          "maps": 2,
+          "start": 2209197
+        },
+        {
+          "label": "g1-a8-preview-d5ba4f29-d1-2-968f7b3c",
+          "maps": 1,
+          "start": 2209236
+        },
+        {
+          "label": "g1-a8-preview-d5ba4f29-d1-3-af89cd76",
+          "maps": 1,
+          "start": 2209274
+        },
+        {
+          "label": "g1-a8-preview-e9733ddb-d1-0-9096559f",
+          "maps": 4,
+          "start": 2209312
+        },
+        {
+          "label": "g1-a8-preview-e9733ddb-d1-1-e1dea9c3",
+          "maps": 2,
+          "start": 2209353
+        },
+        {
+          "label": "g1-a8-preview-e9733ddb-d1-2-968f7b3c",
+          "maps": 1,
+          "start": 2209392
+        },
+        {
+          "label": "g1-a8-preview-e9733ddb-d1-3-af89cd76",
+          "maps": 1,
+          "start": 2209430
+        },
+        {
+          "label": "g1-a8-preview-a14b9194-d1-0-9096559f",
+          "maps": 4,
+          "start": 2209468
+        },
+        {
+          "label": "g1-a8-preview-a14b9194-d1-1-e1dea9c3",
+          "maps": 2,
+          "start": 2209509
+        },
+        {
+          "label": "g1-a8-preview-a14b9194-d1-2-968f7b3c",
+          "maps": 1,
+          "start": 2209548
+        },
+        {
+          "label": "g1-a8-preview-a14b9194-d1-3-af89cd76",
+          "maps": 1,
+          "start": 2209586
+        },
+        {
+          "label": "g1-a8-preview-00fc72d7-d1-0-9096559f",
+          "maps": 4,
+          "start": 2209624
+        },
+        {
+          "label": "g1-a8-preview-00fc72d7-d1-1-e1dea9c3",
+          "maps": 2,
+          "start": 2209665
+        },
+        {
+          "label": "g1-a8-preview-00fc72d7-d1-2-968f7b3c",
+          "maps": 1,
+          "start": 2209704
+        },
+        {
+          "label": "g1-a8-preview-00fc72d7-d1-3-af89cd76",
+          "maps": 1,
+          "start": 2209742
+        },
+        {
+          "label": "g1-a8-preview-4fbadd87-d1-0-9096559f",
+          "maps": 4,
+          "start": 2209780
+        },
+        {
+          "label": "g1-a8-preview-4fbadd87-d1-1-e1dea9c3",
+          "maps": 2,
+          "start": 2209821
+        },
+        {
+          "label": "g1-a8-preview-4fbadd87-d1-2-968f7b3c",
+          "maps": 1,
+          "start": 2209860
+        },
+        {
+          "label": "g1-a8-preview-4fbadd87-d1-3-af89cd76",
+          "maps": 1,
+          "start": 2209898
+        },
+        {
+          "label": "g1-a8-preview-b90c151d-d1-0-9096559f",
+          "maps": 4,
+          "start": 2209936
+        },
+        {
+          "label": "g1-a8-preview-b90c151d-d1-1-e1dea9c3",
+          "maps": 2,
+          "start": 2209977
+        },
+        {
+          "label": "g1-a8-preview-b90c151d-d1-2-968f7b3c",
+          "maps": 1,
+          "start": 2210016
+        },
+        {
+          "label": "g1-a8-preview-b90c151d-d1-3-af89cd76",
+          "maps": 1,
+          "start": 2210054
+        },
+        {
+          "label": "g1-a8-preview-0d496a6f-d1-0-9096559f",
+          "maps": 4,
+          "start": 2210092
+        },
+        {
+          "label": "g1-a8-preview-0d496a6f-d1-1-e1dea9c3",
+          "maps": 2,
+          "start": 2210133
+        },
+        {
+          "label": "g1-a8-preview-0d496a6f-d1-2-968f7b3c",
+          "maps": 1,
+          "start": 2210172
+        },
+        {
+          "label": "g1-a8-preview-0d496a6f-d1-3-af89cd76",
+          "maps": 1,
+          "start": 2210210
+        },
+        {
+          "label": "g1-a8-preview-61b68e90-d1-0-9096559f",
+          "maps": 4,
+          "start": 2210248
+        },
+        {
+          "label": "g1-a8-preview-61b68e90-d1-1-e1dea9c3",
+          "maps": 2,
+          "start": 2210289
+        },
+        {
+          "label": "g1-a8-preview-61b68e90-d1-2-968f7b3c",
+          "maps": 1,
+          "start": 2210328
+        },
+        {
+          "label": "g1-a8-preview-61b68e90-d1-3-af89cd76",
+          "maps": 1,
+          "start": 2210366
+        },
+        {
+          "label": "g1-a8-preview-d6892344-d1-0-9096559f",
+          "maps": 4,
+          "start": 2210404
+        },
+        {
+          "label": "g1-a8-preview-d6892344-d1-1-e1dea9c3",
+          "maps": 2,
+          "start": 2210445
+        },
+        {
+          "label": "g1-a8-preview-d6892344-d1-2-968f7b3c",
+          "maps": 1,
+          "start": 2210484
+        },
+        {
+          "label": "g1-a8-preview-d6892344-d1-3-af89cd76",
+          "maps": 1,
+          "start": 2210522
+        },
+        {
+          "label": "g1-a8-parent-d5ba4f29-d1-0-9096559f",
+          "maps": 24,
+          "start": 2210560
+        },
+        {
+          "label": "g1-a8-parent-d5ba4f29-d1-1-e1dea9c3",
+          "maps": 8,
+          "start": 2210621
+        },
+        {
+          "label": "g1-a8-parent-d5ba4f29-d1-2-968f7b3c",
+          "maps": 8,
+          "start": 2210666
+        },
+        {
+          "label": "g1-a8-parent-d5ba4f29-d1-3-af89cd76",
+          "maps": 8,
+          "start": 2210711
+        },
+        {
+          "label": "g1-a8-parent-00fc72d7-d1-0-9096559f",
+          "maps": 24,
+          "start": 2210756
+        },
+        {
+          "label": "g1-a8-parent-00fc72d7-d1-1-e1dea9c3",
+          "maps": 8,
+          "start": 2210817
+        },
+        {
+          "label": "g1-a8-parent-00fc72d7-d1-2-968f7b3c",
+          "maps": 8,
+          "start": 2210862
+        },
+        {
+          "label": "g1-a8-parent-00fc72d7-d1-3-af89cd76",
+          "maps": 8,
+          "start": 2210907
+        },
+        {
+          "label": "g1-a8-parent-0d496a6f-d1-0-9096559f",
+          "maps": 24,
+          "start": 2210952
+        },
+        {
+          "label": "g1-a8-parent-0d496a6f-d1-1-e1dea9c3",
+          "maps": 8,
+          "start": 2211013
+        },
+        {
+          "label": "g1-a8-parent-0d496a6f-d1-2-968f7b3c",
+          "maps": 8,
+          "start": 2211058
+        },
+        {
+          "label": "g1-a8-parent-0d496a6f-d1-3-af89cd76",
+          "maps": 8,
+          "start": 2211103
         }
       ]
     },
     "reference": {
-      "next_seed": 5224320,
+      "next_seed": 5226752,
       "ranges": [
         {
           "label": "g0-a2-ref-normal-expansion",
@@ -4904,11 +5174,331 @@
           "label": "g1-a7-ref-gatherer-economy",
           "maps": 1,
           "start": 5224282
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5224320
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5224358
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5224396
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5224434
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5224472
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5224510
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5224548
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5224586
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5224624
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5224662
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5224700
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5224738
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5224776
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5224814
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5224852
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5224890
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5224928
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5224966
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5225004
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5225042
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5225080
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5225118
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5225156
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5225194
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5225232
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5225270
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5225308
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5225346
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5225384
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5225422
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5225460
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5225498
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5225536
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5225574
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5225612
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5225650
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5225688
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5225726
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5225764
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5225802
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5225840
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5225878
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5225916
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5225954
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5225992
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5226030
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5226068
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5226106
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5226144
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5226182
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5226220
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5226258
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5226296
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5226334
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5226372
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5226410
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5226448
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5226486
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5226524
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5226562
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5226600
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5226638
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5226676
+        },
+        {
+          "label": "g1-a8-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5226714
         }
       ]
     },
     "screen": {
-      "next_seed": 1215744,
+      "next_seed": 1218368,
       "ranges": [
         {
           "label": "g0-a2-screen-08ce5348",
@@ -6829,6 +7419,326 @@
           "label": "g1-a7-screen-a9c4b92c",
           "maps": 4,
           "start": 1215703
+        },
+        {
+          "label": "g1-a8-screen-72b6f9c4",
+          "maps": 4,
+          "start": 1215744
+        },
+        {
+          "label": "g1-a8-screen-fa28ff94",
+          "maps": 4,
+          "start": 1215785
+        },
+        {
+          "label": "g1-a8-screen-390e57cb",
+          "maps": 4,
+          "start": 1215826
+        },
+        {
+          "label": "g1-a8-screen-de29cd72",
+          "maps": 4,
+          "start": 1215867
+        },
+        {
+          "label": "g1-a8-screen-c18fd814",
+          "maps": 4,
+          "start": 1215908
+        },
+        {
+          "label": "g1-a8-screen-5a3a8e0b",
+          "maps": 4,
+          "start": 1215949
+        },
+        {
+          "label": "g1-a8-screen-ad9fd484",
+          "maps": 4,
+          "start": 1215990
+        },
+        {
+          "label": "g1-a8-screen-00fc72d7",
+          "maps": 4,
+          "start": 1216031
+        },
+        {
+          "label": "g1-a8-screen-b90c151d",
+          "maps": 4,
+          "start": 1216072
+        },
+        {
+          "label": "g1-a8-screen-2fb536cf",
+          "maps": 4,
+          "start": 1216113
+        },
+        {
+          "label": "g1-a8-screen-0d496a6f",
+          "maps": 4,
+          "start": 1216154
+        },
+        {
+          "label": "g1-a8-screen-8e6cdc97",
+          "maps": 4,
+          "start": 1216195
+        },
+        {
+          "label": "g1-a8-screen-61b68e90",
+          "maps": 4,
+          "start": 1216236
+        },
+        {
+          "label": "g1-a8-screen-d6892344",
+          "maps": 4,
+          "start": 1216277
+        },
+        {
+          "label": "g1-a8-screen-499613cb",
+          "maps": 4,
+          "start": 1216318
+        },
+        {
+          "label": "g1-a8-screen-45fcffa4",
+          "maps": 4,
+          "start": 1216359
+        },
+        {
+          "label": "g1-a8-screen-541a127d",
+          "maps": 4,
+          "start": 1216400
+        },
+        {
+          "label": "g1-a8-screen-f6531ddc",
+          "maps": 4,
+          "start": 1216441
+        },
+        {
+          "label": "g1-a8-screen-a14b9194",
+          "maps": 4,
+          "start": 1216482
+        },
+        {
+          "label": "g1-a8-screen-daf784d7",
+          "maps": 4,
+          "start": 1216523
+        },
+        {
+          "label": "g1-a8-screen-9fd62be1",
+          "maps": 4,
+          "start": 1216564
+        },
+        {
+          "label": "g1-a8-screen-4fbadd87",
+          "maps": 4,
+          "start": 1216605
+        },
+        {
+          "label": "g1-a8-screen-e9733ddb",
+          "maps": 4,
+          "start": 1216646
+        },
+        {
+          "label": "g1-a8-screen-d5ba4f29",
+          "maps": 4,
+          "start": 1216687
+        },
+        {
+          "label": "g1-a8-screen-03e42a3b",
+          "maps": 4,
+          "start": 1216728
+        },
+        {
+          "label": "g1-a8-screen-4ffe26ae",
+          "maps": 4,
+          "start": 1216769
+        },
+        {
+          "label": "g1-a8-screen-5efe3c0b",
+          "maps": 4,
+          "start": 1216810
+        },
+        {
+          "label": "g1-a8-screen-165a1b15",
+          "maps": 4,
+          "start": 1216851
+        },
+        {
+          "label": "g1-a8-screen-89924ade",
+          "maps": 4,
+          "start": 1216892
+        },
+        {
+          "label": "g1-a8-screen-7429d1a5",
+          "maps": 4,
+          "start": 1216933
+        },
+        {
+          "label": "g1-a8-screen-ad8b51f1",
+          "maps": 4,
+          "start": 1216974
+        },
+        {
+          "label": "g1-a8-screen-fa9eb8bb",
+          "maps": 4,
+          "start": 1217015
+        },
+        {
+          "label": "g1-a8-screen-86c4d29a",
+          "maps": 4,
+          "start": 1217056
+        },
+        {
+          "label": "g1-a8-screen-d4a5439d",
+          "maps": 4,
+          "start": 1217097
+        },
+        {
+          "label": "g1-a8-screen-70dd4322",
+          "maps": 4,
+          "start": 1217138
+        },
+        {
+          "label": "g1-a8-screen-2186d873",
+          "maps": 4,
+          "start": 1217179
+        },
+        {
+          "label": "g1-a8-screen-2aea58fb",
+          "maps": 4,
+          "start": 1217220
+        },
+        {
+          "label": "g1-a8-screen-cdc6500d",
+          "maps": 4,
+          "start": 1217261
+        },
+        {
+          "label": "g1-a8-screen-77dac501",
+          "maps": 4,
+          "start": 1217302
+        },
+        {
+          "label": "g1-a8-screen-d1a1633a",
+          "maps": 4,
+          "start": 1217343
+        },
+        {
+          "label": "g1-a8-screen-52408980",
+          "maps": 4,
+          "start": 1217384
+        },
+        {
+          "label": "g1-a8-screen-759399c7",
+          "maps": 4,
+          "start": 1217425
+        },
+        {
+          "label": "g1-a8-screen-3bf72e26",
+          "maps": 4,
+          "start": 1217466
+        },
+        {
+          "label": "g1-a8-screen-a2b988fc",
+          "maps": 4,
+          "start": 1217507
+        },
+        {
+          "label": "g1-a8-screen-58f459f7",
+          "maps": 4,
+          "start": 1217548
+        },
+        {
+          "label": "g1-a8-screen-3c9c79a4",
+          "maps": 4,
+          "start": 1217589
+        },
+        {
+          "label": "g1-a8-screen-c269dd87",
+          "maps": 4,
+          "start": 1217630
+        },
+        {
+          "label": "g1-a8-screen-f465add3",
+          "maps": 4,
+          "start": 1217671
+        },
+        {
+          "label": "g1-a8-screen-e94e9cd0",
+          "maps": 4,
+          "start": 1217712
+        },
+        {
+          "label": "g1-a8-screen-97e3631c",
+          "maps": 4,
+          "start": 1217753
+        },
+        {
+          "label": "g1-a8-screen-c6253cdc",
+          "maps": 4,
+          "start": 1217794
+        },
+        {
+          "label": "g1-a8-screen-c092ca51",
+          "maps": 4,
+          "start": 1217835
+        },
+        {
+          "label": "g1-a8-screen-1a4d7f98",
+          "maps": 4,
+          "start": 1217876
+        },
+        {
+          "label": "g1-a8-screen-59ee57e8",
+          "maps": 4,
+          "start": 1217917
+        },
+        {
+          "label": "g1-a8-screen-6ad09dfb",
+          "maps": 4,
+          "start": 1217958
+        },
+        {
+          "label": "g1-a8-screen-a6a4e025",
+          "maps": 4,
+          "start": 1217999
+        },
+        {
+          "label": "g1-a8-screen-129d7a57",
+          "maps": 4,
+          "start": 1218040
+        },
+        {
+          "label": "g1-a8-screen-14286b2a",
+          "maps": 4,
+          "start": 1218081
+        },
+        {
+          "label": "g1-a8-screen-09326a27",
+          "maps": 4,
+          "start": 1218122
+        },
+        {
+          "label": "g1-a8-screen-91dc28de",
+          "maps": 4,
+          "start": 1218163
+        },
+        {
+          "label": "g1-a8-screen-32ec8525",
+          "maps": 4,
+          "start": 1218204
+        },
+        {
+          "label": "g1-a8-screen-c011be52",
+          "maps": 4,
+          "start": 1218245
+        },
+        {
+          "label": "g1-a8-screen-ce7f406d",
+          "maps": 4,
+          "start": 1218286
+        },
+        {
+          "label": "g1-a8-screen-d33c571f",
+          "maps": 4,
+          "start": 1218327
         }
       ]
     },
@@ -6875,10 +7785,10 @@
   },
   "source_cambrian_best": "3f7db2ee03b4d3dde726ddc81fbd66898d74b59f03c8797f681dfb89584ab6e3",
   "source_cambrian_generation": 7,
-  "tested_challengers": 384,
+  "tested_challengers": 448,
   "vs_grandparent_win_rate": null,
   "vs_great_grandparent_win_rate": null,
-  "vs_parent_win_rate": 0.4479166666666667,
+  "vs_parent_win_rate": 0.4895833333333333,
   "watchdog_history": [
     {
       "generation": 1,
