@@ -2,6 +2,10 @@ name: evolution5-lineage
 
 on:
   workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - '.github/lineage-trigger'
 
 permissions:
   contents: write
@@ -9,7 +13,7 @@ permissions:
 
 concurrency:
   group: evolution5-lineage
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   selfplay:
