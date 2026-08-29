@@ -1,0 +1,3175 @@
+{
+  "ancestor_gauntlet": {},
+  "attempt": 10,
+  "dominance_targets": {
+    "1": 0.6,
+    "2": 0.7,
+    "3": 0.8
+  },
+  "finalists": [
+    {
+      "dominance_gate_passed": false,
+      "evaluation_complete": false,
+      "g1_preview": {
+        "D": 3,
+        "L": 4,
+        "W": 9,
+        "decision_roundtrip_ms": {},
+        "elite_members": [
+          "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+          "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8",
+          "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d",
+          "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e"
+        ],
+        "errors": 0,
+        "games": 16,
+        "illegal_actions": 0,
+        "main_champion": "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+        "member_results": {
+          "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f": {
+            "D": 3,
+            "L": 1,
+            "W": 4,
+            "decision_roundtrip_ms": {
+              "max": 12.468962000184547,
+              "p50": 0.5696790003639762,
+              "p95": 0.6036609997863707,
+              "p99": 0.6036609997863707
+            },
+            "errors": 0,
+            "games": 8,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.875
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.6875
+          },
+          "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d": {
+            "D": 0,
+            "L": 0,
+            "W": 2,
+            "decision_roundtrip_ms": {
+              "max": 11.634703999789053,
+              "p50": 0.5143260000295413,
+              "p95": 0.5529740001293248,
+              "p99": 0.5529740001293248
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              1.0,
+              1.0
+            ],
+            "raw_win_rate": 0.0,
+            "score": 1.0
+          },
+          "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e": {
+            "D": 0,
+            "L": 1,
+            "W": 1,
+            "decision_roundtrip_ms": {
+              "max": 12.899011000172322,
+              "p50": 0.579674000164232,
+              "p95": 0.5919129998801509,
+              "p99": 0.5919129998801509
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          },
+          "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8": {
+            "D": 0,
+            "L": 2,
+            "W": 2,
+            "decision_roundtrip_ms": {
+              "max": 13.623803999962547,
+              "p50": 0.6533050000143703,
+              "p95": 0.6695500001114851,
+              "p99": 0.6695500001114851
+            },
+            "errors": 0,
+            "games": 4,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          }
+        },
+        "pair_distribution": [
+          4,
+          2,
+          1,
+          1
+        ],
+        "paired_ci95": [],
+        "raw_win_rate": 0.5625,
+        "score": 0.65625,
+        "target_generation": 1,
+        "timing_ok": true
+      },
+      "genome_id": "14fe8ca02044e1456dfcb08f996baf4242e9a76ad3649dfab6a00d3fd78f2240",
+      "matchups": {
+        "1": {
+          "D": 18,
+          "L": 29,
+          "W": 49,
+          "decision_roundtrip_ms": {},
+          "elite_members": [
+            "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+            "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8",
+            "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d",
+            "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e"
+          ],
+          "errors": 0,
+          "games": 96,
+          "illegal_actions": 0,
+          "main_champion": "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+          "member_results": {
+            "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f": {
+              "D": 7,
+              "L": 12,
+              "W": 29,
+              "decision_roundtrip_ms": {
+                "max": 21.011888999964867,
+                "p50": 0.5908520001867146,
+                "p95": 0.7052840001051663,
+                "p99": 0.7363400000031106
+              },
+              "errors": 0,
+              "games": 48,
+              "illegal_actions": 0,
+              "paired_ci95": [
+                0.5625,
+                0.78125
+              ],
+              "raw_win_rate": 0.0,
+              "score": 0.6770833333333334
+            },
+            "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d": {
+              "D": 6,
+              "L": 4,
+              "W": 6,
+              "decision_roundtrip_ms": {
+                "max": 12.675844999648689,
+                "p50": 0.5760990002272592,
+                "p95": 0.6420390000130283,
+                "p99": 0.649250000151369
+              },
+              "errors": 0,
+              "games": 16,
+              "illegal_actions": 0,
+              "paired_ci95": [
+                0.4375,
+                0.6875
+              ],
+              "raw_win_rate": 0.0,
+              "score": 0.5625
+            },
+            "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e": {
+              "D": 2,
+              "L": 7,
+              "W": 7,
+              "decision_roundtrip_ms": {
+                "max": 12.907990999792673,
+                "p50": 0.5494689999068214,
+                "p95": 0.6031499997334322,
+                "p99": 0.6431199999497039
+              },
+              "errors": 0,
+              "games": 16,
+              "illegal_actions": 0,
+              "paired_ci95": [
+                0.5,
+                0.5
+              ],
+              "raw_win_rate": 0.0,
+              "score": 0.5
+            },
+            "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8": {
+              "D": 3,
+              "L": 6,
+              "W": 7,
+              "decision_roundtrip_ms": {
+                "max": 13.340482000330667,
+                "p50": 0.5661739996867254,
+                "p95": 0.5949169999439619,
+                "p99": 0.6056540000827226
+              },
+              "errors": 0,
+              "games": 16,
+              "illegal_actions": 0,
+              "paired_ci95": [
+                0.28125,
+                0.75
+              ],
+              "raw_win_rate": 0.0,
+              "score": 0.53125
+            }
+          },
+          "pair_distribution": [
+            24,
+            8,
+            8,
+            8
+          ],
+          "paired_ci95": [],
+          "raw_win_rate": 0.5104166666666666,
+          "score": 0.6041666666666666,
+          "target_generation": 1,
+          "timing_ok": true
+        }
+      },
+      "minimum_lineage_score": 0.6041666666666666,
+      "novelty": 0.49124324324324325,
+      "promotion_gate_passed": false,
+      "reference": {
+        "games": 2,
+        "raw_win_rate": 1.0,
+        "score": 1.0,
+        "summaries": {
+          "gatherer-economy": {
+            "D": 0,
+            "L": 0,
+            "W": 2,
+            "decision_roundtrip_ms": {
+              "max": 21.189769999978125,
+              "p50": 1.061922999952003,
+              "p95": 1.0957250000274144,
+              "p99": 1.0957250000274144
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              1.0,
+              1.0
+            ],
+            "raw_win_rate": 0.0,
+            "score": 1.0
+          }
+        }
+      },
+      "reference_score": 1.0,
+      "screen_parent": {
+        "D": 1,
+        "L": 3,
+        "W": 4,
+        "decision_roundtrip_ms": {
+          "max": 38.98065900000347,
+          "p50": 0.9400200000300174,
+          "p95": 1.0471509999661066,
+          "p99": 1.0471509999661066
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "paired_ci95": [
+          0.5,
+          0.6875
+        ],
+        "raw_win_rate": 0.0,
+        "score": 0.5625,
+        "timing_ok": true
+      },
+      "selection_score": 0.6281249999999999,
+      "weighted_lineage_score": 0.6041666666666666
+    },
+    {
+      "dominance_gate_passed": false,
+      "evaluation_complete": false,
+      "g1_preview": {
+        "D": 3,
+        "L": 3,
+        "W": 10,
+        "decision_roundtrip_ms": {},
+        "elite_members": [
+          "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+          "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8",
+          "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d",
+          "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e"
+        ],
+        "errors": 0,
+        "games": 16,
+        "illegal_actions": 0,
+        "main_champion": "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+        "member_results": {
+          "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f": {
+            "D": 1,
+            "L": 1,
+            "W": 6,
+            "decision_roundtrip_ms": {
+              "max": 14.586827000130143,
+              "p50": 0.5984230001558899,
+              "p95": 0.6641620002483251,
+              "p99": 0.6641620002483251
+            },
+            "errors": 0,
+            "games": 8,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.625,
+              1.0
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.8125
+          },
+          "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d": {
+            "D": 2,
+            "L": 0,
+            "W": 0,
+            "decision_roundtrip_ms": {
+              "max": 13.997053999901254,
+              "p50": 0.6011469999975816,
+              "p95": 0.6477560000348603,
+              "p99": 0.6477560000348603
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          },
+          "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e": {
+            "D": 0,
+            "L": 1,
+            "W": 1,
+            "decision_roundtrip_ms": {
+              "max": 13.180930999624252,
+              "p50": 0.5960189996585541,
+              "p95": 0.6270950002544851,
+              "p99": 0.6270950002544851
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          },
+          "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8": {
+            "D": 0,
+            "L": 1,
+            "W": 3,
+            "decision_roundtrip_ms": {
+              "max": 13.606463000087388,
+              "p50": 0.5969899998490291,
+              "p95": 0.6071170000723214,
+              "p99": 0.6071170000723214
+            },
+            "errors": 0,
+            "games": 4,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              1.0
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.75
+          }
+        },
+        "pair_distribution": [
+          4,
+          2,
+          1,
+          1
+        ],
+        "paired_ci95": [],
+        "raw_win_rate": 0.625,
+        "score": 0.71875,
+        "target_generation": 1,
+        "timing_ok": true
+      },
+      "genome_id": "cca6f60593da5f86236370c01e08790149256164389b8cc3e6a23fd4ae1e1a9b",
+      "matchups": {
+        "1": {
+          "D": 19,
+          "L": 33,
+          "W": 44,
+          "decision_roundtrip_ms": {},
+          "elite_members": [
+            "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+            "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8",
+            "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d",
+            "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e"
+          ],
+          "errors": 0,
+          "games": 96,
+          "illegal_actions": 0,
+          "main_champion": "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+          "member_results": {
+            "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f": {
+              "D": 2,
+              "L": 18,
+              "W": 28,
+              "decision_roundtrip_ms": {
+                "max": 14.078453000365698,
+                "p50": 0.5604560001302161,
+                "p95": 0.6409569996321807,
+                "p99": 0.660316999983479
+              },
+              "errors": 0,
+              "games": 48,
+              "illegal_actions": 0,
+              "paired_ci95": [
+                0.46875,
+                0.7395833333333334
+              ],
+              "raw_win_rate": 0.0,
+              "score": 0.6041666666666666
+            },
+            "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d": {
+              "D": 8,
+              "L": 6,
+              "W": 2,
+              "decision_roundtrip_ms": {
+                "max": 12.740545000269776,
+                "p50": 0.5750790001002315,
+                "p95": 0.609239999903366,
+                "p99": 0.6440830002247822
+              },
+              "errors": 0,
+              "games": 16,
+              "illegal_actions": 0,
+              "paired_ci95": [
+                0.21875,
+                0.5625
+              ],
+              "raw_win_rate": 0.0,
+              "score": 0.375
+            },
+            "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e": {
+              "D": 4,
+              "L": 6,
+              "W": 6,
+              "decision_roundtrip_ms": {
+                "max": 14.45897999974477,
+                "p50": 0.639846000012767,
+                "p95": 0.6782139998904313,
+                "p99": 0.7005070001468994
+              },
+              "errors": 0,
+              "games": 16,
+              "illegal_actions": 0,
+              "paired_ci95": [
+                0.5,
+                0.5
+              ],
+              "raw_win_rate": 0.0,
+              "score": 0.5
+            },
+            "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8": {
+              "D": 5,
+              "L": 3,
+              "W": 8,
+              "decision_roundtrip_ms": {
+                "max": 14.390007999736554,
+                "p50": 0.5521640000551997,
+                "p95": 0.6859360000817105,
+                "p99": 0.7063259999995353
+              },
+              "errors": 0,
+              "games": 16,
+              "illegal_actions": 0,
+              "paired_ci95": [
+                0.53125,
+                0.78125
+              ],
+              "raw_win_rate": 0.0,
+              "score": 0.65625
+            }
+          },
+          "pair_distribution": [
+            24,
+            8,
+            8,
+            8
+          ],
+          "paired_ci95": [],
+          "raw_win_rate": 0.4583333333333333,
+          "score": 0.5572916666666666,
+          "target_generation": 1,
+          "timing_ok": true
+        }
+      },
+      "minimum_lineage_score": 0.5572916666666666,
+      "novelty": 0.49124324324324325,
+      "promotion_gate_passed": false,
+      "reference": {
+        "games": 2,
+        "raw_win_rate": 0.5,
+        "score": 0.75,
+        "summaries": {
+          "gatherer-economy": {
+            "D": 1,
+            "L": 0,
+            "W": 1,
+            "decision_roundtrip_ms": {
+              "max": 18.75888700010364,
+              "p50": 1.0151930000574794,
+              "p95": 1.0773869998956798,
+              "p99": 1.0773869998956798
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.75,
+              0.75
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.75
+          }
+        }
+      },
+      "reference_score": 0.75,
+      "screen_parent": {
+        "D": 3,
+        "L": 1,
+        "W": 4,
+        "decision_roundtrip_ms": {
+          "max": 56.86259799995241,
+          "p50": 0.9446269998534262,
+          "p95": 1.023124000084863,
+          "p99": 1.023124000084863
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "paired_ci95": [
+          0.5625,
+          0.75
+        ],
+        "raw_win_rate": 0.0,
+        "score": 0.6875,
+        "timing_ok": true
+      },
+      "selection_score": 0.6968749999999999,
+      "weighted_lineage_score": 0.5572916666666666
+    },
+    {
+      "dominance_gate_passed": false,
+      "evaluation_complete": false,
+      "g1_preview": {
+        "D": 3,
+        "L": 5,
+        "W": 8,
+        "decision_roundtrip_ms": {},
+        "elite_members": [
+          "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+          "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8",
+          "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d",
+          "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e"
+        ],
+        "errors": 0,
+        "games": 16,
+        "illegal_actions": 0,
+        "main_champion": "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+        "member_results": {
+          "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f": {
+            "D": 2,
+            "L": 3,
+            "W": 3,
+            "decision_roundtrip_ms": {
+              "max": 13.64444499995443,
+              "p50": 0.606444999903033,
+              "p95": 0.6645829998888075,
+              "p99": 0.6645829998888075
+            },
+            "errors": 0,
+            "games": 8,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.3125,
+              0.6875
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          },
+          "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d": {
+            "D": 0,
+            "L": 0,
+            "W": 2,
+            "decision_roundtrip_ms": {
+              "max": 12.577144999795564,
+              "p50": 0.4426979999152536,
+              "p95": 0.6090990000302554,
+              "p99": 0.6090990000302554
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              1.0,
+              1.0
+            ],
+            "raw_win_rate": 0.0,
+            "score": 1.0
+          },
+          "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e": {
+            "D": 0,
+            "L": 1,
+            "W": 1,
+            "decision_roundtrip_ms": {
+              "max": 11.050100999909773,
+              "p50": 0.5012960000385647,
+              "p95": 0.5678070001522428,
+              "p99": 0.5678070001522428
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          },
+          "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8": {
+            "D": 1,
+            "L": 1,
+            "W": 2,
+            "decision_roundtrip_ms": {
+              "max": 13.635342000270612,
+              "p50": 0.584071000048425,
+              "p95": 0.6632199997511634,
+              "p99": 0.6632199997511634
+            },
+            "errors": 0,
+            "games": 4,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.75
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.625
+          }
+        },
+        "pair_distribution": [
+          4,
+          2,
+          1,
+          1
+        ],
+        "paired_ci95": [],
+        "raw_win_rate": 0.5,
+        "score": 0.59375,
+        "target_generation": 1,
+        "timing_ok": true
+      },
+      "genome_id": "95987f756c292469471456a6ad9d7006477b5cdb8372822cb04aeb8e36c567bc",
+      "matchups": {
+        "1": {
+          "D": 28,
+          "L": 34,
+          "W": 34,
+          "decision_roundtrip_ms": {},
+          "elite_members": [
+            "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+            "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8",
+            "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d",
+            "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e"
+          ],
+          "errors": 0,
+          "games": 96,
+          "illegal_actions": 0,
+          "main_champion": "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+          "member_results": {
+            "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f": {
+              "D": 14,
+              "L": 14,
+              "W": 20,
+              "decision_roundtrip_ms": {
+                "max": 14.835761000085768,
+                "p50": 0.5797949997941032,
+                "p95": 0.686425999901985,
+                "p99": 0.7211090000964759
+              },
+              "errors": 0,
+              "games": 48,
+              "illegal_actions": 0,
+              "paired_ci95": [
+                0.46875,
+                0.65625
+              ],
+              "raw_win_rate": 0.0,
+              "score": 0.5625
+            },
+            "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d": {
+              "D": 10,
+              "L": 4,
+              "W": 2,
+              "decision_roundtrip_ms": {
+                "max": 14.287749000686745,
+                "p50": 0.6107130002419581,
+                "p95": 0.7186949997048941,
+                "p99": 0.7319449996430194
+              },
+              "errors": 0,
+              "games": 16,
+              "illegal_actions": 0,
+              "paired_ci95": [
+                0.3125,
+                0.5625
+              ],
+              "raw_win_rate": 0.0,
+              "score": 0.4375
+            },
+            "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e": {
+              "D": 4,
+              "L": 9,
+              "W": 3,
+              "decision_roundtrip_ms": {
+                "max": 13.712232000216318,
+                "p50": 0.5900910000491422,
+                "p95": 0.6626009999308735,
+                "p99": 0.7070869996823603
+              },
+              "errors": 0,
+              "games": 16,
+              "illegal_actions": 0,
+              "paired_ci95": [
+                0.15625,
+                0.46875
+              ],
+              "raw_win_rate": 0.0,
+              "score": 0.3125
+            },
+            "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8": {
+              "D": 0,
+              "L": 7,
+              "W": 9,
+              "decision_roundtrip_ms": {
+                "max": 15.389150999908452,
+                "p50": 0.583080000069458,
+                "p95": 0.6366309999066289,
+                "p99": 0.7009880000623525
+              },
+              "errors": 0,
+              "games": 16,
+              "illegal_actions": 0,
+              "paired_ci95": [
+                0.375,
+                0.75
+              ],
+              "raw_win_rate": 0.0,
+              "score": 0.5625
+            }
+          },
+          "pair_distribution": [
+            24,
+            8,
+            8,
+            8
+          ],
+          "paired_ci95": [],
+          "raw_win_rate": 0.3541666666666667,
+          "score": 0.5,
+          "target_generation": 1,
+          "timing_ok": true
+        }
+      },
+      "minimum_lineage_score": 0.5,
+      "novelty": 0.4997573260073261,
+      "promotion_gate_passed": false,
+      "reference": {
+        "games": 2,
+        "raw_win_rate": 1.0,
+        "score": 1.0,
+        "summaries": {
+          "gatherer-economy": {
+            "D": 0,
+            "L": 0,
+            "W": 2,
+            "decision_roundtrip_ms": {
+              "max": 28.665991000025315,
+              "p50": 0.8410200000525947,
+              "p95": 0.8677199998601282,
+              "p99": 0.8677199998601282
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              1.0,
+              1.0
+            ],
+            "raw_win_rate": 0.0,
+            "score": 1.0
+          }
+        }
+      },
+      "reference_score": 1.0,
+      "screen_parent": {
+        "D": 3,
+        "L": 2,
+        "W": 3,
+        "decision_roundtrip_ms": {
+          "max": 17.571330000009766,
+          "p50": 0.9007300000121177,
+          "p95": 0.990114999922298,
+          "p99": 0.990114999922298
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "paired_ci95": [
+          0.375,
+          0.75
+        ],
+        "raw_win_rate": 0.0,
+        "score": 0.5625,
+        "timing_ok": true
+      },
+      "selection_score": 0.6281249999999999,
+      "weighted_lineage_score": 0.5
+    }
+  ],
+  "hard_gates": {
+    "1": 0.55,
+    "2": 0.6,
+    "3": 0.65
+  },
+  "lineage_generation_after": 1,
+  "lineage_generation_before": 1,
+  "mutation_counts": {
+    "bundle": 13,
+    "crossover": 22,
+    "graph": 7,
+    "immigrant": 3,
+    "micro": 6,
+    "module": 13
+  },
+  "opponent_mix": {
+    "lineage": 0.85,
+    "reference": 0.15
+  },
+  "phase": "early",
+  "promoted": null,
+  "screened": [
+    {
+      "g1_preview": {
+        "D": 4,
+        "L": 6,
+        "W": 6,
+        "decision_roundtrip_ms": {},
+        "elite_members": [
+          "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+          "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8",
+          "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d",
+          "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e"
+        ],
+        "errors": 0,
+        "games": 16,
+        "illegal_actions": 0,
+        "main_champion": "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+        "member_results": {
+          "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f": {
+            "D": 2,
+            "L": 3,
+            "W": 3,
+            "decision_roundtrip_ms": {
+              "max": 12.562057000195637,
+              "p50": 0.5741559998568846,
+              "p95": 0.6182930001159548,
+              "p99": 0.6182930001159548
+            },
+            "errors": 0,
+            "games": 8,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          },
+          "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d": {
+            "D": 0,
+            "L": 1,
+            "W": 1,
+            "decision_roundtrip_ms": {
+              "max": 12.999677000152587,
+              "p50": 0.5663249999088293,
+              "p95": 0.6131459999778599,
+              "p99": 0.6131459999778599
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          },
+          "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e": {
+            "D": 1,
+            "L": 1,
+            "W": 0,
+            "decision_roundtrip_ms": {
+              "max": 13.355345000036323,
+              "p50": 0.49351600000591134,
+              "p95": 0.6072969999877387,
+              "p99": 0.6072969999877387
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.25,
+              0.25
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.25
+          },
+          "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8": {
+            "D": 1,
+            "L": 1,
+            "W": 2,
+            "decision_roundtrip_ms": {
+              "max": 13.954679000107717,
+              "p50": 0.6284689998210524,
+              "p95": 0.647516999833897,
+              "p99": 0.647516999833897
+            },
+            "errors": 0,
+            "games": 4,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.75
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.625
+          }
+        },
+        "pair_distribution": [
+          4,
+          2,
+          1,
+          1
+        ],
+        "paired_ci95": [],
+        "raw_win_rate": 0.375,
+        "score": 0.5,
+        "target_generation": 1,
+        "timing_ok": true
+      },
+      "genome_id": "ace5c55a3c12cc490da05b5a3f8842f9b9d324f11172ab4b95ca01e2c21ec72a",
+      "novelty": 0.7429844665138783,
+      "reference": {
+        "games": 2,
+        "raw_win_rate": 0.0,
+        "score": 0.5,
+        "summaries": {
+          "gatherer-economy": {
+            "D": 2,
+            "L": 0,
+            "W": 0,
+            "decision_roundtrip_ms": {
+              "max": 19.401184999992438,
+              "p50": 0.9198180000566936,
+              "p95": 1.0344519999989643,
+              "p99": 1.0344519999989643
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          }
+        }
+      },
+      "reference_score": 0.5,
+      "screen_parent": {
+        "D": 2,
+        "L": 1,
+        "W": 5,
+        "decision_roundtrip_ms": {
+          "max": 55.9845679999853,
+          "p50": 0.9170550000590083,
+          "p95": 1.0881729999709933,
+          "p99": 1.0881729999709933
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "paired_ci95": [
+          0.5625,
+          0.9375
+        ],
+        "raw_win_rate": 0.0,
+        "score": 0.75,
+        "timing_ok": true
+      },
+      "selection_score": 0.7124999999999999
+    },
+    {
+      "g1_preview": {
+        "D": 0,
+        "L": 8,
+        "W": 8,
+        "decision_roundtrip_ms": {},
+        "elite_members": [
+          "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+          "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8",
+          "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d",
+          "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e"
+        ],
+        "errors": 0,
+        "games": 16,
+        "illegal_actions": 0,
+        "main_champion": "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+        "member_results": {
+          "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f": {
+            "D": 0,
+            "L": 3,
+            "W": 5,
+            "decision_roundtrip_ms": {
+              "max": 13.118016000134958,
+              "p50": 0.5187729998397117,
+              "p95": 0.5885390000912594,
+              "p99": 0.5885390000912594
+            },
+            "errors": 0,
+            "games": 8,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.875
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.625
+          },
+          "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d": {
+            "D": 0,
+            "L": 1,
+            "W": 1,
+            "decision_roundtrip_ms": {
+              "max": 13.848228999904677,
+              "p50": 0.6645739999839861,
+              "p95": 0.6836019997535914,
+              "p99": 0.6836019997535914
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          },
+          "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e": {
+            "D": 0,
+            "L": 1,
+            "W": 1,
+            "decision_roundtrip_ms": {
+              "max": 11.925254999823665,
+              "p50": 0.562508999792044,
+              "p95": 0.5647030002364772,
+              "p99": 0.5647030002364772
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          },
+          "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8": {
+            "D": 0,
+            "L": 3,
+            "W": 1,
+            "decision_roundtrip_ms": {
+              "max": 13.553994999710994,
+              "p50": 0.5619180001303903,
+              "p95": 0.6894210000609746,
+              "p99": 0.6894210000609746
+            },
+            "errors": 0,
+            "games": 4,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.0,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.25
+          }
+        },
+        "pair_distribution": [
+          4,
+          2,
+          1,
+          1
+        ],
+        "paired_ci95": [],
+        "raw_win_rate": 0.5,
+        "score": 0.5,
+        "target_generation": 1,
+        "timing_ok": true
+      },
+      "genome_id": "156c855059dcdf385e9fb0ce5206533e28620641c93620cbb3ab670dfd4204e5",
+      "novelty": 0.45557470479830725,
+      "reference": {
+        "games": 2,
+        "raw_win_rate": 0.5,
+        "score": 0.5,
+        "summaries": {
+          "gatherer-economy": {
+            "D": 0,
+            "L": 1,
+            "W": 1,
+            "decision_roundtrip_ms": {
+              "max": 15.464125999869793,
+              "p50": 0.9760929999629298,
+              "p95": 1.0456620000240946,
+              "p99": 1.0456620000240946
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          }
+        }
+      },
+      "reference_score": 0.5,
+      "screen_parent": {
+        "D": 0,
+        "L": 2,
+        "W": 6,
+        "decision_roundtrip_ms": {
+          "max": 53.20095799993396,
+          "p50": 0.8962229999269766,
+          "p95": 1.0405200000604964,
+          "p99": 1.0405200000604964
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "paired_ci95": [
+          0.5,
+          1.0
+        ],
+        "raw_win_rate": 0.0,
+        "score": 0.75,
+        "timing_ok": true
+      },
+      "selection_score": 0.7124999999999999
+    },
+    {
+      "g1_preview": {
+        "D": 11,
+        "L": 2,
+        "W": 3,
+        "decision_roundtrip_ms": {},
+        "elite_members": [
+          "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+          "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8",
+          "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d",
+          "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e"
+        ],
+        "errors": 0,
+        "games": 16,
+        "illegal_actions": 0,
+        "main_champion": "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+        "member_results": {
+          "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f": {
+            "D": 4,
+            "L": 1,
+            "W": 3,
+            "decision_roundtrip_ms": {
+              "max": 14.105096000093909,
+              "p50": 0.5929559997639444,
+              "p95": 0.6612490001316473,
+              "p99": 0.6612490001316473
+            },
+            "errors": 0,
+            "games": 8,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.875
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.625
+          },
+          "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d": {
+            "D": 2,
+            "L": 0,
+            "W": 0,
+            "decision_roundtrip_ms": {
+              "max": 12.398770999880071,
+              "p50": 0.5486489999384503,
+              "p95": 0.5666259999088652,
+              "p99": 0.5666259999088652
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          },
+          "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e": {
+            "D": 2,
+            "L": 0,
+            "W": 0,
+            "decision_roundtrip_ms": {
+              "max": 12.52064500022243,
+              "p50": 0.5415079999693262,
+              "p95": 0.5984039999020752,
+              "p99": 0.5984039999020752
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          },
+          "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8": {
+            "D": 3,
+            "L": 1,
+            "W": 0,
+            "decision_roundtrip_ms": {
+              "max": 13.885966000088956,
+              "p50": 0.6126149996816821,
+              "p95": 0.6367419996422541,
+              "p99": 0.6367419996422541
+            },
+            "errors": 0,
+            "games": 4,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.25,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.375
+          }
+        },
+        "pair_distribution": [
+          4,
+          2,
+          1,
+          1
+        ],
+        "paired_ci95": [],
+        "raw_win_rate": 0.1875,
+        "score": 0.53125,
+        "target_generation": 1,
+        "timing_ok": true
+      },
+      "genome_id": "a8fbc73cfeffbcac9bd798ae00d2be94f4ffd629a8d82089ee6125e5c4d55f56",
+      "novelty": 0.6440951133542023,
+      "reference": {
+        "games": 2,
+        "raw_win_rate": 0.5,
+        "score": 0.75,
+        "summaries": {
+          "gatherer-economy": {
+            "D": 1,
+            "L": 0,
+            "W": 1,
+            "decision_roundtrip_ms": {
+              "max": 18.60017700005301,
+              "p50": 1.056113999993613,
+              "p95": 1.0603509999782545,
+              "p99": 1.0603509999782545
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.75,
+              0.75
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.75
+          }
+        }
+      },
+      "reference_score": 0.75,
+      "screen_parent": {
+        "D": 3,
+        "L": 1,
+        "W": 4,
+        "decision_roundtrip_ms": {
+          "max": 27.837414000032368,
+          "p50": 0.980770999831293,
+          "p95": 1.1040570000204752,
+          "p99": 1.1040570000204752
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "paired_ci95": [
+          0.5,
+          0.875
+        ],
+        "raw_win_rate": 0.0,
+        "score": 0.6875,
+        "timing_ok": true
+      },
+      "selection_score": 0.6968749999999999
+    },
+    {
+      "dominance_gate_passed": false,
+      "evaluation_complete": false,
+      "g1_preview": {
+        "D": 3,
+        "L": 3,
+        "W": 10,
+        "decision_roundtrip_ms": {},
+        "elite_members": [
+          "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+          "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8",
+          "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d",
+          "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e"
+        ],
+        "errors": 0,
+        "games": 16,
+        "illegal_actions": 0,
+        "main_champion": "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+        "member_results": {
+          "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f": {
+            "D": 1,
+            "L": 1,
+            "W": 6,
+            "decision_roundtrip_ms": {
+              "max": 14.586827000130143,
+              "p50": 0.5984230001558899,
+              "p95": 0.6641620002483251,
+              "p99": 0.6641620002483251
+            },
+            "errors": 0,
+            "games": 8,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.625,
+              1.0
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.8125
+          },
+          "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d": {
+            "D": 2,
+            "L": 0,
+            "W": 0,
+            "decision_roundtrip_ms": {
+              "max": 13.997053999901254,
+              "p50": 0.6011469999975816,
+              "p95": 0.6477560000348603,
+              "p99": 0.6477560000348603
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          },
+          "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e": {
+            "D": 0,
+            "L": 1,
+            "W": 1,
+            "decision_roundtrip_ms": {
+              "max": 13.180930999624252,
+              "p50": 0.5960189996585541,
+              "p95": 0.6270950002544851,
+              "p99": 0.6270950002544851
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          },
+          "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8": {
+            "D": 0,
+            "L": 1,
+            "W": 3,
+            "decision_roundtrip_ms": {
+              "max": 13.606463000087388,
+              "p50": 0.5969899998490291,
+              "p95": 0.6071170000723214,
+              "p99": 0.6071170000723214
+            },
+            "errors": 0,
+            "games": 4,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              1.0
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.75
+          }
+        },
+        "pair_distribution": [
+          4,
+          2,
+          1,
+          1
+        ],
+        "paired_ci95": [],
+        "raw_win_rate": 0.625,
+        "score": 0.71875,
+        "target_generation": 1,
+        "timing_ok": true
+      },
+      "genome_id": "cca6f60593da5f86236370c01e08790149256164389b8cc3e6a23fd4ae1e1a9b",
+      "matchups": {
+        "1": {
+          "D": 19,
+          "L": 33,
+          "W": 44,
+          "decision_roundtrip_ms": {},
+          "elite_members": [
+            "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+            "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8",
+            "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d",
+            "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e"
+          ],
+          "errors": 0,
+          "games": 96,
+          "illegal_actions": 0,
+          "main_champion": "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+          "member_results": {
+            "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f": {
+              "D": 2,
+              "L": 18,
+              "W": 28,
+              "decision_roundtrip_ms": {
+                "max": 14.078453000365698,
+                "p50": 0.5604560001302161,
+                "p95": 0.6409569996321807,
+                "p99": 0.660316999983479
+              },
+              "errors": 0,
+              "games": 48,
+              "illegal_actions": 0,
+              "paired_ci95": [
+                0.46875,
+                0.7395833333333334
+              ],
+              "raw_win_rate": 0.0,
+              "score": 0.6041666666666666
+            },
+            "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d": {
+              "D": 8,
+              "L": 6,
+              "W": 2,
+              "decision_roundtrip_ms": {
+                "max": 12.740545000269776,
+                "p50": 0.5750790001002315,
+                "p95": 0.609239999903366,
+                "p99": 0.6440830002247822
+              },
+              "errors": 0,
+              "games": 16,
+              "illegal_actions": 0,
+              "paired_ci95": [
+                0.21875,
+                0.5625
+              ],
+              "raw_win_rate": 0.0,
+              "score": 0.375
+            },
+            "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e": {
+              "D": 4,
+              "L": 6,
+              "W": 6,
+              "decision_roundtrip_ms": {
+                "max": 14.45897999974477,
+                "p50": 0.639846000012767,
+                "p95": 0.6782139998904313,
+                "p99": 0.7005070001468994
+              },
+              "errors": 0,
+              "games": 16,
+              "illegal_actions": 0,
+              "paired_ci95": [
+                0.5,
+                0.5
+              ],
+              "raw_win_rate": 0.0,
+              "score": 0.5
+            },
+            "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8": {
+              "D": 5,
+              "L": 3,
+              "W": 8,
+              "decision_roundtrip_ms": {
+                "max": 14.390007999736554,
+                "p50": 0.5521640000551997,
+                "p95": 0.6859360000817105,
+                "p99": 0.7063259999995353
+              },
+              "errors": 0,
+              "games": 16,
+              "illegal_actions": 0,
+              "paired_ci95": [
+                0.53125,
+                0.78125
+              ],
+              "raw_win_rate": 0.0,
+              "score": 0.65625
+            }
+          },
+          "pair_distribution": [
+            24,
+            8,
+            8,
+            8
+          ],
+          "paired_ci95": [],
+          "raw_win_rate": 0.4583333333333333,
+          "score": 0.5572916666666666,
+          "target_generation": 1,
+          "timing_ok": true
+        }
+      },
+      "minimum_lineage_score": 0.5572916666666666,
+      "novelty": 0.49124324324324325,
+      "promotion_gate_passed": false,
+      "reference": {
+        "games": 2,
+        "raw_win_rate": 0.5,
+        "score": 0.75,
+        "summaries": {
+          "gatherer-economy": {
+            "D": 1,
+            "L": 0,
+            "W": 1,
+            "decision_roundtrip_ms": {
+              "max": 18.75888700010364,
+              "p50": 1.0151930000574794,
+              "p95": 1.0773869998956798,
+              "p99": 1.0773869998956798
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.75,
+              0.75
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.75
+          }
+        }
+      },
+      "reference_score": 0.75,
+      "screen_parent": {
+        "D": 3,
+        "L": 1,
+        "W": 4,
+        "decision_roundtrip_ms": {
+          "max": 56.86259799995241,
+          "p50": 0.9446269998534262,
+          "p95": 1.023124000084863,
+          "p99": 1.023124000084863
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "paired_ci95": [
+          0.5625,
+          0.75
+        ],
+        "raw_win_rate": 0.0,
+        "score": 0.6875,
+        "timing_ok": true
+      },
+      "selection_score": 0.6968749999999999,
+      "weighted_lineage_score": 0.5572916666666666
+    },
+    {
+      "g1_preview": {
+        "D": 5,
+        "L": 10,
+        "W": 1,
+        "decision_roundtrip_ms": {},
+        "elite_members": [
+          "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+          "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8",
+          "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d",
+          "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e"
+        ],
+        "errors": 0,
+        "games": 16,
+        "illegal_actions": 0,
+        "main_champion": "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+        "member_results": {
+          "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f": {
+            "D": 3,
+            "L": 5,
+            "W": 0,
+            "decision_roundtrip_ms": {
+              "max": 12.758835000113322,
+              "p50": 0.5811570003970701,
+              "p95": 0.6493490000138991,
+              "p99": 0.6493490000138991
+            },
+            "errors": 0,
+            "games": 8,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.0625,
+              0.25
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.1875
+          },
+          "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d": {
+            "D": 0,
+            "L": 2,
+            "W": 0,
+            "decision_roundtrip_ms": {
+              "max": 12.782712999978685,
+              "p50": 0.5732750000788656,
+              "p95": 0.6154789998618071,
+              "p99": 0.6154789998618071
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.0,
+              0.0
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.0
+          },
+          "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e": {
+            "D": 0,
+            "L": 2,
+            "W": 0,
+            "decision_roundtrip_ms": {
+              "max": 12.367106000056083,
+              "p50": 0.6122330000835063,
+              "p95": 0.6435209998016944,
+              "p99": 0.6435209998016944
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.0,
+              0.0
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.0
+          },
+          "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8": {
+            "D": 2,
+            "L": 1,
+            "W": 1,
+            "decision_roundtrip_ms": {
+              "max": 13.051286000063556,
+              "p50": 0.5574909996539645,
+              "p95": 0.6103709997660189,
+              "p99": 0.6103709997660189
+            },
+            "errors": 0,
+            "games": 4,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          }
+        },
+        "pair_distribution": [
+          4,
+          2,
+          1,
+          1
+        ],
+        "paired_ci95": [],
+        "raw_win_rate": 0.0625,
+        "score": 0.21875,
+        "target_generation": 1,
+        "timing_ok": true
+      },
+      "genome_id": "a844e6e2c3429c398d920bf12c47f56f6921d678d109579eb7f63eb5095dcc98",
+      "novelty": 0.5070289855072463,
+      "reference": {
+        "games": 2,
+        "raw_win_rate": 0.5,
+        "score": 0.75,
+        "summaries": {
+          "gatherer-economy": {
+            "D": 1,
+            "L": 0,
+            "W": 1,
+            "decision_roundtrip_ms": {
+              "max": 44.04113900000084,
+              "p50": 0.925467000001845,
+              "p95": 0.9695340000916985,
+              "p99": 0.9695340000916985
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.75,
+              0.75
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.75
+          }
+        }
+      },
+      "reference_score": 0.75,
+      "screen_parent": {
+        "D": 0,
+        "L": 3,
+        "W": 5,
+        "decision_roundtrip_ms": {
+          "max": 20.995184999947014,
+          "p50": 0.9042550000231131,
+          "p95": 1.1740820000341046,
+          "p99": 1.1740820000341046
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "paired_ci95": [
+          0.5,
+          0.875
+        ],
+        "raw_win_rate": 0.0,
+        "score": 0.625,
+        "timing_ok": true
+      },
+      "selection_score": 0.64375
+    },
+    {
+      "dominance_gate_passed": false,
+      "evaluation_complete": false,
+      "g1_preview": {
+        "D": 3,
+        "L": 5,
+        "W": 8,
+        "decision_roundtrip_ms": {},
+        "elite_members": [
+          "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+          "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8",
+          "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d",
+          "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e"
+        ],
+        "errors": 0,
+        "games": 16,
+        "illegal_actions": 0,
+        "main_champion": "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+        "member_results": {
+          "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f": {
+            "D": 2,
+            "L": 3,
+            "W": 3,
+            "decision_roundtrip_ms": {
+              "max": 13.64444499995443,
+              "p50": 0.606444999903033,
+              "p95": 0.6645829998888075,
+              "p99": 0.6645829998888075
+            },
+            "errors": 0,
+            "games": 8,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.3125,
+              0.6875
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          },
+          "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d": {
+            "D": 0,
+            "L": 0,
+            "W": 2,
+            "decision_roundtrip_ms": {
+              "max": 12.577144999795564,
+              "p50": 0.4426979999152536,
+              "p95": 0.6090990000302554,
+              "p99": 0.6090990000302554
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              1.0,
+              1.0
+            ],
+            "raw_win_rate": 0.0,
+            "score": 1.0
+          },
+          "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e": {
+            "D": 0,
+            "L": 1,
+            "W": 1,
+            "decision_roundtrip_ms": {
+              "max": 11.050100999909773,
+              "p50": 0.5012960000385647,
+              "p95": 0.5678070001522428,
+              "p99": 0.5678070001522428
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          },
+          "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8": {
+            "D": 1,
+            "L": 1,
+            "W": 2,
+            "decision_roundtrip_ms": {
+              "max": 13.635342000270612,
+              "p50": 0.584071000048425,
+              "p95": 0.6632199997511634,
+              "p99": 0.6632199997511634
+            },
+            "errors": 0,
+            "games": 4,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.75
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.625
+          }
+        },
+        "pair_distribution": [
+          4,
+          2,
+          1,
+          1
+        ],
+        "paired_ci95": [],
+        "raw_win_rate": 0.5,
+        "score": 0.59375,
+        "target_generation": 1,
+        "timing_ok": true
+      },
+      "genome_id": "95987f756c292469471456a6ad9d7006477b5cdb8372822cb04aeb8e36c567bc",
+      "matchups": {
+        "1": {
+          "D": 28,
+          "L": 34,
+          "W": 34,
+          "decision_roundtrip_ms": {},
+          "elite_members": [
+            "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+            "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8",
+            "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d",
+            "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e"
+          ],
+          "errors": 0,
+          "games": 96,
+          "illegal_actions": 0,
+          "main_champion": "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+          "member_results": {
+            "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f": {
+              "D": 14,
+              "L": 14,
+              "W": 20,
+              "decision_roundtrip_ms": {
+                "max": 14.835761000085768,
+                "p50": 0.5797949997941032,
+                "p95": 0.686425999901985,
+                "p99": 0.7211090000964759
+              },
+              "errors": 0,
+              "games": 48,
+              "illegal_actions": 0,
+              "paired_ci95": [
+                0.46875,
+                0.65625
+              ],
+              "raw_win_rate": 0.0,
+              "score": 0.5625
+            },
+            "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d": {
+              "D": 10,
+              "L": 4,
+              "W": 2,
+              "decision_roundtrip_ms": {
+                "max": 14.287749000686745,
+                "p50": 0.6107130002419581,
+                "p95": 0.7186949997048941,
+                "p99": 0.7319449996430194
+              },
+              "errors": 0,
+              "games": 16,
+              "illegal_actions": 0,
+              "paired_ci95": [
+                0.3125,
+                0.5625
+              ],
+              "raw_win_rate": 0.0,
+              "score": 0.4375
+            },
+            "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e": {
+              "D": 4,
+              "L": 9,
+              "W": 3,
+              "decision_roundtrip_ms": {
+                "max": 13.712232000216318,
+                "p50": 0.5900910000491422,
+                "p95": 0.6626009999308735,
+                "p99": 0.7070869996823603
+              },
+              "errors": 0,
+              "games": 16,
+              "illegal_actions": 0,
+              "paired_ci95": [
+                0.15625,
+                0.46875
+              ],
+              "raw_win_rate": 0.0,
+              "score": 0.3125
+            },
+            "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8": {
+              "D": 0,
+              "L": 7,
+              "W": 9,
+              "decision_roundtrip_ms": {
+                "max": 15.389150999908452,
+                "p50": 0.583080000069458,
+                "p95": 0.6366309999066289,
+                "p99": 0.7009880000623525
+              },
+              "errors": 0,
+              "games": 16,
+              "illegal_actions": 0,
+              "paired_ci95": [
+                0.375,
+                0.75
+              ],
+              "raw_win_rate": 0.0,
+              "score": 0.5625
+            }
+          },
+          "pair_distribution": [
+            24,
+            8,
+            8,
+            8
+          ],
+          "paired_ci95": [],
+          "raw_win_rate": 0.3541666666666667,
+          "score": 0.5,
+          "target_generation": 1,
+          "timing_ok": true
+        }
+      },
+      "minimum_lineage_score": 0.5,
+      "novelty": 0.4997573260073261,
+      "promotion_gate_passed": false,
+      "reference": {
+        "games": 2,
+        "raw_win_rate": 1.0,
+        "score": 1.0,
+        "summaries": {
+          "gatherer-economy": {
+            "D": 0,
+            "L": 0,
+            "W": 2,
+            "decision_roundtrip_ms": {
+              "max": 28.665991000025315,
+              "p50": 0.8410200000525947,
+              "p95": 0.8677199998601282,
+              "p99": 0.8677199998601282
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              1.0,
+              1.0
+            ],
+            "raw_win_rate": 0.0,
+            "score": 1.0
+          }
+        }
+      },
+      "reference_score": 1.0,
+      "screen_parent": {
+        "D": 3,
+        "L": 2,
+        "W": 3,
+        "decision_roundtrip_ms": {
+          "max": 17.571330000009766,
+          "p50": 0.9007300000121177,
+          "p95": 0.990114999922298,
+          "p99": 0.990114999922298
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "paired_ci95": [
+          0.375,
+          0.75
+        ],
+        "raw_win_rate": 0.0,
+        "score": 0.5625,
+        "timing_ok": true
+      },
+      "selection_score": 0.6281249999999999,
+      "weighted_lineage_score": 0.5
+    },
+    {
+      "dominance_gate_passed": false,
+      "evaluation_complete": false,
+      "g1_preview": {
+        "D": 3,
+        "L": 4,
+        "W": 9,
+        "decision_roundtrip_ms": {},
+        "elite_members": [
+          "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+          "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8",
+          "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d",
+          "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e"
+        ],
+        "errors": 0,
+        "games": 16,
+        "illegal_actions": 0,
+        "main_champion": "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+        "member_results": {
+          "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f": {
+            "D": 3,
+            "L": 1,
+            "W": 4,
+            "decision_roundtrip_ms": {
+              "max": 12.468962000184547,
+              "p50": 0.5696790003639762,
+              "p95": 0.6036609997863707,
+              "p99": 0.6036609997863707
+            },
+            "errors": 0,
+            "games": 8,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.875
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.6875
+          },
+          "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d": {
+            "D": 0,
+            "L": 0,
+            "W": 2,
+            "decision_roundtrip_ms": {
+              "max": 11.634703999789053,
+              "p50": 0.5143260000295413,
+              "p95": 0.5529740001293248,
+              "p99": 0.5529740001293248
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              1.0,
+              1.0
+            ],
+            "raw_win_rate": 0.0,
+            "score": 1.0
+          },
+          "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e": {
+            "D": 0,
+            "L": 1,
+            "W": 1,
+            "decision_roundtrip_ms": {
+              "max": 12.899011000172322,
+              "p50": 0.579674000164232,
+              "p95": 0.5919129998801509,
+              "p99": 0.5919129998801509
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          },
+          "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8": {
+            "D": 0,
+            "L": 2,
+            "W": 2,
+            "decision_roundtrip_ms": {
+              "max": 13.623803999962547,
+              "p50": 0.6533050000143703,
+              "p95": 0.6695500001114851,
+              "p99": 0.6695500001114851
+            },
+            "errors": 0,
+            "games": 4,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          }
+        },
+        "pair_distribution": [
+          4,
+          2,
+          1,
+          1
+        ],
+        "paired_ci95": [],
+        "raw_win_rate": 0.5625,
+        "score": 0.65625,
+        "target_generation": 1,
+        "timing_ok": true
+      },
+      "genome_id": "14fe8ca02044e1456dfcb08f996baf4242e9a76ad3649dfab6a00d3fd78f2240",
+      "matchups": {
+        "1": {
+          "D": 18,
+          "L": 29,
+          "W": 49,
+          "decision_roundtrip_ms": {},
+          "elite_members": [
+            "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+            "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8",
+            "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d",
+            "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e"
+          ],
+          "errors": 0,
+          "games": 96,
+          "illegal_actions": 0,
+          "main_champion": "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+          "member_results": {
+            "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f": {
+              "D": 7,
+              "L": 12,
+              "W": 29,
+              "decision_roundtrip_ms": {
+                "max": 21.011888999964867,
+                "p50": 0.5908520001867146,
+                "p95": 0.7052840001051663,
+                "p99": 0.7363400000031106
+              },
+              "errors": 0,
+              "games": 48,
+              "illegal_actions": 0,
+              "paired_ci95": [
+                0.5625,
+                0.78125
+              ],
+              "raw_win_rate": 0.0,
+              "score": 0.6770833333333334
+            },
+            "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d": {
+              "D": 6,
+              "L": 4,
+              "W": 6,
+              "decision_roundtrip_ms": {
+                "max": 12.675844999648689,
+                "p50": 0.5760990002272592,
+                "p95": 0.6420390000130283,
+                "p99": 0.649250000151369
+              },
+              "errors": 0,
+              "games": 16,
+              "illegal_actions": 0,
+              "paired_ci95": [
+                0.4375,
+                0.6875
+              ],
+              "raw_win_rate": 0.0,
+              "score": 0.5625
+            },
+            "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e": {
+              "D": 2,
+              "L": 7,
+              "W": 7,
+              "decision_roundtrip_ms": {
+                "max": 12.907990999792673,
+                "p50": 0.5494689999068214,
+                "p95": 0.6031499997334322,
+                "p99": 0.6431199999497039
+              },
+              "errors": 0,
+              "games": 16,
+              "illegal_actions": 0,
+              "paired_ci95": [
+                0.5,
+                0.5
+              ],
+              "raw_win_rate": 0.0,
+              "score": 0.5
+            },
+            "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8": {
+              "D": 3,
+              "L": 6,
+              "W": 7,
+              "decision_roundtrip_ms": {
+                "max": 13.340482000330667,
+                "p50": 0.5661739996867254,
+                "p95": 0.5949169999439619,
+                "p99": 0.6056540000827226
+              },
+              "errors": 0,
+              "games": 16,
+              "illegal_actions": 0,
+              "paired_ci95": [
+                0.28125,
+                0.75
+              ],
+              "raw_win_rate": 0.0,
+              "score": 0.53125
+            }
+          },
+          "pair_distribution": [
+            24,
+            8,
+            8,
+            8
+          ],
+          "paired_ci95": [],
+          "raw_win_rate": 0.5104166666666666,
+          "score": 0.6041666666666666,
+          "target_generation": 1,
+          "timing_ok": true
+        }
+      },
+      "minimum_lineage_score": 0.6041666666666666,
+      "novelty": 0.49124324324324325,
+      "promotion_gate_passed": false,
+      "reference": {
+        "games": 2,
+        "raw_win_rate": 1.0,
+        "score": 1.0,
+        "summaries": {
+          "gatherer-economy": {
+            "D": 0,
+            "L": 0,
+            "W": 2,
+            "decision_roundtrip_ms": {
+              "max": 21.189769999978125,
+              "p50": 1.061922999952003,
+              "p95": 1.0957250000274144,
+              "p99": 1.0957250000274144
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              1.0,
+              1.0
+            ],
+            "raw_win_rate": 0.0,
+            "score": 1.0
+          }
+        }
+      },
+      "reference_score": 1.0,
+      "screen_parent": {
+        "D": 1,
+        "L": 3,
+        "W": 4,
+        "decision_roundtrip_ms": {
+          "max": 38.98065900000347,
+          "p50": 0.9400200000300174,
+          "p95": 1.0471509999661066,
+          "p99": 1.0471509999661066
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "paired_ci95": [
+          0.5,
+          0.6875
+        ],
+        "raw_win_rate": 0.0,
+        "score": 0.5625,
+        "timing_ok": true
+      },
+      "selection_score": 0.6281249999999999,
+      "weighted_lineage_score": 0.6041666666666666
+    },
+    {
+      "g1_preview": {
+        "D": 2,
+        "L": 8,
+        "W": 6,
+        "decision_roundtrip_ms": {},
+        "elite_members": [
+          "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+          "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8",
+          "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d",
+          "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e"
+        ],
+        "errors": 0,
+        "games": 16,
+        "illegal_actions": 0,
+        "main_champion": "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+        "member_results": {
+          "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f": {
+            "D": 1,
+            "L": 4,
+            "W": 3,
+            "decision_roundtrip_ms": {
+              "max": 11.928718000035587,
+              "p50": 0.5553780001719133,
+              "p95": 0.5897989999539277,
+              "p99": 0.5897989999539277
+            },
+            "errors": 0,
+            "games": 8,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.3125,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.4375
+          },
+          "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d": {
+            "D": 1,
+            "L": 1,
+            "W": 0,
+            "decision_roundtrip_ms": {
+              "max": 13.458421999985148,
+              "p50": 0.61654199998884,
+              "p95": 0.6452239999816811,
+              "p99": 0.6452239999816811
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.25,
+              0.25
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.25
+          },
+          "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e": {
+            "D": 0,
+            "L": 1,
+            "W": 1,
+            "decision_roundtrip_ms": {
+              "max": 11.052046000258997,
+              "p50": 0.5058030001237057,
+              "p95": 0.5452239997794095,
+              "p99": 0.5452239997794095
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          },
+          "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8": {
+            "D": 0,
+            "L": 2,
+            "W": 2,
+            "decision_roundtrip_ms": {
+              "max": 11.881785999776184,
+              "p50": 0.5660239999087935,
+              "p95": 0.6118659998719522,
+              "p99": 0.6118659998719522
+            },
+            "errors": 0,
+            "games": 4,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          }
+        },
+        "pair_distribution": [
+          4,
+          2,
+          1,
+          1
+        ],
+        "paired_ci95": [],
+        "raw_win_rate": 0.375,
+        "score": 0.4375,
+        "target_generation": 1,
+        "timing_ok": true
+      },
+      "genome_id": "adec73bf33d5875a42d5ac589cf326ffdcbdee6565aa1477883acbf565516251",
+      "novelty": 0.07142857142857142,
+      "reference": {
+        "games": 2,
+        "raw_win_rate": 1.0,
+        "score": 1.0,
+        "summaries": {
+          "gatherer-economy": {
+            "D": 0,
+            "L": 0,
+            "W": 2,
+            "decision_roundtrip_ms": {
+              "max": 22.08591700002671,
+              "p50": 1.0087320000593536,
+              "p95": 1.1428439999576767,
+              "p99": 1.1428439999576767
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              1.0,
+              1.0
+            ],
+            "raw_win_rate": 0.0,
+            "score": 1.0
+          }
+        }
+      },
+      "reference_score": 1.0,
+      "screen_parent": {
+        "D": 1,
+        "L": 3,
+        "W": 4,
+        "decision_roundtrip_ms": {
+          "max": 54.39128599999776,
+          "p50": 0.9155920000125661,
+          "p95": 1.0986890000026506,
+          "p99": 1.0986890000026506
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "paired_ci95": [
+          0.5,
+          0.6875
+        ],
+        "raw_win_rate": 0.0,
+        "score": 0.5625,
+        "timing_ok": true
+      },
+      "selection_score": 0.6281249999999999
+    },
+    {
+      "g1_preview": {
+        "D": 7,
+        "L": 2,
+        "W": 7,
+        "decision_roundtrip_ms": {},
+        "elite_members": [
+          "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+          "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8",
+          "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d",
+          "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e"
+        ],
+        "errors": 0,
+        "games": 16,
+        "illegal_actions": 0,
+        "main_champion": "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+        "member_results": {
+          "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f": {
+            "D": 3,
+            "L": 1,
+            "W": 4,
+            "decision_roundtrip_ms": {
+              "max": 13.882733000173175,
+              "p50": 0.6035900000824768,
+              "p95": 0.6461650000346708,
+              "p99": 0.6461650000346708
+            },
+            "errors": 0,
+            "games": 8,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.875
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.6875
+          },
+          "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d": {
+            "D": 2,
+            "L": 0,
+            "W": 0,
+            "decision_roundtrip_ms": {
+              "max": 12.318002000029082,
+              "p50": 0.5832709998685459,
+              "p95": 0.5993649997435568,
+              "p99": 0.5993649997435568
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          },
+          "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e": {
+            "D": 0,
+            "L": 1,
+            "W": 1,
+            "decision_roundtrip_ms": {
+              "max": 14.065462999951706,
+              "p50": 0.5378519999794662,
+              "p95": 0.5614179999611224,
+              "p99": 0.5614179999611224
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          },
+          "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8": {
+            "D": 2,
+            "L": 0,
+            "W": 2,
+            "decision_roundtrip_ms": {
+              "max": 12.6385579997077,
+              "p50": 0.587837000239233,
+              "p95": 0.6238209998628008,
+              "p99": 0.6238209998628008
+            },
+            "errors": 0,
+            "games": 4,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.75,
+              0.75
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.75
+          }
+        },
+        "pair_distribution": [
+          4,
+          2,
+          1,
+          1
+        ],
+        "paired_ci95": [],
+        "raw_win_rate": 0.4375,
+        "score": 0.65625,
+        "target_generation": 1,
+        "timing_ok": true
+      },
+      "genome_id": "38b97fde42d464f426d195d95b20b43691a969f06bb1b328995d04ad5ec4a274",
+      "novelty": 0.49447181171319105,
+      "reference": {
+        "games": 2,
+        "raw_win_rate": 0.5,
+        "score": 0.5,
+        "summaries": {
+          "gatherer-economy": {
+            "D": 0,
+            "L": 1,
+            "W": 1,
+            "decision_roundtrip_ms": {
+              "max": 15.516675000014857,
+              "p50": 0.850281999987601,
+              "p95": 0.9758059999853685,
+              "p99": 0.9758059999853685
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          }
+        }
+      },
+      "reference_score": 0.5,
+      "screen_parent": {
+        "D": 2,
+        "L": 2,
+        "W": 4,
+        "decision_roundtrip_ms": {
+          "max": 25.33026400004701,
+          "p50": 0.9930680000138636,
+          "p95": 1.1402709999970284,
+          "p99": 1.1402709999970284
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "paired_ci95": [
+          0.375,
+          0.875
+        ],
+        "raw_win_rate": 0.0,
+        "score": 0.625,
+        "timing_ok": true
+      },
+      "selection_score": 0.60625
+    },
+    {
+      "g1_preview": {
+        "D": 3,
+        "L": 8,
+        "W": 5,
+        "decision_roundtrip_ms": {},
+        "elite_members": [
+          "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+          "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8",
+          "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d",
+          "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e"
+        ],
+        "errors": 0,
+        "games": 16,
+        "illegal_actions": 0,
+        "main_champion": "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+        "member_results": {
+          "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f": {
+            "D": 2,
+            "L": 3,
+            "W": 3,
+            "decision_roundtrip_ms": {
+              "max": 14.991678000114916,
+              "p50": 0.5974020000394376,
+              "p95": 0.6917040000189445,
+              "p99": 0.6917040000189445
+            },
+            "errors": 0,
+            "games": 8,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.125,
+              0.875
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          },
+          "968f7b3c28044a8f3d779f95e8cadc5d1463c07b45624a5976d3199417d8ab3d": {
+            "D": 0,
+            "L": 1,
+            "W": 1,
+            "decision_roundtrip_ms": {
+              "max": 13.004598999941663,
+              "p50": 0.6199250001373002,
+              "p95": 0.6227600001693645,
+              "p99": 0.6227600001693645
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          },
+          "af89cd76c9e06257b509c9a8cb7c569471d7d8b42dec838bf0fb6dc8b678c80e": {
+            "D": 1,
+            "L": 1,
+            "W": 0,
+            "decision_roundtrip_ms": {
+              "max": 10.872760999973252,
+              "p50": 0.4493390001698572,
+              "p95": 0.4803749998245621,
+              "p99": 0.4803749998245621
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.25,
+              0.25
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.25
+          },
+          "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8": {
+            "D": 0,
+            "L": 3,
+            "W": 1,
+            "decision_roundtrip_ms": {
+              "max": 12.902811000003567,
+              "p50": 0.5748880003011436,
+              "p95": 0.6006560001878825,
+              "p99": 0.6006560001878825
+            },
+            "errors": 0,
+            "games": 4,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.0,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.25
+          }
+        },
+        "pair_distribution": [
+          4,
+          2,
+          1,
+          1
+        ],
+        "paired_ci95": [],
+        "raw_win_rate": 0.3125,
+        "score": 0.40625,
+        "target_generation": 1,
+        "timing_ok": true
+      },
+      "genome_id": "bef49fa72b45e04dc8e5a0952b568799b7a9e583eff66c38aff4f97c036e9751",
+      "novelty": 0.0,
+      "reference": {
+        "games": 2,
+        "raw_win_rate": 0.5,
+        "score": 0.5,
+        "summaries": {
+          "gatherer-economy": {
+            "D": 0,
+            "L": 1,
+            "W": 1,
+            "decision_roundtrip_ms": {
+              "max": 34.062108999933116,
+              "p50": 0.79084399999374,
+              "p95": 0.8999290000701876,
+              "p99": 0.8999290000701876
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              0.5,
+              0.5
+            ],
+            "raw_win_rate": 0.0,
+            "score": 0.5
+          }
+        }
+      },
+      "reference_score": 0.5,
+      "screen_parent": {
+        "D": 0,
+        "L": 3,
+        "W": 5,
+        "decision_roundtrip_ms": {
+          "max": 36.06819800006633,
+          "p50": 0.9112860000186629,
+          "p95": 1.0568960001364758,
+          "p99": 1.0568960001364758
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "paired_ci95": [
+          0.5,
+          0.875
+        ],
+        "raw_win_rate": 0.0,
+        "score": 0.625,
+        "timing_ok": true
+      },
+      "selection_score": 0.60625
+    },
+    {
+      "genome_id": "3e14be19071c17bd695a6c30e1c5ab9496d5c37da773fb057104ec04f3e65d2b",
+      "novelty": 0.555952380952381,
+      "reference": {
+        "games": 2,
+        "raw_win_rate": 1.0,
+        "score": 1.0,
+        "summaries": {
+          "gatherer-economy": {
+            "D": 0,
+            "L": 0,
+            "W": 2,
+            "decision_roundtrip_ms": {
+              "max": 37.84522399996604,
+              "p50": 0.8551710000119783,
+              "p95": 1.0592789999464003,
+              "p99": 1.0592789999464003
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              1.0,
+              1.0
+            ],
+            "raw_win_rate": 0.0,
+            "score": 1.0
+          }
+        }
+      },
+      "reference_score": 1.0,
+      "screen_parent": {
+        "D": 0,
+        "L": 4,
+        "W": 4,
+        "decision_roundtrip_ms": {
+          "max": 17.59441199999401,
+          "p50": 0.9651970000277288,
+          "p95": 1.004064999960974,
+          "p99": 1.004064999960974
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "paired_ci95": [
+          0.5,
+          0.5
+        ],
+        "raw_win_rate": 0.0,
+        "score": 0.5,
+        "timing_ok": true
+      },
+      "selection_score": 0.575
+    },
+    {
+      "genome_id": "998e772f3209809ad93f28021b1e4ddc04055ec1577ba66bb5b1fa576160bf11",
+      "novelty": 0.2598790322580645,
+      "reference": {
+        "games": 2,
+        "raw_win_rate": 1.0,
+        "score": 1.0,
+        "summaries": {
+          "gatherer-economy": {
+            "D": 0,
+            "L": 0,
+            "W": 2,
+            "decision_roundtrip_ms": {
+              "max": 42.59005100016111,
+              "p50": 0.7811890000084531,
+              "p95": 0.8891019999737182,
+              "p99": 0.8891019999737182
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              1.0,
+              1.0
+            ],
+            "raw_win_rate": 0.0,
+            "score": 1.0
+          }
+        }
+      },
+      "reference_score": 1.0,
+      "screen_parent": {
+        "D": 0,
+        "L": 4,
+        "W": 4,
+        "decision_roundtrip_ms": {
+          "max": 26.878501999817672,
+          "p50": 0.8395180000206892,
+          "p95": 0.9638799999720504,
+          "p99": 0.9638799999720504
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "paired_ci95": [
+          0.125,
+          0.875
+        ],
+        "raw_win_rate": 0.0,
+        "score": 0.5,
+        "timing_ok": true
+      },
+      "selection_score": 0.575
+    },
+    {
+      "genome_id": "cc3546393ee6b106ccb8808637751030a721ac4e67b7de2f7d493ca4b020c856",
+      "novelty": 0.07142857142857142,
+      "reference": {
+        "games": 2,
+        "raw_win_rate": 1.0,
+        "score": 1.0,
+        "summaries": {
+          "gatherer-economy": {
+            "D": 0,
+            "L": 0,
+            "W": 2,
+            "decision_roundtrip_ms": {
+              "max": 22.12540099992566,
+              "p50": 0.8383450000337689,
+              "p95": 0.9417429999984961,
+              "p99": 0.9417429999984961
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              1.0,
+              1.0
+            ],
+            "raw_win_rate": 0.0,
+            "score": 1.0
+          }
+        }
+      },
+      "reference_score": 1.0,
+      "screen_parent": {
+        "D": 2,
+        "L": 3,
+        "W": 3,
+        "decision_roundtrip_ms": {
+          "max": 43.73649599995133,
+          "p50": 0.91493200000059,
+          "p95": 1.057627000022876,
+          "p99": 1.057627000022876
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "paired_ci95": [
+          0.5,
+          0.5
+        ],
+        "raw_win_rate": 0.0,
+        "score": 0.5,
+        "timing_ok": true
+      },
+      "selection_score": 0.575
+    },
+    {
+      "genome_id": "4566dc82c7d16d322a3dab31248cbf7611eab5ecb7242dd6add6375f5f8d3fa4",
+      "novelty": 0.0,
+      "reference": {
+        "games": 2,
+        "raw_win_rate": 1.0,
+        "score": 1.0,
+        "summaries": {
+          "gatherer-economy": {
+            "D": 0,
+            "L": 0,
+            "W": 2,
+            "decision_roundtrip_ms": {
+              "max": 42.659417000095345,
+              "p50": 0.8174730000973796,
+              "p95": 0.9774459999789542,
+              "p99": 0.9774459999789542
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              1.0,
+              1.0
+            ],
+            "raw_win_rate": 0.0,
+            "score": 1.0
+          }
+        }
+      },
+      "reference_score": 1.0,
+      "screen_parent": {
+        "D": 2,
+        "L": 3,
+        "W": 3,
+        "decision_roundtrip_ms": {
+          "max": 34.479255999940506,
+          "p50": 0.9009390000755957,
+          "p95": 1.074732999995831,
+          "p99": 1.074732999995831
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "paired_ci95": [
+          0.5,
+          0.5
+        ],
+        "raw_win_rate": 0.0,
+        "score": 0.5,
+        "timing_ok": true
+      },
+      "selection_score": 0.575
+    },
+    {
+      "genome_id": "c17faac9b928142f7e8b2fef9489e13ee2185555e05252725e090d1b7b527b63",
+      "novelty": 0.682464581662657,
+      "reference": {
+        "games": 2,
+        "raw_win_rate": 1.0,
+        "score": 1.0,
+        "summaries": {
+          "gatherer-economy": {
+            "D": 0,
+            "L": 0,
+            "W": 2,
+            "decision_roundtrip_ms": {
+              "max": 15.176536000012675,
+              "p50": 0.7385249999742882,
+              "p95": 0.7501919999413076,
+              "p99": 0.7501919999413076
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              1.0,
+              1.0
+            ],
+            "raw_win_rate": 0.0,
+            "score": 1.0
+          }
+        }
+      },
+      "reference_score": 1.0,
+      "screen_parent": {
+        "D": 3,
+        "L": 3,
+        "W": 2,
+        "decision_roundtrip_ms": {
+          "max": 24.409456999933354,
+          "p50": 1.0662299999921743,
+          "p95": 1.2197309999919526,
+          "p99": 1.2197309999919526
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "paired_ci95": [
+          0.125,
+          0.75
+        ],
+        "raw_win_rate": 0.0,
+        "score": 0.4375,
+        "timing_ok": true
+      },
+      "selection_score": 0.521875
+    },
+    {
+      "genome_id": "391878b39b823591a09306850371b1bcd3683017bcaeeec64c502080652770af",
+      "novelty": 0.5186634018155757,
+      "reference": {
+        "games": 2,
+        "raw_win_rate": 1.0,
+        "score": 1.0,
+        "summaries": {
+          "gatherer-economy": {
+            "D": 0,
+            "L": 0,
+            "W": 2,
+            "decision_roundtrip_ms": {
+              "max": 19.168690000014976,
+              "p50": 0.9495439999227528,
+              "p95": 0.9524490001240338,
+              "p99": 0.9524490001240338
+            },
+            "errors": 0,
+            "games": 2,
+            "illegal_actions": 0,
+            "paired_ci95": [
+              1.0,
+              1.0
+            ],
+            "raw_win_rate": 0.0,
+            "score": 1.0
+          }
+        }
+      },
+      "reference_score": 1.0,
+      "screen_parent": {
+        "D": 3,
+        "L": 3,
+        "W": 2,
+        "decision_roundtrip_ms": {
+          "max": 26.610907999838673,
+          "p50": 0.9823430000324151,
+          "p95": 1.0590379999939614,
+          "p99": 1.0590379999939614
+        },
+        "errors": 0,
+        "games": 8,
+        "illegal_actions": 0,
+        "paired_ci95": [
+          0.125,
+          0.6875
+        ],
+        "raw_win_rate": 0.0,
+        "score": 0.4375,
+        "timing_ok": true
+      },
+      "selection_score": 0.521875
+    }
+  ],
+  "transaction_id": "082e1970-7e6f-416c-b2c6-247babca0a0a",
+  "watchdog": {}
+}
