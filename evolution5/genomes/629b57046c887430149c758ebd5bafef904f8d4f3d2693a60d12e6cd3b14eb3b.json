@@ -1,0 +1,175 @@
+{
+  "genome": {
+    "graph": {
+      "entry": "OPENING",
+      "mode": "evolved",
+      "nodes": {
+        "BEHIND": {
+          "instances": {
+            "ATTACK": 2,
+            "FINISH": 2,
+            "HUNT_GENERAL": 2,
+            "RECOVER": 2
+          },
+          "modules": [
+            "HUNT_GENERAL",
+            "FINISH",
+            "ATTACK",
+            "RECOVER"
+          ],
+          "priority": [
+            "HUNT_GENERAL",
+            "FINISH",
+            "ATTACK",
+            "RECOVER"
+          ],
+          "transitions": [
+            {
+              "condition": "ahead",
+              "target": "OPENING"
+            },
+            {
+              "condition": "late",
+              "target": "LATE"
+            }
+          ]
+        },
+        "LATE": {
+          "instances": {
+            "EXPAND": 1,
+            "FINISH": 2,
+            "HUNT_GENERAL": 1,
+            "INTERCEPT": 2,
+            "RECOVER": 1,
+            "SCOUT": 1
+          },
+          "modules": [
+            "EXPAND",
+            "HUNT_GENERAL",
+            "RECOVER",
+            "SCOUT",
+            "FINISH",
+            "INTERCEPT"
+          ],
+          "priority": [
+            "SCOUT",
+            "HUNT_GENERAL",
+            "EXPAND",
+            "RECOVER",
+            "INTERCEPT",
+            "FINISH"
+          ],
+          "transitions": []
+        },
+        "OPENING": {
+          "instances": {
+            "ATTACK": 2,
+            "DEFEND_GENERAL": 2,
+            "EXPAND": 2,
+            "INTERCEPT": 2,
+            "MUSTER": 2,
+            "SCOUT": 2
+          },
+          "modules": [
+            "MUSTER",
+            "EXPAND",
+            "ATTACK",
+            "SCOUT",
+            "DEFEND_GENERAL",
+            "INTERCEPT"
+          ],
+          "priority": [
+            "ATTACK",
+            "SCOUT",
+            "MUSTER",
+            "INTERCEPT",
+            "DEFEND_GENERAL",
+            "EXPAND"
+          ],
+          "transitions": [
+            {
+              "condition": "contact",
+              "target": "OPENING"
+            },
+            {
+              "condition": "late",
+              "target": "LATE"
+            },
+            {
+              "condition": "always",
+              "target": "BEHIND"
+            }
+          ]
+        }
+      },
+      "version": 1
+    },
+    "params": {
+      "adjacent_reserve_base": 2,
+      "castle1_target_turn": 135,
+      "castle2_target_turn": 228,
+      "chunk_transfer_policy": "full",
+      "defense_policy": "reinforce_first",
+      "doomguard_enabled": false,
+      "edge_picker_threshold": 16,
+      "expansion_share_healthy": 0.35,
+      "expansion_share_precontact": 0.35,
+      "expansion_share_severe": 0.62,
+      "expansion_share_soft": 0.4540640547292884,
+      "expansion_wait_limit": 2,
+      "fallback_policy": "balanced",
+      "free_share_peace": 0.15,
+      "free_share_war": 0.22,
+      "general_reserve_base": 5,
+      "general_reserve_opp_divisor": 18,
+      "late_castle_army_margin": 22,
+      "late_finish_base": 50,
+      "late_finish_enemy_bonus": 9,
+      "late_finish_enemy_mult": 1.5213658049576204,
+      "late_finish_turn": 763,
+      "logistics_route_policy": "shortest",
+      "muster_anchor_policy": "central",
+      "muster_army_margin": 70,
+      "muster_enemy_bonus": 10,
+      "muster_enemy_mult": 3.1768925958707954,
+      "muster_launch_base": 180,
+      "muster_opp_divisor": 3,
+      "muster_ratio_den": 11,
+      "muster_ratio_num": 10,
+      "muster_start_turn": 338,
+      "muster_threshold": 11,
+      "muster_topology": "dual",
+      "picker_enabled": true,
+      "picker_growth25": 0.10416399435100378,
+      "picker_growth50": 0.06,
+      "picker_growth_land_pct": 45,
+      "picker_mature_land_pct": 35,
+      "picker_mature_turn": 150,
+      "picker_min_efficiency": 1.9137187828528253,
+      "picker_neutrals_max": 3,
+      "picker_not_behind_den": 4,
+      "picker_not_behind_num": 3,
+      "picker_start_policy": "speed",
+      "picker_top3_share_max": 0.55,
+      "precontact_expansion_until": -1,
+      "production_recover_gap": 6,
+      "production_recover_slope": 0.07799973193955806,
+      "production_severe_gap": 12,
+      "production_soft_gap": 8,
+      "search_share_seen": 0.2183730978629046,
+      "search_share_unseen": 0.4833903540411597,
+      "war_share_contact": 0.49988059710137717,
+      "war_share_peace": 0.12100854782516292
+    }
+  },
+  "genome_id": "629b57046c887430149c758ebd5bafef904f8d4f3d2693a60d12e6cd3b14eb3b",
+  "meta": {
+    "crossover_parent": null,
+    "island": "Wildcard",
+    "kind": "immigrant",
+    "lineage_generation_target": 2,
+    "lineage_parent": "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8",
+    "promotion_attempt": 8,
+    "temperature": 2.2
+  }
+}
