@@ -1,0 +1,222 @@
+{
+  "genome": {
+    "graph": {
+      "entry": "OPENING",
+      "mode": "evolved",
+      "nodes": {
+        "CONTACT": {
+          "instances": {
+            "ATTACK": 2,
+            "DEFEND_GENERAL": 1,
+            "INTERCEPT": 1,
+            "LOGISTICS": 1,
+            "MUSTER": 3,
+            "PICK": 1
+          },
+          "modules": [
+            "MUSTER",
+            "LOGISTICS",
+            "PICK",
+            "ATTACK",
+            "DEFEND_GENERAL",
+            "INTERCEPT"
+          ],
+          "priority": [
+            "LOGISTICS",
+            "PICK",
+            "MUSTER",
+            "ATTACK",
+            "INTERCEPT",
+            "DEFEND_GENERAL"
+          ],
+          "transitions": [
+            {
+              "condition": "behind",
+              "target": "OPENING"
+            },
+            {
+              "condition": "late",
+              "target": "LATE"
+            }
+          ]
+        },
+        "LATE": {
+          "instances": {
+            "ATTACK": 2,
+            "DEFEND_GENERAL": 1,
+            "FINISH": 1,
+            "HUNT_GENERAL": 1,
+            "LOGISTICS": 1,
+            "MUSTER": 3
+          },
+          "modules": [
+            "MUSTER",
+            "ATTACK",
+            "FINISH",
+            "HUNT_GENERAL",
+            "LOGISTICS",
+            "DEFEND_GENERAL"
+          ],
+          "priority": [
+            "MUSTER",
+            "LOGISTICS",
+            "ATTACK",
+            "FINISH",
+            "HUNT_GENERAL",
+            "DEFEND_GENERAL"
+          ],
+          "transitions": []
+        },
+        "NOVEL_20001": {
+          "instances": {
+            "BUILD_CASTLE": 2,
+            "EXPAND": 1,
+            "FINISH": 1,
+            "HUNT_GENERAL": 2,
+            "INTERCEPT": 2,
+            "MUSTER": 3,
+            "PICK": 2,
+            "RECOVER": 1,
+            "SCOUT": 1
+          },
+          "modules": [
+            "EXPAND",
+            "MUSTER",
+            "HUNT_GENERAL",
+            "SCOUT",
+            "RECOVER",
+            "BUILD_CASTLE",
+            "PICK",
+            "FINISH",
+            "INTERCEPT"
+          ],
+          "priority": [
+            "MUSTER",
+            "RECOVER",
+            "EXPAND",
+            "FINISH",
+            "PICK",
+            "HUNT_GENERAL",
+            "INTERCEPT",
+            "SCOUT",
+            "BUILD_CASTLE"
+          ],
+          "transitions": []
+        },
+        "OPENING": {
+          "instances": {
+            "CONSOLIDATE": 2,
+            "DEFEND_GENERAL": 2,
+            "EXPAND": 2,
+            "FINISH": 1,
+            "INTERCEPT": 1,
+            "PICK": 2,
+            "RECOVER": 2,
+            "SCOUT": 1
+          },
+          "modules": [
+            "FINISH",
+            "SCOUT",
+            "EXPAND",
+            "INTERCEPT",
+            "PICK",
+            "DEFEND_GENERAL",
+            "CONSOLIDATE",
+            "RECOVER"
+          ],
+          "priority": [
+            "SCOUT",
+            "RECOVER",
+            "INTERCEPT",
+            "FINISH",
+            "PICK",
+            "CONSOLIDATE",
+            "DEFEND_GENERAL",
+            "EXPAND"
+          ],
+          "transitions": [
+            {
+              "condition": "always",
+              "target": "CONTACT"
+            },
+            {
+              "condition": "always",
+              "target": "LATE"
+            },
+            {
+              "condition": "always",
+              "target": "NOVEL_20001"
+            }
+          ]
+        }
+      },
+      "version": 1
+    },
+    "params": {
+      "adjacent_reserve_base": 5,
+      "castle1_target_turn": 145,
+      "castle2_target_turn": 245,
+      "chunk_transfer_policy": "full",
+      "defense_policy": "block_first",
+      "doomguard_enabled": true,
+      "edge_picker_threshold": 12,
+      "expansion_share_healthy": 0.576924452820807,
+      "expansion_share_precontact": 0.39090271193446896,
+      "expansion_share_severe": 0.5951686847568455,
+      "expansion_share_soft": 0.64,
+      "expansion_wait_limit": 3,
+      "fallback_policy": "balanced",
+      "free_share_peace": 0.15,
+      "free_share_war": 0.35,
+      "general_reserve_base": 9,
+      "general_reserve_opp_divisor": 7,
+      "late_castle_army_margin": 56,
+      "late_finish_base": 50,
+      "late_finish_enemy_bonus": 41,
+      "late_finish_enemy_mult": 1.8156967991233899,
+      "late_finish_turn": 700,
+      "logistics_route_policy": "interior",
+      "muster_anchor_policy": "forward",
+      "muster_army_margin": 70,
+      "muster_enemy_bonus": 10,
+      "muster_enemy_mult": 3.1459274923958778,
+      "muster_launch_base": 60,
+      "muster_opp_divisor": 3,
+      "muster_ratio_den": 11,
+      "muster_ratio_num": 10,
+      "muster_start_turn": 291,
+      "muster_threshold": 11,
+      "muster_topology": "triple",
+      "picker_enabled": true,
+      "picker_growth25": 0.08246177619085701,
+      "picker_growth50": 0.08401633409562514,
+      "picker_growth_land_pct": 40,
+      "picker_mature_land_pct": 48,
+      "picker_mature_turn": 225,
+      "picker_min_efficiency": 1.25,
+      "picker_neutrals_max": 3,
+      "picker_not_behind_den": 3,
+      "picker_not_behind_num": 7,
+      "picker_start_policy": "mass",
+      "picker_top3_share_max": 0.6632793467152491,
+      "precontact_expansion_until": 250,
+      "production_recover_gap": 10,
+      "production_recover_slope": 0.1037143291684475,
+      "production_severe_gap": 21,
+      "production_soft_gap": 11,
+      "search_share_seen": 0.2553044561106506,
+      "search_share_unseen": 0.34,
+      "war_share_contact": 0.52,
+      "war_share_peace": 0.15291131570600477
+    }
+  },
+  "genome_id": "3c81700f34a99bec782d953b510e008594e9ddea0e482ed3d230acb9bf1df87d",
+  "meta": {
+    "behavior_epoch": 6,
+    "behavior_family": "edge_harvest",
+    "kind": "behavior_explore",
+    "lineage_generation_target": 2,
+    "lineage_parent": "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
+    "promotion_attempt": 27
+  }
+}
