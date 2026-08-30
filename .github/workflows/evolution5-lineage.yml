@@ -63,7 +63,7 @@ jobs:
           python -m pip install pytest numpy jax jaxlib
           python -m pip install -e . --no-deps
           python -m py_compile tools/evolution4/*.py tools/evolution5/*.py tools/evolution5_lineage/*.py
-          pytest -q tests/test_evolution5.py tests/test_evolution5_lineage.py
+          pytest -q tests/test_evolution5.py tests/test_evolution5_runtime_v2.py tests/test_evolution5_lineage.py
 
       - name: V3.5 regression and graph-runtime equivalence
         if: steps.pre.outputs.stopped != 'true'
@@ -74,6 +74,7 @@ jobs:
           git reset --hard origin/evolution5/lineage-selfplay
           python -m tools.evolution5.apply_cpp
           grep -q 'e5_.update' competition/agents/juraj_v35_cpp/main.cpp
+          grep -q 'e5_.tune' competition/agents/juraj_v35_cpp/main.cpp
           grep -q 'evolution5_behavior.hpp' competition/agents/juraj_v35_cpp/main.cpp
           bash competition/agents/juraj_v35_cpp/build.sh
           test -x competition/agents/juraj_v35_cpp/agent
@@ -85,7 +86,7 @@ jobs:
             --original /tmp/e5-lineage-baseline/competition/agents/juraj_v35_cpp/run.sh \
             --template competition/agents/juraj_v35_cpp/run.sh \
             --env-json '{}' --seeds 12
-          echo 'LINEAGE V3.5 GRAPH RUNTIME PREFLIGHT OK'
+          echo 'LINEAGE RUNTIME V2 PREFLIGHT OK'
 
       - name: Execute one challenger/promotion cycle
         id: tx
