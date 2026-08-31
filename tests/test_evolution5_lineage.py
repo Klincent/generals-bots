@@ -10,6 +10,10 @@ from tools.evolution5_lineage.policy import (
 )
 from tools.evolution5_lineage.orchestrator_pool import _pair_distribution, _failure_bias
 from tools.evolution5_lineage.orchestrator_breeding import _merge_entries, _directed_numeric_child, POOL_SIZE
+from tools.evolution5_lineage.orchestrator_cmaes import (
+    CMA_LAMBDA, _constants, _row_fitness, genome_from_vector,
+    numeric_genes, vector_from_genome,
+)
 
 
 def q(win, score=None, errors=0, illegal=0):
@@ -108,3 +112,42 @@ def test_directed_numeric_probe_extrapolates_successful_direction():
     child = _directed_numeric_child(champion, elite, random.Random(7), .50)
     assert child['params']['war_share_contact'] > elite['params']['war_share_contact']
     assert child['params']['war_share_contact'] <= .60
+
+
+def test_cma_es_uses_all_46_numeric_genes_and_round_trips_defaults():
+    champion = canonical_genome({'graph': baseline_graph(), 'params': defaults()})
+    genes = numeric_genes()
+    vector = vector_from_genome(champion)
+    rebuilt = genome_from_vector(champion, vector)
+    assert len(genes) == 46
+    assert len(vector) == 46
+    for gene in genes:
+        name = gene['name']
+        if gene['type'] == 'int':
+            assert rebuilt['params'][name] == champion['params'][name]
+        else:
+            assert abs(rebuilt['params'][name] - champion['params'][name]) < 1e-10
+
+
+def test_cma_es_constants_are_valid_for_46d_lambda16_island():
+    assert CMA_LAMBDA == 16
+    weights, mueff, cc, cs, c1, cmu, damps, chi_n = _constants(46, 8)
+    assert abs(float(weights.sum()) - 1.0) < 1e-12
+    assert all(float(w) > 0.0 for w in weights)
+    assert mueff > 1.0
+    assert 0.0 < cc < 1.0
+    assert 0.0 < cs < 1.0
+    assert 0.0 < c1 < 1.0
+    assert 0.0 <= cmu <= 1.0 - c1
+    assert damps > 0.0
+    assert chi_n > 0.0
+
+
+def test_cma_es_ranking_spends_learning_signal_on_deeper_funnel_results():
+    screen = {'selection_score': .95}
+    preview = {'g1_preview': {'raw_win_rate': .50}}
+    full_g1 = {'matchups': {1: {'raw_win_rate': .49}}}
+    g2 = {'matchups': {1: {'raw_win_rate': .56}, 2: {'raw_win_rate': .58}}}
+    assert _row_fitness(preview) > _row_fitness(screen)
+    assert _row_fitness(full_g1) > _row_fitness(preview)
+    assert _row_fitness(g2) > _row_fitness(full_g1)
