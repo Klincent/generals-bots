@@ -19,10 +19,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: evolution5/lineage-selfplay
-      - name: Build attempt 37 finalist submissions
+      - name: Prepare Runtime v2 and build attempt 37 finalist submissions
         shell: bash
         run: |
           set -euo pipefail
+          python3 -m tools.evolution5.apply_cpp
+          grep -q 'evolution5_behavior.hpp' competition/agents/juraj_v35_cpp/main.cpp
           python3 -m tools.evolution5_lineage.freeze_finalists \
             --result evolution5_lineage/results/attempt_0037_g001.json \
             --out-dir /tmp/attempt37-submission
