@@ -1,0 +1,28 @@
+name: build-attempt37-submission
+on:
+  push:
+    branches:
+      - evolution5/lineage-selfplay
+    paths:
+      - '.github/workflows/build-attempt37-submission.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: evolution5/lineage-selfplay
+      - name: Build attempt 37 finalist submissions
+        run: |
+          python3 tools/evolution5_lineage/freeze_finalists.py \
+            --result evolution5_lineage/results/attempt_0037_g001.json \
+            --out-dir /tmp/attempt37-submission
+          ls -lh /tmp/attempt37-submission
+      - name: Upload submission artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: attempt37-submission
+          path: /tmp/attempt37-submission/*
+          if-no-files-found: error
