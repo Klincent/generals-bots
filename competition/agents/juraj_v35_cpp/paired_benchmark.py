@@ -4,12 +4,17 @@ import argparse, json, os, re, statistics, subprocess, sys
 from pathlib import Path
 import numpy as np
 p=argparse.ArgumentParser();p.add_argument('--candidate',type=Path,required=True);p.add_argument('--baseline',type=Path,required=True);p.add_argument('--start',type=int,required=True);p.add_argument('--seeds',type=int,required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args()
+def executable(path):
+ if path.is_dir(): path=path/'run.sh'
+ if not path.is_file(): p.error(f'agent executable does not exist: {path}')
+ return path.resolve()
+a.candidate=executable(a.candidate);a.baseline=executable(a.baseline)
 a.output.mkdir(parents=True,exist_ok=True); raw=a.output/'games.jsonl'; games=[]
 for seed in range(a.start,a.start+a.seeds):
  rng_seed=(seed*0x9E3779B1+0x35)&0xffffffff
  for swap in (False,True):
   candidate_seat=1 if swap else 0; agents=[a.candidate,a.baseline] if not swap else [a.baseline,a.candidate]
-  audit=a.output/f'audit-{seed}-{candidate_seat}.json'; env=os.environ.copy();env['JURAJ_RNG_SEED']=str(rng_seed);env['JURAJ_V35_TRACE']='1'
+  audit=a.output/f'audit-{seed}-{candidate_seat}.json'; env=os.environ.copy();env['JURAJ_RNG_SEED']=str(rng_seed);env['JURAJ_V35_TRACE']='1';env['PYTHONPATH']=str(Path.cwd())+os.pathsep+env.get('PYTHONPATH','')
   try:r=subprocess.run([sys.executable,'competition/matchup.py',*[str(x.resolve()) for x in agents],'--mode','competition','--seed',str(seed),'--audit-json',str(audit)],text=True,capture_output=True,timeout=180,env=env)
   except subprocess.TimeoutExpired as e:
    games.append({'seed':seed,'candidate_seat':candidate_seat,'rng_seed':rng_seed,'error':'timeout'});continue
