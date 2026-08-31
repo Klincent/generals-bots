@@ -1,0 +1,49 @@
+name: lineage-freeze-finalists
+
+on:
+  push:
+    branches: [evolution5/lineage-selfplay]
+    paths:
+      - 'evolution5_lineage/results/**'
+
+permissions:
+  contents: read
+
+actions: {}
+
+jobs:
+  freeze:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout durable lineage state
+        uses: actions/checkout@v4
+        with:
+          ref: evolution5/lineage-selfplay
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Freeze best evaluated G1 and G2 finalists
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/evolution5_lineage/freeze_finalists.py
+          RESULT=$(ls evolution5_lineage/results/attempt_*.json | sort | tail -1)
+          echo "Freezing finalists from $RESULT"
+          rm -rf /tmp/lineage-finalists
+          mkdir -p /tmp/lineage-finalists
+          python -m tools.evolution5_lineage.freeze_finalists \
+            --result "$RESULT" \
+            --out-dir /tmp/lineage-finalists
+          ls -lah /tmp/lineage-finalists
+
+      - name: Upload submission candidates
+        uses: actions/upload-artifact@v4
+        with:
+          name: lineage-finalists-${{ github.run_number }}
+          path: /tmp/lineage-finalists/
+          if-no-files-found: error
+          retention-days: 30
