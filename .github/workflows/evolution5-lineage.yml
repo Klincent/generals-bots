@@ -86,7 +86,7 @@ jobs:
             --original /tmp/e5-lineage-baseline/competition/agents/juraj_v35_cpp/run.sh \
             --template competition/agents/juraj_v35_cpp/run.sh \
             --env-json '{}' --seeds 12
-          echo 'LINEAGE RUNTIME V2 PREFLIGHT OK'
+          echo 'LINEAGE RUNTIME V2 + FULL CMA-ES PREFLIGHT OK'
 
       - name: Execute one challenger/promotion cycle
         id: tx
@@ -94,7 +94,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          python -m tools.evolution5_lineage.orchestrator_behavior_safe 2>&1 | tee /tmp/evolution5-lineage.log
+          python -m tools.evolution5_lineage.orchestrator_cmaes_full 2>&1 | tee /tmp/evolution5-lineage.log
           rc=${PIPESTATUS[0]}
           echo "rc=$rc" >> "$GITHUB_OUTPUT"
           exit 0
@@ -153,7 +153,8 @@ jobs:
           python - <<'PY'
           import json
           s=json.load(open('/tmp/lineage-latest.json'))
-          print('next lineage generation=',s['lineage_generation'],'attempt=',s['promotion_attempt'],'champion=',s['current_champion'],'dominance=',s['dominance_gate_passed'],'bias=',s.get('mutation_bias'))
+          c=s.get('cma_state') or {}
+          print('next lineage generation=',s['lineage_generation'],'attempt=',s['promotion_attempt'],'champion=',s['current_champion'],'dominance=',s['dominance_gate_passed'],'cma_generation=',c.get('es_generation'),'cma_sigma=',c.get('sigma'))
           PY
           gh workflow run evolution5-lineage.yml --repo "$GITHUB_REPOSITORY" --ref master
 
