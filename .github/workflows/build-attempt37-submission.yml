@@ -23,7 +23,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 tools/evolution5_lineage/freeze_finalists.py \
+          python3 -m tools.evolution5_lineage.freeze_finalists \
             --result evolution5_lineage/results/attempt_0037_g001.json \
             --out-dir /tmp/attempt37-submission
           ls -lh /tmp/attempt37-submission
