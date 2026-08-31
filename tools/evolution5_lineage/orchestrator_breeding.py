@@ -8,6 +8,7 @@ from collections import Counter
 from . import orchestrator as b
 from . import orchestrator_pool as p
 from . import orchestrator_behavior as behavior
+from . import orchestrator_cmaes as cma
 from .policy import HARD_GATES
 from tools.evolution4.schema import load_schema
 from tools.evolution5.genome import canonical_genome, genome_id, save_genome
@@ -152,11 +153,7 @@ def _choose_parent_id(state: dict, rng: random.Random, pool: list[dict]) -> str:
 
 
 def _directed_numeric_child(champion: dict, elite: dict, rng: random.Random, factor: float) -> dict:
-    """Extrapolate a successful elite farther along one numeric chromosome.
-
-    This is deliberately a small line-search step, not a global gradient claim: the
-    evaluator is noisy and the policy contains mixed discrete/graph structure.
-    """
+    """Extrapolate a successful elite farther along one numeric chromosome."""
     champ = canonical_genome(champion)
     child = canonical_genome(elite)
     data, _ = load_schema()
@@ -220,12 +217,12 @@ def create_challengers_breeding(state: dict):
     known = {path.name[:-5] for path in b.GENOMES.glob('*.json')}
     ids, created = [], []
     counts = {family: 0 for family in behavior.FAMILIES}
-    counts.update({'crossover': 0, 'directed': 0, 'explore': 0})
+    counts.update({'crossover': 0, 'cma_es': 0, 'directed': 0, 'explore': 0})
     parent_counts: Counter[str] = Counter()
-    archetypes: list[tuple[str, dict, str]] = []
 
-    # Keep the same 48 tactical-family slots, but breed them from persistent near-winners.
-    for slot in range(48):
+    # 36 structural/tactical offspring remain the majority of the search budget.
+    # CMA-ES gets a separate 16-member island rather than replacing graph evolution.
+    for slot in range(36):
         family = families[slot % len(families)]
         intensity = (slot // len(families) + epoch) % 5
         parent_id = _choose_parent_id(state, rng, pool)
@@ -242,9 +239,8 @@ def create_challengers_breeding(state: dict):
             'behavior_intensity': intensity,
         })
         ids.append(gid); created.append(path); counts[family] += 1; parent_counts[parent_id] += 1
-        archetypes.append((family, child, parent_id))
 
-    # Cross generations, not merely siblings from the same attempt.
+    # Eight cross-generation recombinations exploit complementary near-winners.
     parent_source = [current] + [row['genome_id'] for row in pool]
     for slot in range(8):
         left_id = _choose_parent_id(state, rng, pool)
@@ -263,17 +259,24 @@ def create_challengers_breeding(state: dict):
         ids.append(gid); created.append(path); counts['crossover'] += 1
         parent_counts[left_id] += 1; parent_counts[right_id] += 1
 
-    # Four cheap directional probes learn a useful numerical direction from near-winners.
-    for slot in range(4):
+    # A full CMA-ES lambda=16 island learns the 46-dimensional INT/FLOAT landscape
+    # on one fixed graph.  Its covariance persists across attempts.
+    cma_ids, cma_created, cma_info = cma.sample_candidates(
+        state, pool, known, attempt, count=cma.CMA_LAMBDA
+    )
+    ids.extend(cma_ids); created.extend(cma_created); counts['cma_es'] += len(cma_ids)
+    parent_counts[cma_info['anchor_gid']] += len(cma_ids)
+
+    # Keep two simple directional probes as an independent sanity check on CMA's
+    # learned direction and two broad graph rewrites as explicit escape routes.
+    for slot, factor in enumerate((0.50, 1.00)):
         if pool:
-            elite_id = pool[slot % min(4, len(pool))]['genome_id']
-            factor = (0.35, 0.65, 1.0, 0.50)[slot]
+            elite_id = pool[slot % min(2, len(pool))]['genome_id']
             child = _directed_numeric_child(champion, b.genome(elite_id), rng, factor)
             parent_id = elite_id
         else:
             parent_id = current
             child = graph_rewrite(champion, rng, 0.24)
-            factor = 0.0
         gid, path = _save_unique(child, known, rng, {
             'lineage_generation_target': generation + 1,
             'promotion_attempt': attempt,
@@ -285,11 +288,10 @@ def create_challengers_breeding(state: dict):
         })
         ids.append(gid); created.append(path); counts['directed'] += 1; parent_counts[parent_id] += 1
 
-    # Retain explicit graph escape routes so the numeric search cannot trap the lineage.
-    for slot in range(4):
+    for slot in range(2):
         parent_id = _choose_parent_id(state, rng, pool)
         seed = b.genome(parent_id)
-        child = graph_rewrite(seed, rng, 0.34 + 0.02 * (slot % 2))
+        child = graph_rewrite(seed, rng, 0.36 + 0.02 * slot)
         gid, path = _save_unique(child, known, rng, {
             'lineage_generation_target': generation + 1,
             'promotion_attempt': attempt,
@@ -300,6 +302,7 @@ def create_challengers_breeding(state: dict):
         })
         ids.append(gid); created.append(path); counts['explore'] += 1; parent_counts[parent_id] += 1
 
+    assert len(ids) == 64, f'lineage population budget drifted: {len(ids)}'
     behavior.f.phase_heartbeat(
         state,
         'persistent_population_created',
@@ -310,6 +313,11 @@ def create_challengers_breeding(state: dict):
         breeding_pool_size=len(pool),
         breeding_parent_counts=dict(parent_counts),
         directed_probes=counts['directed'],
+        cma_es_candidates=counts['cma_es'],
+        cma_es_generation=cma_info['es_generation'],
+        cma_es_sigma=cma_info['sigma'],
+        cma_es_anchor=cma_info['anchor_gid'],
+        cma_es_dimension=cma_info['dimension'],
     )
     return ids, created, counts
 
@@ -320,8 +328,6 @@ def transaction_breeding(state: dict, txid: str):
     generation = int(latest['lineage_generation'])
 
     if result.get('promoted'):
-        # Old near-winner scores were measured against the previous champion. Start a
-        # fresh pool for the new official generation rather than trusting stale fitness.
         latest['breeding_pool_generation'] = generation
         latest['breeding_pool'] = []
     else:
@@ -334,6 +340,8 @@ def transaction_breeding(state: dict, txid: str):
                 incoming.append(entry)
         latest['breeding_pool'] = _merge_entries(pool, incoming, latest.get('current_champion'), generation)
         latest['breeding_pool_generation'] = generation
+
+    cma_update = cma.update_cma_state(latest, result)
 
     b.dump(b.STATE, latest)
     try:
@@ -350,9 +358,23 @@ def transaction_breeding(state: dict, txid: str):
         }
         for row in latest.get('breeding_pool', [])[:5]
     ]
+    heart['cma_es_update'] = cma_update
+    if isinstance(latest.get('cma_state'), dict):
+        cs = latest['cma_state']
+        heart['cma_es_state'] = {
+            'es_generation': int(cs.get('es_generation', 0)),
+            'sigma': float(cs.get('sigma', 0.0)),
+            'anchor_gid': cs.get('anchor_gid'),
+            'best_gid': cs.get('best_gid'),
+            'best_fitness': cs.get('best_fitness'),
+            'stagnation': int(cs.get('stagnation', 0)),
+            'restarts': int(cs.get('restarts', 0)),
+        }
+    else:
+        heart['cma_es_state'] = None
     heart['state_hash'] = b.state_hash(latest)
     b.dump(b.HEART, heart)
-    b.persist([b.STATE, b.HEART], 'lineage: retain persistent near-winner breeding pool')
+    b.persist([b.STATE, b.HEART], 'lineage: retain breeding pool and update CMA-ES')
     return result
 
 
