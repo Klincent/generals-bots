@@ -21,3 +21,11 @@
 - **Paired candidate screen, untouched seeds `43000..43003`, both seats, versus exact e50123:** **3/2/3, 50.00%**, paired bootstrap 95% CI **[18.75%, 75.00%]**, zero errors, zero illegal actions, p50 **1.053 ms**, maximum **20.536 ms**. This small screen establishes runtime safety but is statistically inconclusive; it does not establish superiority.
 - **Known weaknesses:** the requested 60% promotion threshold was not established on an adequately large unseen pool; front pressure is deliberately gated and may be rare; opponent-relative seat asymmetry remains large; games often reach the 1200-turn cap.
 - **Decision:** strongest runtime-clean finalist available in this run, but **PROMISING / UNCONFIRMED**, not a statistically confirmed improvement.
+
+## 2026-08-31 — radical-superbot 98% follow-up
+
+- **Branch:** `codex/radical-superbot-98-v2`.
+- **Compared policies:** the turn-350 / 1.35x hidden-general front-pressure policy at `f72cc2f3` versus the frozen deterministic final-superbot at `ea42416c`.
+- **Fresh paired screen:** seeds `45000..45005`, both seats (12 completed games): **2 W / 6 D / 4 L**, score **41.67%**, **0 illegal actions**. Two extra unpaired games were excluded from the paired result after the long screen was stopped. The complete 13-game prefix was 2/7/4 (42.31%).
+- **Decision:** **REJECT** hidden-general front pressure and restore the `ea42416c` policy for submission. Combined with the earlier 20-game aggressive-pressure rejection (45.00%), the evidence does not support either pressure trigger. The repository evidence does not establish a 98% win rate; the strongest available diverse-pool evidence remains the frozen final-superbot's 24/13/11 (63.54% score) screen. No claim beyond that evidence is made.
+- **Submission:** `submissions/radical-superbot.zip` is rebuilt from the restored policy and contains exactly `main.cpp`, `core.hpp`, `build.sh`, and `run.sh`.
