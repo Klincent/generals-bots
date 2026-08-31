@@ -21,3 +21,11 @@
 - **Paired candidate screen, untouched seeds `43000..43003`, both seats, versus exact e50123:** **3/2/3, 50.00%**, paired bootstrap 95% CI **[18.75%, 75.00%]**, zero errors, zero illegal actions, p50 **1.053 ms**, maximum **20.536 ms**. This small screen establishes runtime safety but is statistically inconclusive; it does not establish superiority.
 - **Known weaknesses:** the requested 60% promotion threshold was not established on an adequately large unseen pool; front pressure is deliberately gated and may be rare; opponent-relative seat asymmetry remains large; games often reach the 1200-turn cap.
 - **Decision:** strongest runtime-clean finalist available in this run, but **PROMISING / UNCONFIRMED**, not a statistically confirmed improvement.
+
+## 2026-08-31 — earlier front-pressure follow-up (rejected)
+
+- **Branch:** `codex/radical-superbot-98`.
+- **Exact baseline:** `ea42416c` (`codex/final-superbot`).
+- **Hypothesis:** begin hidden-general front pressure at turn 325 with a 1.25x army lead, rather than turn 350 with a 1.35x lead, to convert more late advantages.
+- **Paired evaluation:** unseen seeds `44000..44009`, both seats: **5 W / 8 D / 7 L**, score **45.00%**, paired bootstrap 95% CI **[37.50%, 50.00%]**, seat-0/seat-1 **55.00% / 35.00%**, **0 errors**, and **0 illegal actions**. Mean game length was 900.15 turns; decision round-trip latency was p50 **1.491 ms**, p95 **1.778 ms**, p99 **1.844 ms**, maximum **64.507 ms**.
+- **Decision:** **REJECT**. The more aggressive trigger materially regressed against the exact final-superbot baseline, so it was reverted. The submitted policy retains the narrower turn-350 / 1.35x gate from `f72cc2f3`. A 98% win ratio was not observed and is not supported by repository benchmark evidence.
