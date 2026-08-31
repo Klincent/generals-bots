@@ -5,6 +5,7 @@ from pathlib import Path
 from . import orchestrator as b
 from . import orchestrator_focus as f
 from . import orchestrator_behavior as behavior
+from . import orchestrator_breeding as breeding
 
 
 def persist_resilient_v2(paths: list[Path], message: str) -> None:
@@ -45,6 +46,11 @@ def main() -> None:
     # behavior.main() installs f.persist_resilient into the base orchestrator,
     # so replace that function before entering the behavior runtime.
     f.persist_resilient = persist_resilient_v2
+
+    # Install cumulative evolution before behavior.main wires the runtime:
+    # promising non-promoted challengers become future parents, and a few slots
+    # perform a directional numerical line search from the strongest near-winners.
+    breeding.install()
     behavior.main()
 
 
