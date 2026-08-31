@@ -1,8 +1,15 @@
+import copy
+import random
+
+from tools.evolution4.schema import defaults
+from tools.evolution5.graph import baseline_graph
+from tools.evolution5.genome import canonical_genome
 from tools.evolution5_lineage.policy import (
     HARD_GATES, DOMINANCE_TARGETS, dominance_pass, gate_pass,
     opponent_mix, phase, promotion_key, weighted_lineage_score,
 )
 from tools.evolution5_lineage.orchestrator_pool import _pair_distribution, _failure_bias
+from tools.evolution5_lineage.orchestrator_breeding import _merge_entries, _directed_numeric_child, POOL_SIZE
 
 
 def q(win, score=None, errors=0, illegal=0):
@@ -73,3 +80,31 @@ def test_mutation_reacts_to_how_challenger_loses():
     assert _failure_bias({'finalists': [{'matchups': {1: q(.50)}}]}) == 'pressure'
     assert _failure_bias({'finalists': [{'matchups': {1: q(.60), 2: q(.55)}}]}) == 'anti_overfit'
     assert _failure_bias({'finalists': [{'matchups': {1: q(.60), 2: q(.65), 3: q(.70)}}]}) == 'normal'
+
+
+def test_persistent_breeding_keeps_best_near_winners_across_attempts():
+    incoming = [
+        {
+            'genome_id': f'g{i}',
+            'generation': 1,
+            'attempt': i,
+            'rates': {'1': .48 + i / 1000.0},
+            'weighted_lineage_score': .48 + i / 1000.0,
+        }
+        for i in range(24)
+    ]
+    pool = _merge_entries([], incoming, current='g23', generation=1)
+    assert len(pool) == POOL_SIZE
+    assert all(row['genome_id'] != 'g23' for row in pool)
+    assert pool[0]['rates']['1'] > pool[-1]['rates']['1']
+    assert 'g22' in {row['genome_id'] for row in pool}
+
+
+def test_directed_numeric_probe_extrapolates_successful_direction():
+    champion = canonical_genome({'graph': baseline_graph(), 'params': defaults()})
+    elite = copy.deepcopy(champion)
+    elite['params']['war_share_contact'] = champion['params']['war_share_contact'] + .10
+    elite = canonical_genome(elite)
+    child = _directed_numeric_child(champion, elite, random.Random(7), .50)
+    assert child['params']['war_share_contact'] > elite['params']['war_share_contact']
+    assert child['params']['war_share_contact'] <= .60
