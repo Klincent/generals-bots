@@ -1,0 +1,37 @@
+name: build-attempt37-submission
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/submission37-trigger'
+      - '.github/workflows/build-attempt37-submission.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout lineage branch
+        uses: actions/checkout@v4
+        with:
+          ref: evolution5/lineage-selfplay
+      - name: Build attempt 37 finalist submissions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/evolution5_lineage/freeze_finalists.py \
+            --result evolution5_lineage/results/attempt_0037_g001.json \
+            --out-dir /tmp/attempt37-submission
+          ls -lh /tmp/attempt37-submission
+          test -f /tmp/attempt37-submission/attempt_0037_g001_best_g1_78634112b215_submission.zip
+      - name: Upload submission artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: attempt37-submission
+          path: /tmp/attempt37-submission/*
+          if-no-files-found: error
+          retention-days: 30
