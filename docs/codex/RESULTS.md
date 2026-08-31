@@ -39,3 +39,14 @@
   is more decisive after locating the enemy general; conservative picker gates
   can leave some rear mass idle; and the diverse screen still has wide
   uncertainty and cannot model the unknown external opponent distribution.
+
+## 2026-08-31 — final local revalidation
+
+- Re-ran the complete focused test suite and release build from the frozen
+  `codex/final-superbot` policy; all checks passed.
+- Re-extracted `submissions/final-superbot.zip` into a clean temporary directory,
+  confirmed its four files are byte-identical to the agent sources, and built it
+  successfully with only those files present.
+- Recomputed artifact SHA256:
+  `5eaaf799328bdf39fb9cd4d2ae2cfb0a795eb0cb73d019122747ecbc1ac8a9ca`.
+- No gameplay policy changed after the 48-game diverse-opponent screen.
