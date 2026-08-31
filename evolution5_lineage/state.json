@@ -340,6 +340,16 @@
       "generation_before": 1,
       "promoted": null,
       "promotion_gate_passed": false
+    },
+    {
+      "attempt": 35,
+      "best_challenger": "0c3d5439af3e923f0edd67249d5dc76e18d05929c84ec7cae9eb98268cf1232a",
+      "best_vs_parent_win_rate": 0.5104166666666666,
+      "dominance_gate_passed": false,
+      "generation_after": 1,
+      "generation_before": 1,
+      "promoted": null,
+      "promotion_gate_passed": false
     }
   ],
   "bootstrap_candidates": [
@@ -552,6 +562,105 @@
     "68750b88588027085e105c1d456c45ce1228672b1d79304efcd200f8fb245721",
     "4c88012bf9dbda847229e2bfcfe8206fe31030614bef0820ae70a892c67c06fb"
   ],
+  "breeding_pool": [
+    {
+      "attempt": 2,
+      "generation": 1,
+      "genome_id": "7991a8ea1a6f173426c051079e35c25b647bfcc6a6b5c2e6cdefdbe949299848",
+      "novelty": 0.0,
+      "rates": {
+        "1": 0.59375
+      },
+      "selection_score": 0.0,
+      "source": "attempt_history",
+      "weighted_lineage_score": 0.59375
+    },
+    {
+      "attempt": 9,
+      "generation": 1,
+      "genome_id": "5f22cb89b54454cab420861e194d197fcdea912beca98a07a54463819ca7e7ce",
+      "novelty": 0.0,
+      "rates": {
+        "1": 0.5520833333333334
+      },
+      "selection_score": 0.0,
+      "source": "attempt_history",
+      "weighted_lineage_score": 0.5520833333333334
+    },
+    {
+      "attempt": 10,
+      "generation": 1,
+      "genome_id": "14fe8ca02044e1456dfcb08f996baf4242e9a76ad3649dfab6a00d3fd78f2240",
+      "novelty": 0.0,
+      "rates": {
+        "1": 0.5104166666666666
+      },
+      "selection_score": 0.0,
+      "source": "attempt_history",
+      "weighted_lineage_score": 0.5104166666666666
+    },
+    {
+      "attempt": 30,
+      "generation": 1,
+      "genome_id": "ea3621abf05cc2d4a1f1b19fe0fe59aaa76395b0b584a4fabf8ee95dd3b1e1a5",
+      "novelty": 0.0,
+      "rates": {
+        "1": 0.5
+      },
+      "selection_score": 0.0,
+      "source": "attempt_history",
+      "weighted_lineage_score": 0.5
+    },
+    {
+      "attempt": 20,
+      "generation": 1,
+      "genome_id": "d8225235c2be90ca63d787d83ef7d386974db911f2e74a8e50c5b1ee8880be95",
+      "novelty": 0.0,
+      "rates": {
+        "1": 0.4895833333333333
+      },
+      "selection_score": 0.0,
+      "source": "attempt_history",
+      "weighted_lineage_score": 0.4895833333333333
+    },
+    {
+      "attempt": 11,
+      "generation": 1,
+      "genome_id": "c2920e1affd40dfe96689177466efce95bbd99a101c83cf42442549f6a17f16d",
+      "novelty": 0.0,
+      "rates": {
+        "1": 0.4895833333333333
+      },
+      "selection_score": 0.0,
+      "source": "attempt_history",
+      "weighted_lineage_score": 0.4895833333333333
+    },
+    {
+      "attempt": 7,
+      "generation": 1,
+      "genome_id": "d5ba4f297c6ac24a7fc90f31797059ea71b1cf1ee98100ade9520fbcc298b44a",
+      "novelty": 0.0,
+      "rates": {
+        "1": 0.4895833333333333
+      },
+      "selection_score": 0.0,
+      "source": "attempt_history",
+      "weighted_lineage_score": 0.4895833333333333
+    },
+    {
+      "attempt": 5,
+      "generation": 1,
+      "genome_id": "f043df9e211a1654a8344b72fdd7768366a50d818bd2e4f96cb2189dd0cb7731",
+      "novelty": 0.0,
+      "rates": {
+        "1": 0.4895833333333333
+      },
+      "selection_score": 0.0,
+      "source": "attempt_history",
+      "weighted_lineage_score": 0.4895833333333333
+    }
+  ],
+  "breeding_pool_generation": 1,
   "champion_pool": [
     "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
     "e1dea9c35f3752dacb3f22864f9a1f17ac1ab911d234192c102db05e99e936a8",
@@ -561,7 +670,7 @@
   ],
   "current_champion": "9096559fa38bd8889af4de7d0a0d6f50b78cf6c20db436ac82387cca088f957f",
   "dominance_gate_passed": false,
-  "failed_promotion_streak": 33,
+  "failed_promotion_streak": 34,
   "generation_elites": {
     "0": [
       "50d7b439ab7763f63b1be67e41378c1e3650e109c9bebcdbe86a5b357b54c144",
@@ -723,7 +832,7 @@
   "mutation_temperature": 2.5,
   "phase": "active",
   "previous_champion": "50d7b439ab7763f63b1be67e41378c1e3650e109c9bebcdbe86a5b357b54c144",
-  "promotion_attempt": 34,
+  "promotion_attempt": 35,
   "promotion_gate_passed": false,
   "seed_ledger": {
     "gauntlet": {
@@ -978,7 +1087,7 @@
       "next_seed": 4200000
     },
     "parent": {
-      "next_seed": 2269144,
+      "next_seed": 2271292,
       "ranges": [
         {
           "label": "g0-a2-parent-968f7b3c-d1-0-50d7b439",
@@ -9259,11 +9368,271 @@
           "label": "g1-a35-parent-a2dd9208-d1-3-af89cd76",
           "maps": 8,
           "start": 2269099
+        },
+        {
+          "label": "g1-a36-preview-0c3d5439-d1-0-9096559f",
+          "maps": 4,
+          "start": 2269144
+        },
+        {
+          "label": "g1-a36-preview-0c3d5439-d1-1-e1dea9c3",
+          "maps": 2,
+          "start": 2269185
+        },
+        {
+          "label": "g1-a36-preview-0c3d5439-d1-2-968f7b3c",
+          "maps": 1,
+          "start": 2269224
+        },
+        {
+          "label": "g1-a36-preview-0c3d5439-d1-3-af89cd76",
+          "maps": 1,
+          "start": 2269262
+        },
+        {
+          "label": "g1-a36-preview-1f4c736b-d1-0-9096559f",
+          "maps": 4,
+          "start": 2269300
+        },
+        {
+          "label": "g1-a36-preview-1f4c736b-d1-1-e1dea9c3",
+          "maps": 2,
+          "start": 2269341
+        },
+        {
+          "label": "g1-a36-preview-1f4c736b-d1-2-968f7b3c",
+          "maps": 1,
+          "start": 2269380
+        },
+        {
+          "label": "g1-a36-preview-1f4c736b-d1-3-af89cd76",
+          "maps": 1,
+          "start": 2269418
+        },
+        {
+          "label": "g1-a36-preview-68e12811-d1-0-9096559f",
+          "maps": 4,
+          "start": 2269456
+        },
+        {
+          "label": "g1-a36-preview-68e12811-d1-1-e1dea9c3",
+          "maps": 2,
+          "start": 2269497
+        },
+        {
+          "label": "g1-a36-preview-68e12811-d1-2-968f7b3c",
+          "maps": 1,
+          "start": 2269536
+        },
+        {
+          "label": "g1-a36-preview-68e12811-d1-3-af89cd76",
+          "maps": 1,
+          "start": 2269574
+        },
+        {
+          "label": "g1-a36-preview-98f0a074-d1-0-9096559f",
+          "maps": 4,
+          "start": 2269612
+        },
+        {
+          "label": "g1-a36-preview-98f0a074-d1-1-e1dea9c3",
+          "maps": 2,
+          "start": 2269653
+        },
+        {
+          "label": "g1-a36-preview-98f0a074-d1-2-968f7b3c",
+          "maps": 1,
+          "start": 2269692
+        },
+        {
+          "label": "g1-a36-preview-98f0a074-d1-3-af89cd76",
+          "maps": 1,
+          "start": 2269730
+        },
+        {
+          "label": "g1-a36-preview-d7b0b8da-d1-0-9096559f",
+          "maps": 4,
+          "start": 2269768
+        },
+        {
+          "label": "g1-a36-preview-d7b0b8da-d1-1-e1dea9c3",
+          "maps": 2,
+          "start": 2269809
+        },
+        {
+          "label": "g1-a36-preview-d7b0b8da-d1-2-968f7b3c",
+          "maps": 1,
+          "start": 2269848
+        },
+        {
+          "label": "g1-a36-preview-d7b0b8da-d1-3-af89cd76",
+          "maps": 1,
+          "start": 2269886
+        },
+        {
+          "label": "g1-a36-preview-0eb03e95-d1-0-9096559f",
+          "maps": 4,
+          "start": 2269924
+        },
+        {
+          "label": "g1-a36-preview-0eb03e95-d1-1-e1dea9c3",
+          "maps": 2,
+          "start": 2269965
+        },
+        {
+          "label": "g1-a36-preview-0eb03e95-d1-2-968f7b3c",
+          "maps": 1,
+          "start": 2270004
+        },
+        {
+          "label": "g1-a36-preview-0eb03e95-d1-3-af89cd76",
+          "maps": 1,
+          "start": 2270042
+        },
+        {
+          "label": "g1-a36-preview-55c2cc32-d1-0-9096559f",
+          "maps": 4,
+          "start": 2270080
+        },
+        {
+          "label": "g1-a36-preview-55c2cc32-d1-1-e1dea9c3",
+          "maps": 2,
+          "start": 2270121
+        },
+        {
+          "label": "g1-a36-preview-55c2cc32-d1-2-968f7b3c",
+          "maps": 1,
+          "start": 2270160
+        },
+        {
+          "label": "g1-a36-preview-55c2cc32-d1-3-af89cd76",
+          "maps": 1,
+          "start": 2270198
+        },
+        {
+          "label": "g1-a36-preview-84fcef73-d1-0-9096559f",
+          "maps": 4,
+          "start": 2270236
+        },
+        {
+          "label": "g1-a36-preview-84fcef73-d1-1-e1dea9c3",
+          "maps": 2,
+          "start": 2270277
+        },
+        {
+          "label": "g1-a36-preview-84fcef73-d1-2-968f7b3c",
+          "maps": 1,
+          "start": 2270316
+        },
+        {
+          "label": "g1-a36-preview-84fcef73-d1-3-af89cd76",
+          "maps": 1,
+          "start": 2270354
+        },
+        {
+          "label": "g1-a36-preview-3c22e4ad-d1-0-9096559f",
+          "maps": 4,
+          "start": 2270392
+        },
+        {
+          "label": "g1-a36-preview-3c22e4ad-d1-1-e1dea9c3",
+          "maps": 2,
+          "start": 2270433
+        },
+        {
+          "label": "g1-a36-preview-3c22e4ad-d1-2-968f7b3c",
+          "maps": 1,
+          "start": 2270472
+        },
+        {
+          "label": "g1-a36-preview-3c22e4ad-d1-3-af89cd76",
+          "maps": 1,
+          "start": 2270510
+        },
+        {
+          "label": "g1-a36-preview-5bc51fcc-d1-0-9096559f",
+          "maps": 4,
+          "start": 2270548
+        },
+        {
+          "label": "g1-a36-preview-5bc51fcc-d1-1-e1dea9c3",
+          "maps": 2,
+          "start": 2270589
+        },
+        {
+          "label": "g1-a36-preview-5bc51fcc-d1-2-968f7b3c",
+          "maps": 1,
+          "start": 2270628
+        },
+        {
+          "label": "g1-a36-preview-5bc51fcc-d1-3-af89cd76",
+          "maps": 1,
+          "start": 2270666
+        },
+        {
+          "label": "g1-a36-parent-0c3d5439-d1-0-9096559f",
+          "maps": 24,
+          "start": 2270704
+        },
+        {
+          "label": "g1-a36-parent-0c3d5439-d1-1-e1dea9c3",
+          "maps": 8,
+          "start": 2270765
+        },
+        {
+          "label": "g1-a36-parent-0c3d5439-d1-2-968f7b3c",
+          "maps": 8,
+          "start": 2270810
+        },
+        {
+          "label": "g1-a36-parent-0c3d5439-d1-3-af89cd76",
+          "maps": 8,
+          "start": 2270855
+        },
+        {
+          "label": "g1-a36-parent-d7b0b8da-d1-0-9096559f",
+          "maps": 24,
+          "start": 2270900
+        },
+        {
+          "label": "g1-a36-parent-d7b0b8da-d1-1-e1dea9c3",
+          "maps": 8,
+          "start": 2270961
+        },
+        {
+          "label": "g1-a36-parent-d7b0b8da-d1-2-968f7b3c",
+          "maps": 8,
+          "start": 2271006
+        },
+        {
+          "label": "g1-a36-parent-d7b0b8da-d1-3-af89cd76",
+          "maps": 8,
+          "start": 2271051
+        },
+        {
+          "label": "g1-a36-parent-98f0a074-d1-0-9096559f",
+          "maps": 24,
+          "start": 2271096
+        },
+        {
+          "label": "g1-a36-parent-98f0a074-d1-1-e1dea9c3",
+          "maps": 8,
+          "start": 2271157
+        },
+        {
+          "label": "g1-a36-parent-98f0a074-d1-2-968f7b3c",
+          "maps": 8,
+          "start": 2271202
+        },
+        {
+          "label": "g1-a36-parent-98f0a074-d1-3-af89cd76",
+          "maps": 8,
+          "start": 2271247
         }
       ]
     },
     "reference": {
-      "next_seed": 5292416,
+      "next_seed": 5294848,
       "ranges": [
         {
           "label": "g0-a2-ref-normal-expansion",
@@ -21424,11 +21793,331 @@
           "label": "g1-a35-ref-gatherer-economy",
           "maps": 1,
           "start": 5292378
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5292416
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5292454
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5292492
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5292530
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5292568
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5292606
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5292644
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5292682
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5292720
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5292758
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5292796
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5292834
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5292872
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5292910
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5292948
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5292986
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5293024
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5293062
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5293100
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5293138
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5293176
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5293214
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5293252
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5293290
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5293328
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5293366
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5293404
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5293442
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5293480
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5293518
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5293556
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5293594
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5293632
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5293670
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5293708
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5293746
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5293784
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5293822
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5293860
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5293898
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5293936
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5293974
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5294012
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5294050
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5294088
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5294126
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5294164
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5294202
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5294240
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5294278
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5294316
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5294354
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5294392
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5294430
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5294468
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5294506
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5294544
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5294582
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5294620
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5294658
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5294696
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5294734
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5294772
+        },
+        {
+          "label": "g1-a36-ref-logistics-recenter",
+          "maps": 1,
+          "start": 5294810
         }
       ]
     },
     "screen": {
-      "next_seed": 1289216,
+      "next_seed": 1291840,
       "ranges": [
         {
           "label": "g0-a2-screen-08ce5348",
@@ -32309,6 +32998,326 @@
           "label": "g1-a35-screen-3472ea51",
           "maps": 4,
           "start": 1289175
+        },
+        {
+          "label": "g1-a36-screen-0402277d",
+          "maps": 4,
+          "start": 1289216
+        },
+        {
+          "label": "g1-a36-screen-8b093122",
+          "maps": 4,
+          "start": 1289257
+        },
+        {
+          "label": "g1-a36-screen-e2319d85",
+          "maps": 4,
+          "start": 1289298
+        },
+        {
+          "label": "g1-a36-screen-ea3c40bf",
+          "maps": 4,
+          "start": 1289339
+        },
+        {
+          "label": "g1-a36-screen-04a78b1d",
+          "maps": 4,
+          "start": 1289380
+        },
+        {
+          "label": "g1-a36-screen-52326c37",
+          "maps": 4,
+          "start": 1289421
+        },
+        {
+          "label": "g1-a36-screen-317443cc",
+          "maps": 4,
+          "start": 1289462
+        },
+        {
+          "label": "g1-a36-screen-98e3ffa7",
+          "maps": 4,
+          "start": 1289503
+        },
+        {
+          "label": "g1-a36-screen-78ad770a",
+          "maps": 4,
+          "start": 1289544
+        },
+        {
+          "label": "g1-a36-screen-c54996fe",
+          "maps": 4,
+          "start": 1289585
+        },
+        {
+          "label": "g1-a36-screen-ee2b35d7",
+          "maps": 4,
+          "start": 1289626
+        },
+        {
+          "label": "g1-a36-screen-20ca287d",
+          "maps": 4,
+          "start": 1289667
+        },
+        {
+          "label": "g1-a36-screen-04a1279c",
+          "maps": 4,
+          "start": 1289708
+        },
+        {
+          "label": "g1-a36-screen-c99cbac2",
+          "maps": 4,
+          "start": 1289749
+        },
+        {
+          "label": "g1-a36-screen-e23fae23",
+          "maps": 4,
+          "start": 1289790
+        },
+        {
+          "label": "g1-a36-screen-f3f623fe",
+          "maps": 4,
+          "start": 1289831
+        },
+        {
+          "label": "g1-a36-screen-e3b274ad",
+          "maps": 4,
+          "start": 1289872
+        },
+        {
+          "label": "g1-a36-screen-eaddf755",
+          "maps": 4,
+          "start": 1289913
+        },
+        {
+          "label": "g1-a36-screen-55c2cc32",
+          "maps": 4,
+          "start": 1289954
+        },
+        {
+          "label": "g1-a36-screen-57e06cc9",
+          "maps": 4,
+          "start": 1289995
+        },
+        {
+          "label": "g1-a36-screen-c2e603e1",
+          "maps": 4,
+          "start": 1290036
+        },
+        {
+          "label": "g1-a36-screen-840619ca",
+          "maps": 4,
+          "start": 1290077
+        },
+        {
+          "label": "g1-a36-screen-6a44466e",
+          "maps": 4,
+          "start": 1290118
+        },
+        {
+          "label": "g1-a36-screen-900b5f46",
+          "maps": 4,
+          "start": 1290159
+        },
+        {
+          "label": "g1-a36-screen-b46f29ce",
+          "maps": 4,
+          "start": 1290200
+        },
+        {
+          "label": "g1-a36-screen-ae374a65",
+          "maps": 4,
+          "start": 1290241
+        },
+        {
+          "label": "g1-a36-screen-a44433bd",
+          "maps": 4,
+          "start": 1290282
+        },
+        {
+          "label": "g1-a36-screen-84fcef73",
+          "maps": 4,
+          "start": 1290323
+        },
+        {
+          "label": "g1-a36-screen-1f4c736b",
+          "maps": 4,
+          "start": 1290364
+        },
+        {
+          "label": "g1-a36-screen-b1d22bec",
+          "maps": 4,
+          "start": 1290405
+        },
+        {
+          "label": "g1-a36-screen-0b1a8230",
+          "maps": 4,
+          "start": 1290446
+        },
+        {
+          "label": "g1-a36-screen-1fa26a64",
+          "maps": 4,
+          "start": 1290487
+        },
+        {
+          "label": "g1-a36-screen-d7b0b8da",
+          "maps": 4,
+          "start": 1290528
+        },
+        {
+          "label": "g1-a36-screen-d83b8731",
+          "maps": 4,
+          "start": 1290569
+        },
+        {
+          "label": "g1-a36-screen-7bb8f373",
+          "maps": 4,
+          "start": 1290610
+        },
+        {
+          "label": "g1-a36-screen-5bc51fcc",
+          "maps": 4,
+          "start": 1290651
+        },
+        {
+          "label": "g1-a36-screen-6e6cbd53",
+          "maps": 4,
+          "start": 1290692
+        },
+        {
+          "label": "g1-a36-screen-3d5bb7f7",
+          "maps": 4,
+          "start": 1290733
+        },
+        {
+          "label": "g1-a36-screen-f5f9c6b0",
+          "maps": 4,
+          "start": 1290774
+        },
+        {
+          "label": "g1-a36-screen-cc1b5e12",
+          "maps": 4,
+          "start": 1290815
+        },
+        {
+          "label": "g1-a36-screen-5876dc29",
+          "maps": 4,
+          "start": 1290856
+        },
+        {
+          "label": "g1-a36-screen-d4558307",
+          "maps": 4,
+          "start": 1290897
+        },
+        {
+          "label": "g1-a36-screen-7de766da",
+          "maps": 4,
+          "start": 1290938
+        },
+        {
+          "label": "g1-a36-screen-5827d61c",
+          "maps": 4,
+          "start": 1290979
+        },
+        {
+          "label": "g1-a36-screen-2d82d0dd",
+          "maps": 4,
+          "start": 1291020
+        },
+        {
+          "label": "g1-a36-screen-68e12811",
+          "maps": 4,
+          "start": 1291061
+        },
+        {
+          "label": "g1-a36-screen-33509be4",
+          "maps": 4,
+          "start": 1291102
+        },
+        {
+          "label": "g1-a36-screen-a9d87899",
+          "maps": 4,
+          "start": 1291143
+        },
+        {
+          "label": "g1-a36-screen-3e3247e7",
+          "maps": 4,
+          "start": 1291184
+        },
+        {
+          "label": "g1-a36-screen-c4952aa9",
+          "maps": 4,
+          "start": 1291225
+        },
+        {
+          "label": "g1-a36-screen-212694ee",
+          "maps": 4,
+          "start": 1291266
+        },
+        {
+          "label": "g1-a36-screen-7c75ec47",
+          "maps": 4,
+          "start": 1291307
+        },
+        {
+          "label": "g1-a36-screen-0c3d5439",
+          "maps": 4,
+          "start": 1291348
+        },
+        {
+          "label": "g1-a36-screen-fc9190aa",
+          "maps": 4,
+          "start": 1291389
+        },
+        {
+          "label": "g1-a36-screen-0ea445cd",
+          "maps": 4,
+          "start": 1291430
+        },
+        {
+          "label": "g1-a36-screen-e6545b8c",
+          "maps": 4,
+          "start": 1291471
+        },
+        {
+          "label": "g1-a36-screen-98f0a074",
+          "maps": 4,
+          "start": 1291512
+        },
+        {
+          "label": "g1-a36-screen-3411a47e",
+          "maps": 4,
+          "start": 1291553
+        },
+        {
+          "label": "g1-a36-screen-331fa802",
+          "maps": 4,
+          "start": 1291594
+        },
+        {
+          "label": "g1-a36-screen-0eb03e95",
+          "maps": 4,
+          "start": 1291635
+        },
+        {
+          "label": "g1-a36-screen-3c22e4ad",
+          "maps": 4,
+          "start": 1291676
+        },
+        {
+          "label": "g1-a36-screen-79229df2",
+          "maps": 4,
+          "start": 1291717
+        },
+        {
+          "label": "g1-a36-screen-037984ec",
+          "maps": 4,
+          "start": 1291758
+        },
+        {
+          "label": "g1-a36-screen-fe620117",
+          "maps": 4,
+          "start": 1291799
         }
       ]
     },
@@ -32355,10 +33364,10 @@
   },
   "source_cambrian_best": "3f7db2ee03b4d3dde726ddc81fbd66898d74b59f03c8797f681dfb89584ab6e3",
   "source_cambrian_generation": 7,
-  "tested_challengers": 2176,
+  "tested_challengers": 2240,
   "vs_grandparent_win_rate": null,
   "vs_great_grandparent_win_rate": null,
-  "vs_parent_win_rate": 0.4583333333333333,
+  "vs_parent_win_rate": 0.5104166666666666,
   "watchdog_history": [
     {
       "generation": 1,
