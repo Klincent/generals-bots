@@ -1,0 +1,65 @@
+name: Deadline radical hunter v4.1 quick
+
+on:
+  push:
+    branches:
+      - deadline/radical-hunter-v4
+  workflow_dispatch:
+
+jobs:
+  quick-gate:
+    runs-on: ubuntu-24.04
+    env:
+      SDL_VIDEODRIVER: dummy
+      V3_REF: 3f4105849dcde32063fc3030f14884bf062290fa
+      PICKER9_SHA: eea352234ec56d01681e543603c6d6e5db6519a1
+      RUSHER_SHA: 8187289deaa1b49391e1cdb41057a99e84f45a98
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: deadline/radical-hunter-v4
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build V4.1
+        run: |
+          pip install -e .
+          python tools/apply_deadline_rear_belief_logistics_v3.py
+          python tools/apply_deadline_radical_hunter_v4.py
+          python tools/apply_deadline_radical_hunter_v41.py
+          bash competition/agents/juraj_v35_cpp/test.sh
+          bash competition/agents/juraj_v35_cpp/build.sh
+      - name: Build comparators
+        run: |
+          git worktree add --detach /tmp/v3cmp "$V3_REF"
+          cd /tmp/v3cmp
+          python tools/apply_deadline_rear_belief_logistics_v3.py
+          bash competition/agents/juraj_v35_cpp/build.sh
+          cd -
+          git worktree add --detach /tmp/picker9cmp "$PICKER9_SHA"
+          git worktree add --detach /tmp/rushercmp "$RUSHER_SHA"
+          bash /tmp/picker9cmp/competition/agents/juraj_v35_cpp/build.sh
+          bash /tmp/rushercmp/competition/agents/juraj_v35_cpp/build.sh
+      - name: Quick fresh gate
+        run: |
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/v3cmp/competition/agents/juraj_v35_cpp/run.sh --start 46700 --seeds 4 --output /tmp/v41-v3
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/picker9cmp/competition/agents/juraj_v35_cpp/run.sh --start 46720 --seeds 3 --output /tmp/v41-picker9
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/rushercmp/competition/agents/juraj_v35_cpp/run.sh --start 46730 --seeds 3 --output /tmp/v41-rusher
+          echo '=== V4.1 vs V3 ==='; cat /tmp/v41-v3/summary.json
+          echo '=== V4.1 vs picker9 ==='; cat /tmp/v41-picker9/summary.json
+          echo '=== V4.1 vs rusher ==='; cat /tmp/v41-rusher/summary.json
+      - name: Package
+        run: |
+          cd competition/agents/juraj_v35_cpp
+          zip ../../../submission-radical-hunter-v41.zip main.cpp core.hpp build.sh run.sh
+          cd ../../..
+          unzip -l submission-radical-hunter-v41.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deadline-radical-hunter-v41-quick
+          path: |
+            submission-radical-hunter-v41.zip
+            /tmp/v41-v3/summary.json
+            /tmp/v41-picker9/summary.json
+            /tmp/v41-rusher/summary.json
