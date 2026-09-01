@@ -1,0 +1,86 @@
+name: Deadline external-gap broad suite v4
+
+on:
+  push:
+    branches:
+      - deadline/external-gap-broad-suite-v4
+  workflow_dispatch:
+
+jobs:
+  broad-suite:
+    runs-on: ubuntu-24.04
+    env:
+      SDL_VIDEODRIVER: dummy
+      PICKER9_SHA: eea352234ec56d01681e543603c6d6e5db6519a1
+      RUSHER_SHA: 8187289deaa1b49391e1cdb41057a99e84f45a98
+      EVO4_SHA: 2260b6f19d51a14d7c68770677f22d04dfd88022
+      CASTLE_SHA: 58f1d03a6a1df23de094064e66fc0d8cf2287576
+      CHAMP70_SHA: 4f0fac768a8fc4479d45347a3ecbdbfedd6aef05
+      RADICAL_SHA: f72cc2f3a32820c03de6c158ff3525b7d3551857
+      V34_SHA: 773b648e54f8881cdcdd3e30ec9261d71481f1db
+      EVO5_SHA: c0eaab736bc8ad3ecb9cb23fd167037e82844891
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: deadline/external-gap-broad-suite-v4
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install and build V3 candidate
+        run: |
+          pip install -e .
+          python tools/apply_deadline_rear_belief_logistics_v3.py
+          bash competition/agents/juraj_v35_cpp/test.sh
+          bash competition/agents/juraj_v35_cpp/build.sh
+      - name: Build eight diverse opponents
+        run: |
+          for spec in \
+            picker9:$PICKER9_SHA \
+            rusher:$RUSHER_SHA \
+            evo4:$EVO4_SHA \
+            castle:$CASTLE_SHA \
+            champ70:$CHAMP70_SHA \
+            radical:$RADICAL_SHA \
+            v34:$V34_SHA \
+            evo5:$EVO5_SHA; do
+            name=${spec%%:*}; sha=${spec#*:}
+            git worktree add --detach /tmp/$name "$sha"
+            bash /tmp/$name/competition/agents/juraj_v35_cpp/build.sh
+          done
+      - name: Run 64-game broad suite
+        run: |
+          set -e
+          names=(picker9 rusher evo4 castle champ70 radical v34 evo5)
+          starts=(46600 46610 46620 46630 46640 46650 46660 46670)
+          for i in ${!names[@]}; do
+            name=${names[$i]}
+            start=${starts[$i]}
+            python competition/agents/juraj_v35_cpp/paired_benchmark.py \
+              --candidate competition/agents/juraj_v35_cpp/run.sh \
+              --baseline /tmp/$name/competition/agents/juraj_v35_cpp/run.sh \
+              --start $start --seeds 4 --output /tmp/broad-$name
+            echo "=== $name ==="
+            cat /tmp/broad-$name/summary.json
+          done
+      - name: Aggregate broad suite
+        run: |
+          python - <<'PY'
+          import json
+          names=['picker9','rusher','evo4','castle','champ70','radical','v34','evo5']
+          out={'opponents':{}}; W=D=L=G=ERR=ILL=0
+          for name in names:
+              d=json.load(open(f'/tmp/broad-{name}/summary.json'))
+              out['opponents'][name]=d
+              W+=d['W']; D+=d['D']; L+=d['L']; G+=d['games']; ERR+=d['errors']; ILL+=d['illegal_actions']
+          out.update(W=W,D=D,L=L,games=G,score=(W+0.5*D)/G,errors=ERR,illegal_actions=ILL)
+          open('/tmp/v3-broad-suite.json','w').write(json.dumps(out,indent=2,sort_keys=True))
+          print(json.dumps(out,indent=2,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deadline-external-gap-broad-suite-v4
+          path: |
+            /tmp/v3-broad-suite.json
+            /tmp/broad-*/summary.json
+            /tmp/broad-*/games.jsonl
