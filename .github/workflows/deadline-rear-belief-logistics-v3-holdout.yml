@@ -1,0 +1,111 @@
+name: Deadline rear-belief logistics v3 fresh holdout
+
+on:
+  push:
+    branches:
+      - deadline/rear-belief-logistics-v3-holdout
+  workflow_dispatch:
+
+jobs:
+  diverse-holdout:
+    runs-on: ubuntu-24.04
+    env:
+      SDL_VIDEODRIVER: dummy
+      BASE_SHA: 1394df5ac506fb43795993e25cc46ba2abe1f7d4
+      PICKER9_SHA: eea352234ec56d01681e543603c6d6e5db6519a1
+      RUSHER_SHA: 8187289deaa1b49391e1cdb41057a99e84f45a98
+      EVO4_SHA: 2260b6f19d51a14d7c68770677f22d04dfd88022
+      CASTLE_SHA: 58f1d03a6a1df23de094064e66fc0d8cf2287576
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: deadline/rear-belief-logistics-v3-holdout
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install, apply candidate, build
+        run: |
+          pip install -e .
+          python tools/apply_deadline_rear_belief_logistics_v3.py
+          bash competition/agents/juraj_v35_cpp/test.sh
+          bash competition/agents/juraj_v35_cpp/build.sh
+      - name: Build exact holdout opponents
+        run: |
+          git worktree add --detach /tmp/picker9 "$PICKER9_SHA"
+          git worktree add --detach /tmp/rusher "$RUSHER_SHA"
+          git worktree add --detach /tmp/evo4 "$EVO4_SHA"
+          git worktree add --detach /tmp/castle "$CASTLE_SHA"
+          bash /tmp/picker9/competition/agents/juraj_v35_cpp/build.sh
+          bash /tmp/rusher/competition/agents/juraj_v35_cpp/build.sh
+          bash /tmp/evo4/competition/agents/juraj_v35_cpp/build.sh
+          bash /tmp/castle/competition/agents/juraj_v35_cpp/build.sh
+      - name: Fresh picker9 holdout
+        run: |
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py \
+            --candidate competition/agents/juraj_v35_cpp/run.sh \
+            --baseline /tmp/picker9/competition/agents/juraj_v35_cpp/run.sh \
+            --start 46400 --seeds 4 --output /tmp/holdout-picker9
+          cat /tmp/holdout-picker9/summary.json
+      - name: Fresh aggressive-rusher holdout
+        run: |
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py \
+            --candidate competition/agents/juraj_v35_cpp/run.sh \
+            --baseline /tmp/rusher/competition/agents/juraj_v35_cpp/run.sh \
+            --start 46410 --seeds 4 --output /tmp/holdout-rusher
+          cat /tmp/holdout-rusher/summary.json
+      - name: Fresh evolution4 holdout
+        run: |
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py \
+            --candidate competition/agents/juraj_v35_cpp/run.sh \
+            --baseline /tmp/evo4/competition/agents/juraj_v35_cpp/run.sh \
+            --start 46420 --seeds 4 --output /tmp/holdout-evo4
+          cat /tmp/holdout-evo4/summary.json
+      - name: Fresh castle-edge holdout
+        run: |
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py \
+            --candidate competition/agents/juraj_v35_cpp/run.sh \
+            --baseline /tmp/castle/competition/agents/juraj_v35_cpp/run.sh \
+            --start 46430 --seeds 4 --output /tmp/holdout-castle
+          cat /tmp/holdout-castle/summary.json
+      - name: Aggregate holdout
+        run: |
+          python - <<'PY'
+          import json
+          paths = {
+              'picker9': '/tmp/holdout-picker9/summary.json',
+              'rusher': '/tmp/holdout-rusher/summary.json',
+              'evolution4': '/tmp/holdout-evo4/summary.json',
+              'castle_edge': '/tmp/holdout-castle/summary.json',
+          }
+          out = {'opponents': {}}
+          W=D=L=G=ERR=ILL=0
+          for name,p in paths.items():
+              d=json.load(open(p))
+              out['opponents'][name]=d
+              W+=d['W']; D+=d['D']; L+=d['L']; G+=d['games']
+              ERR+=d['errors']; ILL+=d['illegal_actions']
+          out.update(W=W,D=D,L=L,games=G,score=(W+0.5*D)/G,errors=ERR,illegal_actions=ILL)
+          with open('/tmp/holdout-aggregate.json','w') as f: json.dump(out,f,indent=2,sort_keys=True)
+          print(json.dumps(out,indent=2,sort_keys=True))
+          PY
+      - name: Package tested candidate
+        run: |
+          cd competition/agents/juraj_v35_cpp
+          zip ../../../submission-rear-belief-logistics-v3-holdout.zip main.cpp core.hpp build.sh run.sh
+          cd ../../..
+          unzip -l submission-rear-belief-logistics-v3-holdout.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deadline-rear-belief-logistics-v3-holdout
+          path: |
+            submission-rear-belief-logistics-v3-holdout.zip
+            /tmp/holdout-aggregate.json
+            /tmp/holdout-picker9/summary.json
+            /tmp/holdout-picker9/games.jsonl
+            /tmp/holdout-rusher/summary.json
+            /tmp/holdout-rusher/games.jsonl
+            /tmp/holdout-evo4/summary.json
+            /tmp/holdout-evo4/games.jsonl
+            /tmp/holdout-castle/summary.json
+            /tmp/holdout-castle/games.jsonl
