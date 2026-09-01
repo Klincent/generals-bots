@@ -1,0 +1,107 @@
+name: deadline-final-superbot-audit
+
+on:
+  push:
+    branches: [deadline/final-superbot-audit-20260901]
+
+permissions:
+  contents: read
+
+env:
+  SDL_VIDEODRIVER: dummy
+  PICKER9_SHA: eea352234ec56d01681e543603c6d6e5db6519a1
+  RUSHER_SHA: 8187289deaa1b49391e1cdb41057a99e84f45a98
+
+jobs:
+  targeted-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: deadline/final-superbot-audit-20260901
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install engine and dependencies
+        run: |
+          pip install -e .
+          pip install pytest
+
+      - name: Focused agent tests and build
+        run: |
+          bash competition/agents/juraj_v35_cpp/test.sh
+          bash competition/agents/juraj_v35_cpp/build.sh
+
+      - name: Build strong historical opponents
+        run: |
+          git worktree add --detach /tmp/picker9 "$PICKER9_SHA"
+          git worktree add --detach /tmp/rusher "$RUSHER_SHA"
+          bash /tmp/picker9/competition/agents/juraj_v35_cpp/build.sh
+          bash /tmp/rusher/competition/agents/juraj_v35_cpp/build.sh
+
+      - name: Paired screen vs picker9 doomguard
+        run: |
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py \
+            --candidate competition/agents/juraj_v35_cpp/run.sh \
+            --baseline /tmp/picker9/competition/agents/juraj_v35_cpp/run.sh \
+            --start 46000 --seeds 8 --output /tmp/audit-picker9
+          cat /tmp/audit-picker9/summary.json
+
+      - name: Paired screen vs aggressive rusher
+        run: |
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py \
+            --candidate competition/agents/juraj_v35_cpp/run.sh \
+            --baseline /tmp/rusher/competition/agents/juraj_v35_cpp/run.sh \
+            --start 46020 --seeds 8 --output /tmp/audit-rusher
+          cat /tmp/audit-rusher/summary.json
+
+      - name: Smoke vs expander
+        run: |
+          set -euo pipefail
+          bash competition/agents/expander_cpp/build.sh
+          mkdir -p /tmp/audit-expander
+          for seed in $(seq 46040 46045); do
+            python competition/matchup.py \
+              competition/agents/juraj_v35_cpp/run.sh \
+              competition/agents/expander_cpp/run.sh \
+              --mode competition --seed "$seed" --audit-json "/tmp/audit-expander/$seed.json" \
+              >"/tmp/audit-expander/$seed.out" 2>"/tmp/audit-expander/$seed.err"
+          done
+
+      - name: Summarize loss characteristics
+        run: |
+          python - <<'PY'
+          import json, pathlib, statistics
+          out={}
+          for name in ('picker9','rusher'):
+              p=pathlib.Path(f'/tmp/audit-{name}/games.jsonl')
+              games=[json.loads(x) for x in p.read_text().splitlines() if x.strip()]
+              valid=[g for g in games if 'result' in g]
+              losses=[g for g in valid if g['result']=='loss']
+              draws=[g for g in valid if g['result']=='draw']
+              out[name]={
+                  'games':len(valid),'losses':len(losses),'draws':len(draws),
+                  'loss_turns':[g.get('turns') for g in losses],
+                  'draw_turns':[g.get('turns') for g in draws],
+                  'loss_seeds':[[g.get('seed'),g.get('candidate_seat')] for g in losses],
+              }
+          pathlib.Path('/tmp/deadline-audit-summary.json').write_text(json.dumps(out,indent=2)+'\n')
+          print(json.dumps(out,indent=2))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deadline-final-superbot-audit
+          path: |
+            /tmp/audit-picker9/summary.json
+            /tmp/audit-picker9/games.jsonl
+            /tmp/audit-picker9/selected-traces.json
+            /tmp/audit-rusher/summary.json
+            /tmp/audit-rusher/games.jsonl
+            /tmp/audit-rusher/selected-traces.json
+            /tmp/audit-expander
+            /tmp/deadline-audit-summary.json
+          if-no-files-found: error
