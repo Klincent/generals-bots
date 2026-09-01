@@ -1,0 +1,116 @@
+name: Deadline radical hunter v4
+
+on:
+  push:
+    branches:
+      - deadline/radical-hunter-v4
+  workflow_dispatch:
+
+jobs:
+  ab-v3:
+    runs-on: ubuntu-24.04
+    env:
+      SDL_VIDEODRIVER: dummy
+      V3_REF: 3f4105849dcde32063fc3030f14884bf062290fa
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: deadline/radical-hunter-v4
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build radical V4
+        run: |
+          pip install -e .
+          python tools/apply_deadline_rear_belief_logistics_v3.py
+          python tools/apply_deadline_radical_hunter_v4.py
+          bash competition/agents/juraj_v35_cpp/test.sh
+          bash competition/agents/juraj_v35_cpp/build.sh
+      - name: Build exact V3 comparator
+        run: |
+          git worktree add --detach /tmp/v3 "$V3_REF"
+          cd /tmp/v3
+          python tools/apply_deadline_rear_belief_logistics_v3.py
+          bash competition/agents/juraj_v35_cpp/build.sh
+      - name: Fresh direct A/B V4 vs V3
+        run: |
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py \
+            --candidate competition/agents/juraj_v35_cpp/run.sh \
+            --baseline /tmp/v3/competition/agents/juraj_v35_cpp/run.sh \
+            --start 46600 --seeds 8 --output /tmp/v4-v3
+          cat /tmp/v4-v3/summary.json
+      - name: Package V4 candidate
+        run: |
+          cd competition/agents/juraj_v35_cpp
+          zip ../../../submission-radical-hunter-v4.zip main.cpp core.hpp build.sh run.sh
+          cd ../../..
+          unzip -l submission-radical-hunter-v4.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deadline-radical-hunter-v4-ab
+          path: |
+            submission-radical-hunter-v4.zip
+            /tmp/v4-v3/summary.json
+            /tmp/v4-v3/games.jsonl
+
+  broad-screen:
+    runs-on: ubuntu-24.04
+    env:
+      SDL_VIDEODRIVER: dummy
+      PICKER9_SHA: eea352234ec56d01681e543603c6d6e5db6519a1
+      RUSHER_SHA: 8187289deaa1b49391e1cdb41057a99e84f45a98
+      EVO4_SHA: 2260b6f19d51a14d7c68770677f22d04dfd88022
+      CASTLE_SHA: 58f1d03a6a1df23de094064e66fc0d8cf2287576
+      V35_70_SHA: 4f0fac768a8fc4479d45347a3ecbdbfedd6aef05
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: deadline/radical-hunter-v4
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build radical V4
+        run: |
+          pip install -e .
+          python tools/apply_deadline_rear_belief_logistics_v3.py
+          python tools/apply_deadline_radical_hunter_v4.py
+          bash competition/agents/juraj_v35_cpp/test.sh
+          bash competition/agents/juraj_v35_cpp/build.sh
+      - name: Build broad opponents
+        run: |
+          git worktree add --detach /tmp/picker9 "$PICKER9_SHA"
+          git worktree add --detach /tmp/rusher "$RUSHER_SHA"
+          git worktree add --detach /tmp/evo4 "$EVO4_SHA"
+          git worktree add --detach /tmp/castle "$CASTLE_SHA"
+          git worktree add --detach /tmp/v35 "$V35_70_SHA"
+          for d in /tmp/picker9 /tmp/rusher /tmp/evo4 /tmp/castle /tmp/v35; do bash "$d/competition/agents/juraj_v35_cpp/build.sh"; done
+      - name: Broad fresh screen
+        run: |
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/picker9/competition/agents/juraj_v35_cpp/run.sh --start 46620 --seeds 3 --output /tmp/picker9
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/rusher/competition/agents/juraj_v35_cpp/run.sh --start 46630 --seeds 3 --output /tmp/rusher
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/evo4/competition/agents/juraj_v35_cpp/run.sh --start 46640 --seeds 3 --output /tmp/evo4
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/castle/competition/agents/juraj_v35_cpp/run.sh --start 46650 --seeds 3 --output /tmp/castle
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/v35/competition/agents/juraj_v35_cpp/run.sh --start 46660 --seeds 3 --output /tmp/v35
+          python - <<'PY'
+          import json
+          paths={'picker9':'/tmp/picker9/summary.json','rusher':'/tmp/rusher/summary.json','evolution4':'/tmp/evo4/summary.json','castle_edge':'/tmp/castle/summary.json','v35_70fresh':'/tmp/v35/summary.json'}
+          out={'opponents':{}}; W=D=L=G=ERR=ILL=0
+          for name,p in paths.items():
+              d=json.load(open(p)); out['opponents'][name]=d
+              W+=d['W'];D+=d['D'];L+=d['L'];G+=d['games'];ERR+=d['errors'];ILL+=d['illegal_actions']
+          out.update(W=W,D=D,L=L,games=G,score=(W+.5*D)/G,errors=ERR,illegal_actions=ILL)
+          print(json.dumps(out,indent=2,sort_keys=True))
+          open('/tmp/v4-broad.json','w').write(json.dumps(out,indent=2,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deadline-radical-hunter-v4-broad
+          path: |
+            /tmp/v4-broad.json
+            /tmp/picker9/summary.json
+            /tmp/rusher/summary.json
+            /tmp/evo4/summary.json
+            /tmp/castle/summary.json
+            /tmp/v35/summary.json
