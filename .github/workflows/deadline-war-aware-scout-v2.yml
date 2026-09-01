@@ -1,0 +1,71 @@
+name: deadline-war-aware-scout-v2
+
+on:
+  push:
+    branches: [deadline/war-aware-scout-v2]
+
+permissions:
+  contents: read
+
+env:
+  SDL_VIDEODRIVER: dummy
+  BASE_SHA: 1394df5ac506fb43795993e25cc46ba2abe1f7d4
+  PICKER9_SHA: eea352234ec56d01681e543603c6d6e5db6519a1
+  RUSHER_SHA: 8187289deaa1b49391e1cdb41057a99e84f45a98
+
+jobs:
+  test-candidate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: deadline/war-aware-scout-v2
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply candidate patch
+        run: python tools/apply_deadline_war_aware_scout_v2.py
+      - name: Install and validate
+        run: |
+          pip install -e .
+          pip install pytest
+          bash competition/agents/juraj_v35_cpp/test.sh
+          bash competition/agents/juraj_v35_cpp/build.sh
+      - name: Build baselines
+        run: |
+          git worktree add --detach /tmp/base "$BASE_SHA"
+          git worktree add --detach /tmp/picker9 "$PICKER9_SHA"
+          git worktree add --detach /tmp/rusher "$RUSHER_SHA"
+          bash /tmp/base/competition/agents/juraj_v35_cpp/build.sh
+          bash /tmp/picker9/competition/agents/juraj_v35_cpp/build.sh
+          bash /tmp/rusher/competition/agents/juraj_v35_cpp/build.sh
+      - name: Replay draw-heavy picker9 pool
+        run: |
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/picker9/competition/agents/juraj_v35_cpp/run.sh --start 46000 --seeds 8 --output /tmp/picker9
+          cat /tmp/picker9/summary.json
+      - name: Replay aggressive-rusher pool
+        run: |
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/rusher/competition/agents/juraj_v35_cpp/run.sh --start 46020 --seeds 8 --output /tmp/rusher
+          cat /tmp/rusher/summary.json
+      - name: Fresh direct paired test versus frozen final-superbot
+        run: |
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/base/competition/agents/juraj_v35_cpp/run.sh --start 46280 --seeds 8 --output /tmp/base-h2h
+          cat /tmp/base-h2h/summary.json
+      - name: Package tested candidate
+        run: |
+          cd competition/agents/juraj_v35_cpp
+          zip ../../../submission-war-aware-scout-v2.zip main.cpp core.hpp build.sh run.sh
+          cd ../../..
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deadline-war-aware-scout-v2
+          path: |
+            submission-war-aware-scout-v2.zip
+            /tmp/picker9/summary.json
+            /tmp/picker9/games.jsonl
+            /tmp/rusher/summary.json
+            /tmp/rusher/games.jsonl
+            /tmp/base-h2h/summary.json
+            /tmp/base-h2h/games.jsonl
+          if-no-files-found: error
