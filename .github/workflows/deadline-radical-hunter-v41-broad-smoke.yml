@@ -1,0 +1,53 @@
+name: Deadline radical hunter v4.1 broad smoke
+
+on:
+  push:
+    branches:
+      - deadline/radical-hunter-v41-broad
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: evolution4
+            ref: 2260b6f19d51a14d7c68770677f22d04dfd88022
+            seed: 46800
+          - name: castle-edge
+            ref: 58f1d03a6a1df23de094064e66fc0d8cf2287576
+            seed: 46810
+          - name: v35-70fresh
+            ref: 4f0fac768a8fc4479d45347a3ecbdbfedd6aef05
+            seed: 46820
+    runs-on: ubuntu-24.04
+    env:
+      SDL_VIDEODRIVER: dummy
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: deadline/radical-hunter-v41-broad
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build V4.1
+        run: |
+          pip install -e .
+          python tools/apply_deadline_rear_belief_logistics_v3.py
+          python tools/apply_deadline_radical_hunter_v4.py
+          python tools/apply_deadline_radical_hunter_v41.py
+          bash competition/agents/juraj_v35_cpp/build.sh
+      - name: Build opponent
+        run: |
+          git worktree add --detach /tmp/opponent "${{ matrix.ref }}"
+          bash /tmp/opponent/competition/agents/juraj_v35_cpp/build.sh
+      - name: Fresh smoke
+        run: |
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/opponent/competition/agents/juraj_v35_cpp/run.sh --start "${{ matrix.seed }}" --seeds 2 --output /tmp/result
+          cat /tmp/result/summary.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v41-smoke-${{ matrix.name }}
+          path: /tmp/result/summary.json
