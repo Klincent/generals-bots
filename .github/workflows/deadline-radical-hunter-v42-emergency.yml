@@ -1,0 +1,96 @@
+name: Deadline radical hunter v4.2 emergency
+
+on:
+  push:
+    branches:
+      - deadline/radical-hunter-v42-balanced
+  workflow_dispatch:
+
+jobs:
+  gate:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: v3
+            ref: 3f4105849dcde32063fc3030f14884bf062290fa
+            seed: 46900
+            patch_v3: true
+          - name: picker9
+            ref: eea352234ec56d01681e543603c6d6e5db6519a1
+            seed: 46910
+            patch_v3: false
+          - name: rusher
+            ref: 8187289deaa1b49391e1cdb41057a99e84f45a98
+            seed: 46920
+            patch_v3: false
+          - name: evolution4
+            ref: 2260b6f19d51a14d7c68770677f22d04dfd88022
+            seed: 46930
+            patch_v3: false
+          - name: castle-edge
+            ref: 58f1d03a6a1df23de094064e66fc0d8cf2287576
+            seed: 46940
+            patch_v3: false
+          - name: v35-70fresh
+            ref: 4f0fac768a8fc4479d45347a3ecbdbfedd6aef05
+            seed: 46950
+            patch_v3: false
+    runs-on: ubuntu-24.04
+    env:
+      SDL_VIDEODRIVER: dummy
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: deadline/radical-hunter-v42-balanced
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build V4.2
+        run: |
+          pip install -e .
+          python tools/apply_deadline_rear_belief_logistics_v3.py
+          python tools/apply_deadline_radical_hunter_v4.py
+          python tools/apply_deadline_radical_hunter_v41.py
+          python tools/apply_deadline_radical_hunter_v42.py
+          bash competition/agents/juraj_v35_cpp/test.sh
+          bash competition/agents/juraj_v35_cpp/build.sh
+      - name: Build comparator
+        run: |
+          git worktree add --detach /tmp/opponent "${{ matrix.ref }}"
+          if [ "${{ matrix.patch_v3 }}" = "true" ]; then
+            cd /tmp/opponent
+            python tools/apply_deadline_rear_belief_logistics_v3.py
+            cd -
+          fi
+          bash /tmp/opponent/competition/agents/juraj_v35_cpp/build.sh
+      - name: Fresh gate
+        run: |
+          python competition/agents/juraj_v35_cpp/paired_benchmark.py --candidate competition/agents/juraj_v35_cpp/run.sh --baseline /tmp/opponent/competition/agents/juraj_v35_cpp/run.sh --start "${{ matrix.seed }}" --seeds 2 --output /tmp/result
+          cat /tmp/result/summary.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v42-${{ matrix.name }}
+          path: /tmp/result/summary.json
+  package:
+    needs: gate
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: deadline/radical-hunter-v42-balanced
+      - name: Build submission source
+        run: |
+          python tools/apply_deadline_rear_belief_logistics_v3.py
+          python tools/apply_deadline_radical_hunter_v4.py
+          python tools/apply_deadline_radical_hunter_v41.py
+          python tools/apply_deadline_radical_hunter_v42.py
+          cd competition/agents/juraj_v35_cpp
+          zip ../../../submission-radical-hunter-v42.zip main.cpp core.hpp build.sh run.sh
+          cd ../../..
+          unzip -l submission-radical-hunter-v42.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: submission-radical-hunter-v42
+          path: submission-radical-hunter-v42.zip
